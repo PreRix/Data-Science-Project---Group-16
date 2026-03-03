@@ -1,4 +1,4 @@
-# Data-Science-Project---Group-16
+# Data-Science-Project Group-16
 
 ## Using Anaconda
 
