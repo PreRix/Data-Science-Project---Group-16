@@ -1,0 +1,82 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# -------------------------
+# Virtual Environments
+# -------------------------
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# -------------------------
+# Distribution / Packaging
+# -------------------------
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# -------------------------
+# Testing & Coverage
+# -------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# -------------------------
+# Jupyter Notebooks
+# -------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# -------------------------
+# Type Checking
+# -------------------------
+.mypy_cache/
+.pytype/
+
+# -------------------------
+# Environment Variables
+# -------------------------
+.env
+.env.*
+*.pem
+*.key
+
+# -------------------------
+# IDE / Editor
+# -------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# -------------------------
+# OS
+# -------------------------
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# -------------------------
+# Logs & Temp Files
+# -------------------------
+*.log
+*.tmp
+*.bak
+*.cache
