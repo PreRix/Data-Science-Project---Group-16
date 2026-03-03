@@ -5,7 +5,7 @@
 ### Copying an existing Environment
 
 ```powershell
-conda create --name envname --file requirements.txt
+conda create --name <envname> --file requirements.txt
 ```
 
 ### Creating a new Environment
