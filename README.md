@@ -6,6 +6,7 @@
 
 ```powershell
 conda create --name <envname> --file requirements.txt
+python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
 ```
 
 ### Creating a new Environment
