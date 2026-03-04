@@ -22,3 +22,11 @@ conda install ipykernel
 python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
 conda list --export > requirements.txt
 ```
+
+### For using openmeteo
+
+```powershell
+conda install numpy pandas requests-cache
+pip install openmeteo-requests retry-requests
+```
+
