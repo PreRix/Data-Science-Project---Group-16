@@ -19,6 +19,8 @@ conda install jupyter
 conda install matplotlib
 conda install polars
 conda install ipykernel
+conda install numpy pandas requests-cache
+pip install openmeteo-requests retry-requests
 python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
 conda list --export > requirements.txt
 ```
