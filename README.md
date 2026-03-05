@@ -4,7 +4,7 @@
 
 ### Who we are
 
-We are a group of four students from the Christian-Albrechts-University to Kiel (CAU) studiying computer science and business science.
+We are a group of four students from the Christian-Albrechts-University to Kiel (CAU) studying computer science and business science.
 This project is assigned to the Data-Science-Project which is taking place between the fifth and sixth semester (Feb 23 - Mar 20, 2026).
 
 We had to find a topic which is interesting to us and perform data science on it:
