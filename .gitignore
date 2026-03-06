@@ -84,5 +84,5 @@ desktop.ini
 # -------------------------
 # Datasets
 # -------------------------
-data/
+data/**
 !data/**/.gitkeep
