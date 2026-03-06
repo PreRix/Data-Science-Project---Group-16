@@ -1,0 +1,22 @@
+variable,use_for_project,reason
+pm10,ja,Feinstaubpartikel die stark durch Verkehr, Reifenabrieb und Bremsen entstehen
+pm2_5,J´ja,Sehr feiner Feinstaub aus Verbrennungsmotoren und Abgasen
+nitrogen_dioxide,ja,NO2 ist einer der wichtigsten Schadstoffe aus Fahrzeugabgasen
+carbon_monoxide,ja,CO entsteht durch unvollständige Verbrennung in Motoren
+ozone,ja,Reagiert mit NOx und zeigt allgemeine Luftverschmutzung
+european_aqi,ja,Gesamtindex der Luftqualität und gut für einfache Vergleiche
+sulphur_dioxide,optional,Kommt eher aus Industrie und Kraftwerken daher weniger Bezug zu Verkehr
+carbon_dioxide,nein,CO2 ist ein Treibhausgas aber kein typischer Luftqualitätsindikator für lokale Verschmutzung
+ammonia,nein,Kommt hauptsächlich aus Landwirtschaft und Düngung nicht aus Straßenverkehr
+methane,nein,Globales Treibhausgas ohne direkten Zusammenhang zu Verkehrsaufkommen
+aerosol_optical_depth,nein,Satellitenbasierter Indikator für Aerosole schwer direkt mit Verkehr zu verbinden
+dust,nein,Oft Sahara-Staub oder natürliche Quellen nicht durch lokalen Verkehr verursacht
+uv_index,nein,UV Strahlung der Sonne hat keinen direkten Bezug zur Luftverschmutzung durch Verkehr
+uv_index_clear_sky,nein,UV Wert ohne Wolken ebenfalls nicht relevant für Verkehrsanalysen
+alder_pollen,nein,Pollenwerte sind für Allergien relevant aber nicht für Luftverschmutzung
+birch_pollen,nein,Pollenbelastung hat keinen Zusammenhang mit Verkehr
+grass_pollen,nein,Pollenbelastung hat keinen Zusammenhang mit Verkehr
+mugwort_pollen,nein,Pollenbelastung hat keinen Zusammenhang mit Verkehr
+olive_pollen,nein,Pollenbelastung hat keinen Zusammenhang mit Verkehr
+ragweed_pollen,nein,Pollenbelastung hat keinen Zusammenhang mit Verkehr
+us_aqi,nein,US Luftqualitätsindex für Europa weniger relevant
