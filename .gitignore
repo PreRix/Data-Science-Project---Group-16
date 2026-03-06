@@ -84,5 +84,8 @@ desktop.ini
 # -------------------------
 # Datasets
 # -------------------------
+# TO UPDATE FOLDER STRUCTURE:
+# find data/ -type d -exec touch {}/.gitkeep \;
 data/**
+!data/**/
 !data/**/.gitkeep
