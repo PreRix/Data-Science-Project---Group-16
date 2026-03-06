@@ -43,7 +43,7 @@ conda install jupyter
 conda install matplotlib
 conda install polars
 conda install ipykernel
-conda install numpy pandas requests-cache
+conda install requests-cache
 conda install pyproj
 pip install openmeteo-requests retry-requests
 python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
@@ -57,7 +57,7 @@ conda install numpy pandas requests-cache
 pip install openmeteo-requests retry-requests
 ```
 
-#### For updating an Environment to a new requirements.txt
+### For updating an Environment to a new requirements.txt
 
 ```powershell
 conda install --name <envname> --file requirements.txt
