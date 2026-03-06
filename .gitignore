@@ -81,3 +81,7 @@ desktop.ini
 *.bak
 *.cache
 
+# -------------------------
+# Datasets
+# -------------------------
+Datensaetze/
