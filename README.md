@@ -69,7 +69,7 @@ conda list --export > requirements.txt
 conda install --name <envname> --file requirements.txt
 ```
 
-## Information for the selection of the traffic counting stations (so called "Dauermessstellen")
+## Information for the selection of the traffic measuring points ("Dauerzählstellen")
 
 To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file to Google MyMaps
 and identified "the most relevant" counting stations by eye and feeling. 
