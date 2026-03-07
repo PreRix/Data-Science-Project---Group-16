@@ -22,6 +22,18 @@ We developed nine plus one bonus research questions that we want to answer with 
 The data we used is freely available. The sources are the following:
 - BASt datasets for the vehicle counts on German Autobahnen (motorways) and Bundesstraßen (federal highways):
   https://www.bast.de/DE/Publikationen/Daten/Verkehrstechnik/DZ-Richtung.html?nn=427910
+- KBA datasets for the vehicle registration count in Kiel:
+  https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz1_b_uebersicht.html?nn=835828
+- Weather data in Kiel:
+  https://open-meteo.com/en/docs/historical-weather-api
+- Air Quality data in Kiel:
+  https://open-meteo.com/en/docs/air-quality-api
+- Bounding Box data for Kiel:
+  https://nominatim.openstreetmap.org/search
+- Kieler Woche data for visitor count and date:
+  https://www.kieler-woche.de/de/medien/meldung.php?
+- Football data for games in the Bundesliga 1/2 played in Kiel:
+  https://openligadb.de/
   
 
 ## Using Anaconda
