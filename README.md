@@ -16,24 +16,17 @@ Those should then be accessible on a self-programmed website.
 ### The Topic
 The topic of our project is as follows: The Personal Traffic around Kiel in the past five years *(2021 to 2025)*.
 
-We developed nine plus one bonus research questions that we want to answer with this project [Research Questions](Research-Questions.pdf).
+We developed nine plus one bonus [research questions](Research-Questions.pdf) that we want to answer with this project.
 
 ### The Data 
 The data we used is freely available. The sources are the following:
-- BASt datasets for the vehicle counts on German Autobahnen (motorways) and Bundesstraßen (federal highways):
-  https://www.bast.de/DE/Publikationen/Daten/Verkehrstechnik/DZ-Richtung.html?nn=427910
-- KBA datasets for the vehicle registration count in Kiel:
-  https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz1_b_uebersicht.html?nn=835828
-- Weather data in Kiel:
-  https://open-meteo.com/en/docs/historical-weather-api
-- Air Quality data in Kiel:
-  https://open-meteo.com/en/docs/air-quality-api
-- Bounding Box data for Kiel:
-  https://nominatim.openstreetmap.org/search
-- Kieler Woche data for visitor count and date:
-  https://www.kieler-woche.de/de/medien/meldung.php
-- Football data for games in the Bundesliga 1/2 played in Kiel:
-  https://openligadb.de
+- [BASt datasets for the vehicle counts on German Autobahnen (motorways) and Bundesstraßen (federal highways)](https://www.bast.de/DE/Publikationen/Daten/Verkehrstechnik/DZ-Richtung.html?nn=427910)
+- [KBA datasets for the vehicle registration count in Kiel](https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz1_b_uebersicht.html?nn=835828)
+- [Weather data in Kiel](https://open-meteo.com/en/docs/historical-weather-api)
+- [Air Quality data in Kiel](https://open-meteo.com/en/docs/air-quality-api)
+- [Bounding Box data for Kiel](https://nominatim.openstreetmap.org/search)
+- [Kieler Woche data for visitor count and date](https://www.kieler-woche.de/de/medien/meldung.php)
+- [Football data for games in the Bundesliga 1/2 played in Kiel](https://openligadb.de)
   
 
 ## Using Anaconda
