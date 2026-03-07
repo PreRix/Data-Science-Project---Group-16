@@ -31,9 +31,9 @@ The data we used is freely available. The sources are the following:
 - Bounding Box data for Kiel:
   https://nominatim.openstreetmap.org/search
 - Kieler Woche data for visitor count and date:
-  https://www.kieler-woche.de/de/medien/meldung.php?
+  https://www.kieler-woche.de/de/medien/meldung.php
 - Football data for games in the Bundesliga 1/2 played in Kiel:
-  https://openligadb.de/
+  https://openligadb.de
   
 
 ## Using Anaconda
@@ -57,16 +57,10 @@ conda install polars
 conda install ipykernel
 conda install requests-cache
 conda install pyproj
-pip install openmeteo-requests retry-requests
+pip install openmeteo-requests
+pip install retry-requests
 python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
 conda list --export > requirements.txt
-```
-
-### For using openmeteo
-
-```powershell
-conda install numpy pandas requests-cache
-pip install openmeteo-requests retry-requests
 ```
 
 ### For updating an Environment to a new requirements.txt
