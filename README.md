@@ -72,9 +72,9 @@ conda install --name <envname> --file requirements.txt
 ## Information for the selection of the traffic measuring points ("Dauerzählstellen")
 
 To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file to Google MyMaps
-and identified "the most relevant" counting stations by eye and feeling. 
-Because this is no scientific way of selecting the stations providing data the whole project relies on, 
-we created a coordinate frame for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic counting stations that are 
+and identified "the most relevant" measuring points by eye and feeling. 
+Because this is no scientific way of selecting the measuring points providing data the whole project relies on, 
+we created a coordinate frame for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic measuring points that are 
 located within this frame.
 
 *to be continued*
