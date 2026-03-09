@@ -4,7 +4,7 @@
 
 ### Who we are
 
-We are a group of four students from the Christian-Albrechts-University to Kiel (CAU) studying computer science and business science.
+We are a group of four students from the Christian-Albrechts-University to Kiel (CAU) studying computer science and business information systems.
 This project is assigned to the Data-Science-Project which is taking place between the fifth and sixth semester (Feb 23 - Mar 20, 2026).
 
 We had to find a topic which is interesting to us and perform data science on it:
@@ -62,9 +62,11 @@ conda list --export > requirements.txt
 conda install --name <envname> --file requirements.txt
 ```
 
-## Information for the selection of the traffic measuring points ("Dauerzählstellen")
+-----
 
-To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file to Google MyMaps
+## Information for the selection of the traffic measuring points / counting stations ("Dauerzählstellen")
+
+To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file from BASt to Google MyMaps
 and identified "the most relevant" measuring points by eye and feeling.
 
 ![](measuring_points_map_kiel.png)
@@ -72,5 +74,27 @@ and identified "the most relevant" measuring points by eye and feeling.
 Because this is no scientific way of selecting the measuring points providing data the whole project relies on, 
 we created a coordinate frame for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic measuring points that are 
 located within this frame.
+
+This coordinate frame has the following coordinates:
+- min_latitude: 54.068086300000004
+- max_latidude: 54.61594389999999
+
+- min_longitude: 9.8472391
+- max_longitude: 10.404307
+
+
+The counting stations within this frame then got analyized by us in terms of usefullness for our project.
+We selected the follwing stations as relevant:
+- 1104: "Rumohr" on the A215 -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
+- 1111: "Kiel-Holtenau I" on the B503 -> 
+- 1112: "Kiel-Holtenau 2" on the B503 ->
+- 1116: "Gettorf (Wulfshagen)" on the B76 -> the only counting station covering the vehicle counts for the North-West-Axis from Kiel.
+- 1135: "Raisdorf I" on the B76 -> the closest of the counting stations in the East of Kiel; and one that got used over all five years of the observation period.
+- 1156: "AS Wankendorf (Stolpe)" on the A21 -> counting station covering the traffic coming from the East via the Autobahn (e.g. trips from Berlin).
+- 1158: "Kiel/Schönkirchen" on the B502 -> only counting station in the North-East of Kiel.
+- 1162: "Melsdorf" on the A210 -> 
+- 1194: "Kiel-West" on the A215 -> counting station directly in front of Kiel, where the A215 and A210 merge together.
+
+
 
 *to be continued*
