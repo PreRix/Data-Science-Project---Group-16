@@ -84,16 +84,16 @@ This coordinate frame has the following coordinates:
 
 
 The counting stations within this frame then got analyized by us in terms of usefullness for our project.
-We selected the follwing stations as relevant:
-**- 1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
-**- 1111: "Kiel-Holtenau I" on the B503** -> 
-**- 1112: "Kiel-Holtenau 2" on the B503** ->
-**- 1116: "Gettorf (Wulfshagen)" on the B76** -> the only counting station covering the vehicle counts for the North-West-Axis from Kiel.
-**- 1135: "Raisdorf I" on the B76** -> the closest of the counting stations in the East of Kiel; and one that got used over all five years of the observation period.
-**- 1156: "AS Wankendorf (Stolpe)" on the A21** -> counting station covering the traffic coming from the East via the Autobahn (e.g. trips from Berlin).
-**- 1158: "Kiel/Schönkirchen" on the B502** -> only counting station in the North-East of Kiel.
-**- 1162: "Melsdorf" on the A210** -> 
-**- 1194: "Kiel-West" on the A215** -> counting station directly in front of Kiel, where the A215 and A210 merge together.
+We selected the follwing stations as relevant:\ 
+**- 1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.\ 
+**- 1111: "Kiel-Holtenau I" on the B503** -> \ 
+**- 1112: "Kiel-Holtenau 2" on the B503** -> \ 
+**- 1116: "Gettorf (Wulfshagen)" on the B76** -> the only counting station covering the vehicle counts for the North-West-Axis from Kiel.\ 
+**- 1135: "Raisdorf I" on the B76** -> the closest of the counting stations in the East of Kiel; and one that got used over all five years of the observation period.\ 
+**- 1156: "AS Wankendorf (Stolpe)" on the A21** -> counting station covering the traffic coming from the East via the Autobahn (e.g. trips from Berlin).\ 
+**- 1158: "Kiel/Schönkirchen" on the B502** -> only counting station in the North-East of Kiel.\ 
+**- 1162: "Melsdorf" on the A210** -> counting vehicles on the West-Axis of Kiel. \ 
+**- 1194: "Kiel-West" on the A215** -> counting station directly in front of Kiel, where the A215 and A210 merge together.\ 
 
 
 
