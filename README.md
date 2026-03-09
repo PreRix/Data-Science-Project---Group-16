@@ -16,7 +16,7 @@ Those should then be accessible on a self-programmed website.
 ### The Topic
 The topic of our project is as follows: The Personal Traffic around Kiel in the past five years *(2021 to 2025)*.
 
-We developed nine plus one bonus [research questions](Research-Questions.pdf) that we want to answer with this project.
+We developed nine plus one bonus [research questions](Research-Questions.pdf) from which we want to answer eight with this project.
 
 ### The Data 
 The data we used is freely available. The sources are the following:
