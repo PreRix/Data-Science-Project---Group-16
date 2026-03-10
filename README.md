@@ -84,6 +84,12 @@ The code for the API requests is stored [here](Code/API-requests/openmeteo_weath
 ### Open-Meteo Air Quality Data:
 We choose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrive data for corresponding variables.
 A list of the variables we requested from the API can be found [here](data/AirQuality/air_quality_variables_selection.csv) with an explaination on why we decided that way.
+We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retived the data by the coordinates of the BASt counting stations.
+A .csv-file containing all data was created then.
+[This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requestes and collect the data.
+
+
+
 
 -----
 
@@ -94,7 +100,7 @@ and identified "the most relevant" measuring points by eye and feeling.
 ![](measuring_points_map_kiel.png)
 
 Because this is no scientific way of selecting the measuring points providing data the whole project relies on, 
-we created a coordinate frame for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic measuring points that are 
+we created a coordinate frame (bounding box) for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic measuring points that are 
 located within this frame.
 
 This coordinate frame has the following coordinates:
@@ -104,6 +110,7 @@ This coordinate frame has the following coordinates:
 - min_longitude: 9.8472391
 - max_longitude: 10.404307
 
+The data for the bounding box was retrived from the OpenStreetMap API using the script in [this Jupyter Notebook](Code/API-requests/openstreetmap.org-API.ipynb)
 
 The counting stations within this frame then got analyized by us in terms of usefullness for our project.
 We selected the following stations as relevant:
