@@ -76,6 +76,15 @@ We choose the Open-meteo Weather API to collect historical weather data for the 
   - wind gusts
   - relative humidity
 
+We retrived the hourly data by requesting the values for the location coordinates of our selected BASt counting stations and created one .csv-file for the data.
+The same procedure was performed for the daily data.
+The code for the API requests is stored [here](Code/API-requests/openmeteo_weather_API.ipynb).
+
+
+### Open-Meteo Air Quality Data:
+We choose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrive data for corresponding variables.
+A list of the variables we requested from the API can be found [here](data/AirQuality/air_quality_variables_selection.csv) with an explaination on why we decided that way.
+
 -----
 
 ## Selection of the traffic counting stations
