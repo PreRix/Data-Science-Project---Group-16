@@ -30,14 +30,17 @@ The data we used is freely available. The sources are the following:
 
 
 ## Data Pipeline
+### BASt Data:
 We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding meta-data file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
 As we only consider data for Schleswig-Holstein, we aggregated each data file to only contain rows with information corresponding to Schleswig-Holstein.
 To make sure the data is consistant, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
+In the next step we cutted the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) as well as merging all files to one .csv-file for the entire traffic data of interest.
+
 -----
 
-## Information for the selection of the traffic measuring points / counting stations ("Dauerzählstellen")
+## Selection of the traffic counting stations
 
 To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file from BASt to Google MyMaps
 and identified "the most relevant" measuring points by eye and feeling.
