@@ -86,8 +86,8 @@ This coordinate frame has the following coordinates:
 The counting stations within this frame then got analyized by us in terms of usefullness for our project.
 We selected the following stations as relevant:
 - **1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
-- **1111: "Kiel-Holtenau I" on the B503** ->
-- **1112: "Kiel-Holtenau 2" on the B503** -> 
+- **1111: "Kiel-Holtenau I" on the B503** -> counting station on the Holtenauer bridge to count vehicles to the North of Kiel. This station is before a road branches off to Holstein Stadion.
+- **1112: "Kiel-Holtenau 2" on the B503** -> counting station next to station #1111 but after the branch to Holstein Stadion. We selected this station as well to have the opportunity to answer questions where the information might be helpful, how many vehicles took the branch.
 - **1116: "Gettorf (Wulfshagen)" on the B76** -> the only counting station covering the vehicle counts for the North-West-Axis from Kiel.
 - **1135: "Raisdorf I" on the B76** -> the closest of the counting stations in the East of Kiel; and one that got used over all five years of the observation period.
 - **1156: "AS Wankendorf (Stolpe)" on the A21** -> counting station covering the traffic coming from the East via the Autobahn (e.g. trips from Berlin).
