@@ -84,7 +84,7 @@ This coordinate frame has the following coordinates:
 
 
 The counting stations within this frame then got analyized by us in terms of usefullness for our project.
-We selected the follwing stations as relevant:
+We selected the following stations as relevant:
 - **1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
 - **1111: "Kiel-Holtenau I" on the B503** ->
 - **1112: "Kiel-Holtenau 2" on the B503** -> 
