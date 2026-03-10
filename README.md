@@ -21,6 +21,7 @@ We developed nine plus one bonus [research questions](Research-Questions.pdf) fr
 ### The Data 
 The data we used is freely available. The sources are the following:
 - [BASt datasets for the vehicle counts on German Autobahnen (motorways) and Bundesstraßen (federal highways)](https://www.bast.de/DE/Publikationen/Daten/Verkehrstechnik/DZ-Richtung.html?nn=427910)
+- [Description of the BASt datasets](https://files.bast.de/public.php/dav/files/TzK6ceAwP9nTnWL/?accept=zip)
 - [KBA datasets for the vehicle registration count in Kiel](https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz1_b_uebersicht.html?nn=835828)
 - [Open-Meteo Weather data in Kiel](https://open-meteo.com/en/docs/historical-weather-api)
 - [Open-Meteo Air Quality data in Kiel](https://open-meteo.com/en/docs/air-quality-api)
@@ -42,13 +43,19 @@ Next we cutted the .csv-files down to the rows only containing info about the [s
 
 *For these aggregation files its important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
 
-In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.    
-As we fo
+In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.  
+We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
+For all further exploration of the data we will not use entries that are missing values 
+As well we detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
+We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We contacted BASt to explore on that and we'll update this ReadMe accordingly.
+
+
+### KBA Data:
+The data for yearly vehicle registration counts in Kiel are provided in Excel files. The naming of the columns did not stay consistant over the five year observation span. Thus we had to normalize the columns in each file to be able to later join them together into one .csv-file. 
 
 -----
 
 ## Selection of the traffic counting stations
-
 To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file from BASt to Google MyMaps
 and identified "the most relevant" measuring points by eye and feeling.
 
