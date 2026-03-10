@@ -27,40 +27,13 @@ The data we used is freely available. The sources are the following:
 - [OpenStreetMap Bounding Box data for Kiel](https://nominatim.openstreetmap.org/search)
 - [OpenLigaDB Football data for games in the Bundesliga 1/2 played in Kiel](https://openligadb.de)
 - [Kieler Woche data for visitor count and date](https://www.kieler-woche.de/de/medien/meldung.php)
-  
 
-## Using Anaconda
 
-### Copying an existing Environment
-
-```powershell
-conda create --name <envname> --file requirements.txt
-python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
-```
-
-### Creating a new Environment
-
-```powershell
-conda create --name <name> python=3.11
-conda activate <name>
-conda install numpy
-conda install jupyter
-conda install matplotlib
-conda install polars
-conda install ipykernel
-conda install requests-cache
-conda install pyproj
-pip install openmeteo-requests
-pip install retry-requests
-python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
-conda list --export > requirements.txt
-```
-
-### For updating an Environment to a new requirements.txt
-
-```powershell
-conda install --name <envname> --file requirements.txt
-```
+## Data Pipeline
+We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding meta-data file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
+As we only consider data for Schleswig-Holstein, we aggregated each data file to only contain rows with information corresponding to Schleswig-Holstein.
+To make sure the data is consistant, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
+This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
 -----
 
@@ -94,6 +67,44 @@ We selected the following stations as relevant:
 - **1158: "Kiel/Schönkirchen" on the B502** -> only counting station in the North-East of Kiel.
 - **1162: "Melsdorf" on the A210** -> counting vehicles on the West-Axis of Kiel. 
 - **1194: "Kiel-West" on the A215** -> counting station directly in front of Kiel, where the A215 and A210 merge together.
+
+
+
+
+-----
+
+## Using Anaconda
+
+### Copying an existing Environment
+
+```powershell
+conda create --name <envname> --file requirements.txt
+python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
+```
+
+### Creating a new Environment
+
+```powershell
+conda create --name <name> python=3.11
+conda activate <name>
+conda install numpy
+conda install jupyter
+conda install matplotlib
+conda install polars
+conda install ipykernel
+conda install requests-cache
+conda install pyproj
+pip install openmeteo-requests
+pip install retry-requests
+python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
+conda list --export > requirements.txt
+```
+
+### For updating an Environment to a new requirements.txt
+
+```powershell
+conda install --name <envname> --file requirements.txt
+```
 
 
 
