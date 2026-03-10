@@ -110,7 +110,7 @@ This coordinate frame has the following coordinates:
 - min_longitude: 9.8472391
 - max_longitude: 10.404307
 
-The data for the bounding box was retrived from the OpenStreetMap API using the script in [this Jupyter Notebook](Code/API-requests/openstreetmap.org-API.ipynb)
+The data for the bounding box was retrived from the OpenStreetMap API using the script in [this Jupyter Notebook](<Code/API-requests/openstreetmap.org API.ipynb>).
 
 The counting stations within this frame then got analyized by us in terms of usefullness for our project.
 We selected the following stations as relevant:
