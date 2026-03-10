@@ -61,20 +61,20 @@ The code for that can be found [here](Code/CSV-Transformation/KBA_data_combinati
 ### Open-Meteo Weatehr Data:
 We choose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the follwing variables:
 - daily:
--   weather code
--   temperature mean
--   precipitation sum  
+  - weather code
+  - temperature mean
+  - precipitation sum  
 
 
 - hourly:
--   weather code
--   temperature
--   precipitation
--   snow depth
--   snow fall
--   wind speed
--   wind gusts
--   relative humidity
+  - weather code
+  - temperature
+  - precipitation
+  - snow depth
+  - snow fall
+  - wind speed
+  - wind gusts
+  - relative humidity
 
 -----
 
