@@ -30,13 +30,20 @@ The data we used is freely available. The sources are the following:
 
 
 ## Data Pipeline
+
 ### BASt Data:
 We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding meta-data file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
 As we only consider data for Schleswig-Holstein, we aggregated each data file to only contain rows with information corresponding to Schleswig-Holstein.
 To make sure the data is consistant, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
-In the next step we cutted the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) as well as merging all files to one .csv-file for the entire traffic data of interest.
+In the next step we merged all files to one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates given in the files to another encoding, so that they can be used for the API requests on weather and air quality. Here you can find the [code](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb).\  
+Next we cutted the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) with [this code](Code/CSV-Transformation/filter_kiel_measuring_points.ipynb).
+
+*For these aggregation files its important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
+
+In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.\  
+As we fo
 
 -----
 
