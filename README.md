@@ -29,6 +29,7 @@ The data we used is freely available. The sources are the following:
 - [OpenLigaDB Football data for games in the Bundesliga 1/2 played in Kiel](https://openligadb.de)
 - [Kieler Woche data for visitor count and date](https://www.kieler-woche.de/de/medien/meldung.php)
 
+-----
 
 ## Data Pipeline
 
@@ -47,11 +48,33 @@ In an additional step we did some analysis on the data to [check the quality](Co
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
 For all further exploration of the data we will not use entries that are missing values 
 As well we detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
-We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We contacted BASt to explore on that and we'll update this ReadMe accordingly.
+We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore on that and we'll update this ReadMe accordingly.
 
 
 ### KBA Data:
-The data for yearly vehicle registration counts in Kiel are provided in Excel files. The naming of the columns did not stay consistant over the five year observation span. Thus we had to normalize the columns in each file to be able to later join them together into one .csv-file. 
+The data for yearly vehicle registration counts in Germany are provided in Excel files. The naming of the columns did not stay consistant over the five year observation span. Thus we had to normalize the columns in each file, so that columns covering the same information have the same name. We did that so we were able to later join all files into one .csv-file. 
+We then collected only the rows that are giving information about Kiel registration counts. 
+After that the single files got merged into on .csv-file containing all registration count for Kiel from the years 2021 to 2025.
+The code for that can be found [here](Code/CSV-Transformation/KBA_data_combination.ipynb).
+
+
+### Open-Meteo Weatehr Data:
+We choose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the follwing variables:
+- daily:
+-   weather code
+-   temperature mean
+-   precipitation sum  
+
+
+- hourly:
+-   weather code
+-   temperature
+-   precipitation
+-   snow depth
+-   snow fall
+-   wind speed
+-   wind gusts
+-   relative humidity
 
 -----
 
