@@ -167,6 +167,7 @@ conda install polars
 conda install ipykernel
 conda install requests-cache
 conda install pyproj
+conda install streamlit
 pip install openmeteo-requests
 pip install retry-requests
 python -m ipykernel install --user --name <kernelname> --display-name "<displayname>"
