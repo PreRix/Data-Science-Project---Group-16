@@ -58,7 +58,7 @@ After that the single files got merged into on .csv-file containing all registra
 The code for that can be found [here](Code/CSV-Transformation/KBA_data_combination.ipynb).
 
 
-### Open-Meteo Weatehr Data:
+### Open-Meteo Weather Data:
 We choose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the follwing variables:
 - daily:
   - weather code
