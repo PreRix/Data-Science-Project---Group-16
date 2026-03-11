@@ -39,14 +39,14 @@ As we only consider data for Schleswig-Holstein, we aggregated each data file to
 To make sure the data is consistant, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
-In the next step we merged all files to one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates given in the files to another encoding, so that they can be used for the API requests on weather and air quality. [Here](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb) you can find the code.  
+In the next step we merged all files to one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates for the counting stations given in the meta-data files to another encoding, so that they can be used for the API requests on weather and air quality. [Here](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb) you can find the code.  
 Next we cutted the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) with [this code](Code/CSV-Transformation/filter_kiel_measuring_points.ipynb).
 
 *For these aggregation files its important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
 
 In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.  
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
-For all further exploration of the data we will not use entries that are missing values 
+For all further exploration of the data we will not use entries that are containing missing values. We will sort them out during the visualization process. 
 As well we detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
 We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore on that and we'll update this ReadMe accordingly.
 
@@ -89,7 +89,24 @@ A .csv-file containing all data was created then.
 [This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requestes and collect the data.
 
 
+### OpenLigaDB Data:
+For one of our Research Questions we wanted to show how traffic changes when special events take place. We decided that football matches at the Holstein Stadion would be a great case. We used the OpenLigaDB API to get data about when a match took place there.
+For that, we used the knowledge that matches there only take place when Holstein Kiel is playing as the "Home-Team". 
+In the OpenLigaDB for each match both teams are listed; the first team is always the Home-Team. 
+Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API_requests/openligadb.de API.ipynb>).
 
+
+### Kieler Woche Data:
+As well as football matches we wanted to take the Kieler Woche into account as a big event which might influence the traffic around Kiel.
+The data we needed is not available via an API nor given in some data files. Therefore we went on the internet and collected this few data ourselvs and wrote them into a .csv-file containing the dates from when to when the Kieler Woche took place from 2021 to 2025, as well as the estimated visitor counts. 
+
+-----
+
+## Merging data together:
+To gain a good overview over all data we merged all possible data together into one big .csv-file; containing the traffic data, weather and air quality data for the corresponding counting station, in an hourly sample rate. 
+Therefore all encodings or formats for join attributes had to be normalized.
+After joining we removed all redundant columns from the file as well.
+The code can be found [here](Code/CSV-Transformation/holy_file_generator.ipynb).
 
 -----
 
