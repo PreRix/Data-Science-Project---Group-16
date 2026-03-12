@@ -1,6 +1,9 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+import os
+
+BASE_DIR = "../../data"
 
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
 st.title("Rush-Hour Traffic & Home Office Effect (2021–2025)")
@@ -8,7 +11,7 @@ st.title("Rush-Hour Traffic & Home Office Effect (2021–2025)")
 @st.cache_data
 def load_data():
     df = (
-        pl.read_csv("holy_file.csv", infer_schema_length=0)
+        pl.read_csv(os.path.join(BASE_DIR, "MergeData", "holy_file.csv"), infer_schema_length=0)
         .filter(pl.col("Zst") == "1194")
         .with_columns(
             pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
