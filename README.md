@@ -93,7 +93,7 @@ A .csv-file containing all data was created then.
 For one of our Research Questions we wanted to show how traffic changes when special events take place. We decided that football matches at the Holstein Stadion would be a great case. We used the OpenLigaDB API to get data about when a match took place there.
 For that, we used the knowledge that matches there only take place when Holstein Kiel is playing as the "Home-Team". 
 In the OpenLigaDB for each match both teams are listed; the first team is always the Home-Team. 
-Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API_requests/openligadb.de API.ipynb>).
+Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API-requests/openligadb.de API.ipynb>).
 
 
 ### Kieler Woche Data:
