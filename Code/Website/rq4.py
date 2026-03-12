@@ -2,6 +2,9 @@ import streamlit as st
 import polars as pl
 import plotly.express as px
 
+BASE_DIR = "../../data"
+CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
+
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
 st.title("Weekend vs. Weekday Traffic Load (A215 - AK Kiel-West)")
 
