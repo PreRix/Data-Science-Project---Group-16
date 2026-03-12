@@ -1,7 +1,7 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: win-64
-# created-by: conda 25.11.0
+# created-by: conda 26.1.1
 altair=6.0.0=py311haa95532_1
 anyio=4.10.0=py311haa95532_0
 argon2-cffi=25.1.0=py311haa95532_0
@@ -135,7 +135,7 @@ nbconvert-core=7.17.0=py311haa95532_0
 nbconvert-pandoc=7.17.0=py311haa95532_0
 nbformat=5.10.4=py311haa95532_0
 nest-asyncio=1.6.0=py311haa95532_0
-niquests=3.18.1=pypi_0
+niquests=3.17.0=pypi_0
 notebook=7.5.3=py311haa95532_0
 notebook-shim=0.2.4=py311haa95532_1
 numexpr=2.14.1=py311h7660c64_0
@@ -157,6 +157,7 @@ pillow=11.1.0=py311h096bfcc_0
 pip=26.0.1=pyhc872135_0
 pixman=0.46.4=h4043f72_0
 platformdirs=4.5.0=py311haa95532_0
+plotly=6.5.0=py311h4442805_0
 polars=1.34.0=py311hf36bb31_1
 polars-runtime-32=1.34.0=py311haa95532_1
 proj=9.3.1=ha107b6e_0
@@ -227,7 +228,7 @@ tzdata=2025c=he532380_0
 ucrt=10.0.22621.0=haa95532_0
 url-normalize=2.2.1=py311haa95532_0
 urllib3=2.6.3=py311haa95532_0
-urllib3-future=2.17.901=pypi_0
+urllib3-future=2.17.900=pypi_0
 utf8proc=2.6.1=h2bbff1b_1
 vc=14.3=h2df5915_10
 vc14_runtime=14.44.35208=h4927774_10
