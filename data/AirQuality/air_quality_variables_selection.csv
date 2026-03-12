@@ -1,22 +1,22 @@
-variable;use_for_project;reason
-pm10;yes;Fine dust particles that are strongly caused by traffic, tire abrasion and brakes
-pm2_5;yes;Very fine fine dust from combustion engines and exhaust gases
-nitrogen_dioxide;yes;NO2 is one of the most important pollutants from vehicle exhaust gases
-carbon_monoxide;yes;CO is produced by incomplete combustion in engines
-ozone;no;Reacts with NOx and shows general air pollution, but it doesn't correlate with car usage.
-european_aqi;yes;Overall air quality index and good for simple comparisons
-sulphur_dioxide;no;Comes more from industry and power plants therefore less connection to traffic
-carbon_dioxide;yes;CO2 is a greenhouse gas but not a typical air quality indicator for local pollution, but CO2 would be helpful
-ammonia;no;Comes mainly from agriculture and fertilization not from road traffic
-methane;no;Global greenhouse gas with no direct connection to traffic
-aerosol_optical_depth;no;Satellite-based indicator for aerosols difficult to connect directly to traffic
-dust;no;Often Sahara dust or natural springs not caused by local traffic
-uv_index;no;UV radiation of the sun has no direct relation to air pollution by traffic
-uv_index_clear_sky;no;UV value without clouds also not relevant for traffic analysis
-alder_pollen;no;Pollen values are relevant for allergies but not for air pollution
-birch_pollen;no;Pollen load has no connection with traffic
-grass_pollen;no;Pollen load has no connection with traffic
-mugwort_pollen;no;Pollen load has no connection with traffic
-olive_pollen;no;Pollen load has no connection with traffic
-ragweed_pollen;no;Pollen load has no connection with traffic
-us_aqi;no;US air quality index less relevant for Europe
+variable,use_for_project,reason
+pm10,yes,"Fine dust particles that are strongly caused by traffic tire abrasion and brakes"
+pm2_5,yes,"Very fine fine dust from combustion engines and exhaust gases"
+nitrogen_dioxide,yes,"NO2 is one of the most important pollutants from vehicle exhaust gases"
+carbon_monoxide,yes,"CO is produced by incomplete combustion in engines"
+european_aqi,yes,"Overall air quality index and good for simple comparisons"
+carbon_dioxide,yes,"CO2 is a greenhouse gas but not a typical air quality indicator for local pollution but it can still be helpful"
+ozone,no,"Reacts with NOx and shows general air pollution but it doesn't correlate strongly with car usage"
+sulphur_dioxide,no,"Comes more from industry and power plants therefore less connection to traffic"
+ammonia,no,"Comes mainly from agriculture and fertilization not from road traffic"
+methane,no,"Global greenhouse gas with no direct connection to traffic"
+aerosol_optical_depth,no,"Satellite-based indicator for aerosols difficult to connect directly to traffic"
+dust,no,"Often Sahara dust or natural sources not caused by local traffic"
+uv_index,no,"UV radiation of the sun has no direct relation to air pollution by traffic"
+uv_index_clear_sky,no,"UV value without clouds also not relevant for traffic analysis"
+alder_pollen,no,"Pollen values are relevant for allergies but not for air pollution"
+birch_pollen,no,"Pollen load has no connection with traffic"
+grass_pollen,no,"Pollen load has no connection with traffic"
+mugwort_pollen,no,"Pollen load has no connection with traffic"
+olive_pollen,no,"Pollen load has no connection with traffic"
+ragweed_pollen,no,"Pollen load has no connection with traffic"
+us_aqi,no,"US air quality index less relevant for Europe"

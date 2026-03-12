@@ -2,14 +2,19 @@ import streamlit as st
 import polars as pl
 import plotly.express as px
 
+BASE_DIR = "../../data"
+CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
+
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
-st.title("Weekend vs. Weekday Traffic Load")
+st.title("Weekend vs. Weekday Traffic Load (A215 - AK Kiel-West)")
 
 @st.cache_data
 def load_data():
 
     df = (
         pl.read_csv("holy_file.csv", infer_schema_length=0)
+
+        .filter(pl.col("Zst") == "1104")
 
         .with_columns(
             pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
@@ -64,7 +69,7 @@ def weekday_share(df):
 
     daily = daily.with_columns(
         pl.when(pl.col("weekday") <= 5)
-        .then(pl.lit("Weekday (Mon–Fri)"))
+        .then(pl.lit("Weekday"))
         .when(pl.col("weekday") == 6)
         .then(pl.lit("Saturday"))
         .otherwise(pl.lit("Sunday"))
@@ -98,7 +103,7 @@ for col, year in zip(cols, years):
             names="day_type",
             title=str(year),
             category_orders={
-                "day_type": ["Weekday (Mon–Fri)", "Saturday", "Sunday"]
+                "day_type": ["Weekday", "Saturday", "Sunday"]
             }
         )
 
