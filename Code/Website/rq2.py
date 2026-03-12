@@ -14,8 +14,6 @@ AIR_QUALITY_VARS = {
     "PM2.5":        "pm2_5",
     "NO₂":          "nitrogen_dioxide",
     "CO":           "carbon_monoxide",
-    "Ozone":        "ozone",
-    "SO₂":          "sulphur_dioxide",
 }
 
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
