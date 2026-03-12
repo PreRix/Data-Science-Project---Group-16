@@ -9,9 +9,9 @@ BASE_DIR = "../../data"
 CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
 
 st.set_page_config(page_title="Weather & Traffic", layout="wide")
-st.title("Impact of Weather on Traffic (Station 1104)")
+st.title("Impact of Weather on Traffic (Station 1194)")
 
-@st.cache_data(show_spinner="Loading and preparing data...")
+@st.cache_data(show_spinner="Loading and preparing data ...")
 def load_weather_traffic_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
     
@@ -27,7 +27,7 @@ def load_weather_traffic_data(path):
         
     return (
         df
-        # Filter for the specific counting station A215 (1104)
+        # Filter for the specific counting station A215 (1194)
         .filter(pl.col("Zst").str.strip_chars() == "1104")
         .with_columns(pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime"))
         .with_columns([
@@ -95,7 +95,7 @@ def get_heatmap_matrices(df_subset: pl.DataFrame):
 
 # Define conditions
 cond_dry = pl.col(COL_PRECIP) == 0
-cond_wet = pl.col(COL_PRECIP) > 1.0
+cond_wet = pl.col(COL_PRECIP) > 2
 
 # Unpack both mean and count matrices
 matrix_dry_mean, matrix_dry_count = get_heatmap_matrices(df.filter(cond_dry))
