@@ -3,6 +3,9 @@ import polars as pl
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import os
+
+BASE_DIR         = "../../data"
 
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
 st.title("Extreme Weather & Traffic Disruption")
@@ -10,7 +13,7 @@ st.title("Extreme Weather & Traffic Disruption")
 @st.cache_data
 def load_traffic():
     return (
-        pl.read_csv("holy_file.csv", infer_schema_length=0)
+        pl.read_csv(os.path.join(BASE_DIR, "MergeData", "holy_file.csv"), infer_schema_length=0)
         .filter(pl.col("Zst") == "1194")
         .with_columns(
             pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
@@ -38,7 +41,7 @@ def load_traffic():
 @st.cache_data
 def load_weather():
     return (
-        pl.read_csv("weather_hourly.csv")
+        pl.read_csv(os.path.join(BASE_DIR, "Weather", "weather_hourly.csv"))
         .filter(pl.col("location_Zst") == 1194)
         .with_columns(
             pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
