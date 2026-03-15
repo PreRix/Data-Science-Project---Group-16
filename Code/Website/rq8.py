@@ -3,7 +3,7 @@ import polars as pl
 import plotly.graph_objects as go
 import os
 
-BASE_DIR = "../data"
+BASE_DIR = "../../data"
 
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
 st.title("Rush-Hour Traffic & Home Office Effect (2021–2025)")
