@@ -1,34 +1,29 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-import plotly.io as pio
-
-pio.templates["custom"] = go.layout.Template(
-    layout=go.Layout(
-        font=dict(size=18),
-        title=dict(font=dict(size=20)),
-        legend=dict(font=dict(size=16)),
-        xaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-        yaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-    )
-)
-pio.templates.default = "plotly+custom"
 
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
+st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
 st.title("Rush-Hour Traffic & Home Office Effect (2021–2025)")
 
-st.markdown("""
-<style>
-    html, body, [class*="css"] {
-        font-size: 22px;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.markdown("**Research Question #8:** How did the traffic in rush-hours changed on Autobahnen (and Bundesstraßen?) around Kiel because of the mobility change?")
 
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
+def apply_font(fig):
+    fig.update_layout(font_size=22, legend_font_size=22)
+
+    if fig.layout.title.text:
+        fig.update_layout(title_font_size=34)
+
+    fig.update_xaxes(title_font_size=28, tickfont_size=22)
+    fig.update_yaxes(title_font_size=28, tickfont_size=22)
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 26
+    return fig
+
 @st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_data(path):
+def load_measuring_points_data(path):
     df = (
         pl.read_csv(path, infer_schema_length=0)
         .filter(pl.col("Zst") == "1194")
@@ -61,7 +56,7 @@ def load_data(path):
     return df
 
 try:
-    df_traffic = load_data(CSV_HOLYFILE)
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
     st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
@@ -114,4 +109,4 @@ fig.update_layout(
     height=550,
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(apply_font(fig), use_container_width=True)

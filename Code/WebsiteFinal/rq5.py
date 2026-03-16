@@ -3,29 +3,12 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-import plotly.io as pio
-
-pio.templates["custom"] = go.layout.Template(
-    layout=go.Layout(
-        font=dict(size=18),
-        title=dict(font=dict(size=20)),
-        legend=dict(font=dict(size=16)),
-        xaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-        yaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-    )
-)
-pio.templates.default = "plotly+custom"
 
 st.set_page_config(page_title="Kiel Vehicle Registrations", layout="wide")
+st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
 st.title("Vehicle Registrations in Kiel – by Fuel Type (2021–2025)")
 
-st.markdown("""
-<style>
-    html, body, [class*="css"] {
-        font-size: 22px;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.markdown("**Research Question #5:** Using yearly registration data for Kiel to derive the estimated share of electric vehicles in the regional fleet from 2021 to 2025, is there a measurable downward trend in NO2 levels on high- traffic roads (like A21 and A215) near Kiel?")
 
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
@@ -54,13 +37,23 @@ FUEL_COLORS = {
 BEV_COL        = "PT_Nach Kraftstoffarten_Elektro (BEV)"
 HIDE_THRESHOLD = 10
 
-# ── Data loading ──────────────────────────────────────────────────────────────
+def apply_font(fig):
+    fig.update_layout(font_size=22, legend_font_size=22)
+
+    if fig.layout.title.text:
+        fig.update_layout(title_font_size=34)
+
+    fig.update_xaxes(title_font_size=28, tickfont_size=22)
+    fig.update_yaxes(title_font_size=28, tickfont_size=22)
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 26
+    return fig
 
 def extract_year(col: str) -> pl.Expr:
     return pl.col(col).str.slice(6, 4).cast(pl.Int32).alias("year")
 
 @st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_vehicles_by_year(path: str) -> dict[int, float]:
+def load_measuring_points_data(path: str) -> dict[int, float]:
     df = (
         pl.read_csv(path, infer_schema_length=0, ignore_errors=True)
         .with_columns([pl.col(c).str.strip_chars() for c in ["K_KFZ_R1", "K_KFZ_R2", "KFZ_R1", "KFZ_R2"]])
@@ -81,7 +74,7 @@ def load_vehicles_by_year(path: str) -> dict[int, float]:
     return dict(zip(result["year"], result["avg_vehicles"]))
 
 @st.cache_data(show_spinner="Loading Registration data …")
-def load_registrations(path: str) -> pl.DataFrame:
+def load_registrations_data(path: str) -> pl.DataFrame:
     df = pl.read_csv(path, infer_schema_length=0)
     casts = [pl.col("Year").cast(pl.Int32)] + [
         pl.col(c).str.replace_all(r"\.", "").str.strip_chars().cast(pl.Int64, strict=False)
@@ -90,7 +83,7 @@ def load_registrations(path: str) -> pl.DataFrame:
     return df.with_columns(casts).sort("Year")
 
 @st.cache_data(show_spinner="Loading Air Quality data …")
-def load_no2_monthly(path: str) -> pl.DataFrame:
+def load_air_quality_data(path: str) -> pl.DataFrame:
     return (
         pl.read_csv(path, infer_schema_length=0)
         .with_columns([
@@ -106,6 +99,24 @@ def load_no2_monthly(path: str) -> pl.DataFrame:
              pl.col("month").cast(pl.Utf8).str.zfill(2) + "-01").alias("date_str")
         )
     )
+
+try:
+    df_traffic    = load_measuring_points_data(CSV_HOLYFILE)
+except FileNotFoundError:
+    st.error(f"CSV not found: {CSV_HOLYFILE}")
+    st.stop()
+
+try:
+    df_registrations = load_registrations_data(CSV_REGISTRATION_DATA)
+except FileNotFoundError:
+    st.error(f"CSV not found: {CSV_REGISTRATION_DATA}")
+    st.stop()
+
+try:
+    df_no2_monthly = load_air_quality_data(CSV_AIR_QUALITY)
+except FileNotFoundError:
+    st.error(f"CSV not found: {CSV_AIR_QUALITY}")
+    st.stop()
 
 # ── Chart 1: Registration bar chart ──────────────────────────────────────────
 
@@ -297,20 +308,11 @@ def build_bev_no2_chart(
     )
     return fig, summary, common_years
 
-
-# ── App ───────────────────────────────────────────────────────────────────────
-
-try:
-    df_registrations = load_registrations(CSV_REGISTRATION_DATA)
-except FileNotFoundError:
-    st.error(f"CSV not found: {CSV_REGISTRATION_DATA}")
-    st.stop()
-
 # Chart 1
 is_stacked = st.radio("Bar mode", ["Stacked", "Grouped"], horizontal=True) == "Stacked"
 
 fig1, totals = build_registration_chart(df_registrations, is_stacked)
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(apply_font(fig1), use_container_width=True)
 
 with st.expander("Raw data table"):
     table = df_registrations.select(["Year"] + list(FUEL_COLS.keys())).rename(FUEL_COLS)
@@ -322,14 +324,12 @@ st.divider()
 st.subheader("BEV Share vs. Average NO₂ per Vehicle (2021–2025)")
 
 try:
-    df_traffic    = load_vehicles_by_year(CSV_HOLYFILE)
-    df_no2_monthly = load_no2_monthly(CSV_AIR_QUALITY)
     fig2, summary, common_years = build_bev_no2_chart(df_registrations, totals, df_no2_monthly, df_traffic)
 
     if not common_years:
         st.warning("No overlapping years found across the three data sources.")
     else:
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(apply_font(fig2), use_container_width=True)
         st.caption(
             "⚠️ **Data limitation:** NO₂ values are sourced from Open-Meteo, which provides "
             "a model-based atmospheric estimate for the Kiel area rather than a measurement "

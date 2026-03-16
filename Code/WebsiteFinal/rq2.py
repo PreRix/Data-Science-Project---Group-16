@@ -3,29 +3,12 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.io as pio
-
-pio.templates["custom"] = go.layout.Template(
-    layout=go.Layout(
-        font=dict(size=18),
-        title=dict(font=dict(size=20)),
-        legend=dict(font=dict(size=16)),
-        xaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-        yaxis=dict(title=dict(font=dict(size=17)), tickfont=dict(size=15)),
-    )
-)
-pio.templates.default = "plotly+custom"
 
 st.set_page_config(page_title="AQ & Traffic", layout="wide")
+st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
 st.title("Air Quality & Traffic – Hourly Analysis")
 
-st.markdown("""
-<style>
-    html, body, [class*="css"] {
-        font-size: 22px;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.markdown("**Research Question #2:** To what extend does the hourly NO2, CO, PM2,5 and PM10 concentration in Kiel correlate with vehicle count?")
 
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
@@ -39,8 +22,20 @@ AIR_QUALITY_VARS = {
 
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
 
+def apply_font(fig):
+    fig.update_layout(font_size=22, legend_font_size=22)
+
+    if fig.layout.title.text:
+        fig.update_layout(title_font_size=34)
+
+    fig.update_xaxes(title_font_size=28, tickfont_size=22)
+    fig.update_yaxes(title_font_size=28, tickfont_size=22)
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 26
+    return fig
+
 @st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_data(path):
+def load_measuring_points_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
     return (
         df
@@ -68,7 +63,7 @@ def load_data(path):
     )
 
 try:
-    df_traffic = load_data(CSV_HOLYFILE)
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
     st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
@@ -127,7 +122,7 @@ fig.update_layout(
 fig.update_yaxes(title_text=aq_label,        secondary_y=False, gridcolor="#eeeeee")
 fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True,  gridcolor="#eeeeee", showgrid=False)
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(apply_font(fig), use_container_width=True)
 
 # ── Correlation Heatmap ───────────────────────────────────────────────────────
 st.subheader("Correlation Heatmap – Air Quality vs. Traffic")
@@ -205,7 +200,7 @@ if hm_mode == "Overall (all selected years)":
             font=dict(size=13),
         ),
     )
-    st.plotly_chart(fig_hm, use_container_width=True)
+    st.plotly_chart(apply_font(fig_hm), use_container_width=True)
 
 else:  # Per year side by side
     n_years = len(active_years)
@@ -228,7 +223,7 @@ else:  # Per year side by side
     for col_idx in range(1, n_years + 1):
         axis_key = "yaxis" if col_idx == 1 else f"yaxis{col_idx}"
         fig_hm.update_layout(**{axis_key: dict(autorange="reversed")})
-    st.plotly_chart(fig_hm, use_container_width=True)
+    st.plotly_chart(apply_font(fig_hm), use_container_width=True)
 
 # ── Summary table ─────────────────────────────────────────────────────────────
 with st.expander("Hourly summary table"):
