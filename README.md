@@ -83,7 +83,7 @@ The code for the API requests is stored [here](Code/API-requests/openmeteo_weath
 
 ### Open-Meteo Air Quality Data:
 We choose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrive data for corresponding variables.
-A list of the variables we requested from the API can be found [here](data/AirQuality/air_quality_variables_selection.csv) with an explaination on why we decided that way.
+A list of the variables we requested from the API can be found [here](https://cloud.rz.uni-kiel.de/index.php/s/2jW9kXWdny9T8td) with an explaination on why we decided that way.
 We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retived the data by the coordinates of the BASt counting stations.
 A .csv-file containing all data was created then.
 [This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requestes and collect the data.
