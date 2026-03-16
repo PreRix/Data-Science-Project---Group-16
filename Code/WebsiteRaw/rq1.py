@@ -94,30 +94,8 @@ all_years = sorted(df["year"].unique().to_list())
 min_year = int(df["year"].min())
 max_year = int(df["year"].max())
 
-'''
-year_range = col2.slider(
-    "Timeframe",
-    min_value=min_year,
-    max_value=max_year,
-    value=(min_year, max_year)
-)
 
-# Filtern mit dem Bereich
-subset = df.filter(
-    (pl.col("year") >= year_range[0]) & 
-    (pl.col("year") <= year_range[1])
-)
-active_years = list(range(year_range[0], year_range[1] + 1))
-
-#years_sel = col2.multiselect("Years (empty = all)", all_years, default=all_years)
-#active_years = years_sel
-
-if not active_years:
-    st.info("Select at least one year to display data.")
-    st.stop()
-'''
-
-rain_threshold = col3.slider("Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
+rain_threshold = col3.slider("Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=2.0, value=1.0, step=0.1)
 
 # Define conditions
 cond_dry = pl.col(COL_PRECIP) == 0
