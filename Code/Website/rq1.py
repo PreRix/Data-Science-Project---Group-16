@@ -8,8 +8,10 @@ import os
 BASE_DIR = "../../data"
 CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
 
+
+
 st.set_page_config(page_title="Weather & Traffic", layout="wide")
-st.title("Impact of Weather on Traffic (Station 1194)")
+st.title("Impact of Weather on Traffic")
 
 @st.cache_data(show_spinner="Loading and preparing data ...")
 def load_weather_traffic_data(path):
@@ -28,12 +30,13 @@ def load_weather_traffic_data(path):
     return (
         df
         # Filter for the specific counting station A215 (1194)
-        .filter(pl.col("Zst").str.strip_chars() == "1104")
+        #.filter(pl.col("Zst").str.strip_chars() == "1194")
         .with_columns(pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime"))
         .with_columns([
             pl.col("datetime").dt.hour().alias("hour"),
             # dt.weekday() returns 1 (Monday) to 7 (Sunday)
-            pl.col("datetime").dt.weekday().alias("weekday"), 
+            pl.col("datetime").dt.weekday().alias("weekday"),
+            pl.col("datetime").dt.year().alias("year")
         ])
         .with_columns([
             pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
@@ -64,8 +67,66 @@ COL_PRECIP = "precipitation"
 COL_TEMP = "temperature_2m"
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
+ZST_VARS = {
+    "Kiel-West": "1194",
+    "Rumohr": "1104",
+    "AS Wankenforf":      "1156",
+    
+    #"Kiel-Holtenau 1":         "1111",
+    #"Kiel-Holtenau 2":        "1112",
+    #"Gettorf": "1116",
+    #"Raisdorf 1":     "1135",       
+    
+    #"Kiel/Schönkirchen":  "1158",
+    
+}
+
 # ── 1. Heatmap: Rain/Snow vs. Traffic ─────────────────────────────────────────
 st.header("Traffic Volume: Dry vs. Wet Days")
+
+#  selection of zst
+col1, col2, col3 = st.columns(3)
+zst_label  = col1.selectbox("Counting station", list(ZST_VARS))
+zst_col    = ZST_VARS[zst_label]
+
+all_years = sorted(df["year"].unique().to_list())
+min_year = int(df["year"].min())
+max_year = int(df["year"].max())
+
+'''
+year_range = col2.slider(
+    "Timeframe",
+    min_value=min_year,
+    max_value=max_year,
+    value=(min_year, max_year)
+)
+
+# Filtern mit dem Bereich
+subset = df.filter(
+    (pl.col("year") >= year_range[0]) & 
+    (pl.col("year") <= year_range[1])
+)
+active_years = list(range(year_range[0], year_range[1] + 1))
+
+#years_sel = col2.multiselect("Years (empty = all)", all_years, default=all_years)
+#active_years = years_sel
+
+if not active_years:
+    st.info("Select at least one year to display data.")
+    st.stop()
+'''
+
+rain_threshold = col3.slider("Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
+
+# Define conditions
+cond_dry = pl.col(COL_PRECIP) == 0
+cond_wet = pl.col(COL_PRECIP) > rain_threshold
+
+#subset = df.filter(pl.col("year").is_in(active_years))
+
+
+df_selected = df.filter(pl.col("Zst") == zst_col)
 st.markdown("Average *Vehicle Count* per hour and weekday.")
 
 def get_heatmap_matrices(df_subset: pl.DataFrame):
@@ -93,33 +154,55 @@ def get_heatmap_matrices(df_subset: pl.DataFrame):
         
     return matrix_mean, matrix_count
 
-# Define conditions
-cond_dry = pl.col(COL_PRECIP) == 0
-cond_wet = pl.col(COL_PRECIP) > 2
 
 # Unpack both mean and count matrices
-matrix_dry_mean, matrix_dry_count = get_heatmap_matrices(df.filter(cond_dry))
-matrix_wet_mean, matrix_wet_count = get_heatmap_matrices(df.filter(cond_wet))
+matrix_dry_mean, matrix_dry_count = get_heatmap_matrices(df_selected.filter(cond_dry))
+matrix_wet_mean, matrix_wet_count = get_heatmap_matrices(df_selected.filter(cond_wet))
+
+# Calculate the relative difference
+with np.errstate(divide='ignore', invalid='ignore'):
+    matrix_change_rel = (
+        (((matrix_wet_mean / matrix_dry_mean) - 1) * 100)
+    )
+
+with np.errstate(divide='ignore', invalid='ignore'):
+    matrix_change_abs = (matrix_wet_mean - matrix_dry_mean) 
 
 # Calculate a shared color scale for better comparability (based on means)
 global_min = np.nanmin([np.nanmin(matrix_dry_mean), np.nanmin(matrix_wet_mean)])
 global_max = np.nanmax([np.nanmax(matrix_dry_mean), np.nanmax(matrix_wet_mean)])
 
 fig_hm = make_subplots(
-    rows=1, cols=2,
-    subplot_titles=("Dry Day (== 0 mm/h)", "Wet Day (> 1.0 mm/h)"),
+    rows=1, cols=3,
+    subplot_titles=("Average traffic on a Dry Day (== 0 mm/h)", "Average traffic on a Wet Day", "Change between Dry and Wet day"),
     horizontal_spacing=0.08
 )
 
 # Custom hover template to show the count
 hover_template = "<b>%{x}, %{y}:00</b><br>Ø Vehicles: %{z:.0f}<br>Occurrences (Days): %{customdata}<extra></extra>"
 
+custom_scale = [
+    [0.0, "rgb(179, 0, 0)"],      
+    [0.3, "rgb(253, 141, 60)"],  
+    [0.48, "rgb(255, 245, 235)"], 
+    [0.5, "rgb(255, 255, 255)"],  
+    [0.52, "rgb(247, 247, 247)"], 
+    [0.7, "rgb(146, 197, 222)"],   
+    [1.0, "rgb(5, 48, 97)"]       
+]
+
 fig_hm.add_trace(go.Heatmap(
     z=matrix_dry_mean, x=WEEKDAYS, y=list(range(24)),
     customdata=matrix_dry_count, # Pass the counts to Plotly
     hovertemplate=hover_template,
     colorscale="Viridis", zmin=global_min, zmax=global_max,
-    coloraxis="coloraxis"
+    coloraxis="coloraxis",
+    colorbar=dict(
+        title="Vehicles", 
+        x=0.43,     
+        thickness=15,
+        len=0.8
+    )
 ), row=1, col=1)
 
 fig_hm.add_trace(go.Heatmap(
@@ -130,9 +213,23 @@ fig_hm.add_trace(go.Heatmap(
     coloraxis="coloraxis"
 ), row=1, col=2)
 
+fig_hm.add_trace(go.Heatmap(
+    z=matrix_change_rel, x=WEEKDAYS, y=list(range(24)),
+    customdata=matrix_change_abs,
+    hovertemplate="<b>%{x}, %{y}:00</b><br>Change: %{z:.1f}%<br>Abs. Value: %{customdata:.0f}<extra></extra>",
+    colorscale=custom_scale, zmid=0, zmin = -50, zmax = 50,
+    #zmin = np.nanmin(matrix_change_rel), zmax = np.nanmax(matrix_change_rel),
+    colorbar=dict(title="Change %", x=1.0)
+), row=1, col=3)
+
 fig_hm.update_layout(
     height=500,
-    coloraxis=dict(colorscale="Viridis", colorbar_title="Ø Vehicles"),
+    coloraxis=dict(colorscale="Viridis", colorbar_title="Ø Vehicles",colorbar=dict(
+        title="Vehicles", 
+        x=0.64,          
+        thickness=12, 
+        len=0.8
+    )),
     yaxis=dict(title="Hour (0-23)", tickmode="linear", dtick=2),
     yaxis2=dict(tickmode="linear", dtick=2),
     plot_bgcolor="white"
@@ -167,7 +264,7 @@ with col_box1:
 
 # 1. Extract the date, calculate daily mean temp, total vehicles AND keep the weekday
 df_daily = (
-    df.with_columns(pl.col("datetime").dt.date().alias("date_only"))
+    df_selected.with_columns(pl.col("datetime").dt.date().alias("date_only"))
     .group_by("date_only")
     .agg([
         pl.col(COL_TEMP).mean().alias("daily_mean_temp"),
