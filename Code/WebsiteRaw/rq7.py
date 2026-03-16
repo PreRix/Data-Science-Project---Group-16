@@ -8,49 +8,57 @@ from datetime import date, timedelta
 BASE_DIR = "../../data"
 CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
 
-st.set_page_config(page_title="Kieler Woche & Delivery Traffic", layout="wide")
-st.title("Kieler Woche & Delivery Traffic")
-st.markdown("**Research Question #7:** How does the daily car and truck traffic change during the Kieler Woche compared to the surrounding month (2 weeks before/after)?")
+st.set_page_config(page_title="Kieler Woche & transport Traffic", layout="wide")
+st.title("Kieler Woche & transport Traffic")
+st.markdown("**Research Question #7:** How does the daily passenger transport and freight transport traffic change during the Kieler Woche compared to the surrounding month (2 weeks before/after)?")
 
 # --- Data Loading and Preprocessing ---
 @st.cache_data(show_spinner="Loading and preparing traffic data ...")
 def load_and_prep_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
-    
+
+    classes = ["KFZ", "Pkw", "Mot", "Bus", "PmA"
+               #, "Lkw", "LkwA", "Sattel",  "nk", "KFZ"
+              ]
+
+    def clean_tls_col(name):
+        return (
+            pl.when(pl.col(f"K_{name}").str.strip_chars().is_in(["a", "d"]))
+            .then(None)
+            .otherwise(
+                pl.col(name)
+                .str.strip_chars()
+                .str.extract(r"^(-?\d+)")
+                .cast(pl.Float64)
+            )
+            .alias(name)
+        )
+
+    all_cols_to_clean = [f"{c}_R1" for c in classes] + [f"{c}_R2" for c in classes]
     return (
         df
+        # Clean all needed
+        .with_columns([clean_tls_col(col) for col in all_cols_to_clean])
         # Parse datetime and extract weekdays (1 = Monday, 7 = Sunday)
         .with_columns(pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime"))
         .with_columns([
             pl.col("datetime").dt.weekday().alias("weekday"),
             pl.col("datetime").dt.date().alias("date_only")
         ])
-        # Clean total vehicles (KFZ)
+
         .with_columns([
-            pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("KFZ_R1"),
-            pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("KFZ_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("KFZ_R2"),
+            (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("Total_Traffic"),
+            
+            (
+                pl.col("Pkw_R1") + pl.col("Pkw_R2") + 
+                pl.col("Mot_R1") + pl.col("Mot_R2") + 
+                pl.col("Bus_R1") + pl.col("Bus_R2") +
+                pl.col("PmA_R1") + pl.col("PmA_R2")
+            ).alias("Personal_Traffic"),
         ])
-        # Clean heavy traffic / trucks (SV)
         .with_columns([
-            pl.when(pl.col("Lkw_R1").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("Lkw_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("SV_R1"),
-            pl.when(pl.col("Lkw_R2").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("Lkw_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("SV_R2"),
+            (pl.col("Total_Traffic") - pl.col("Personal_Traffic")).alias("Truck_Traffic")
         ])
-        # Calculate sums
-        .with_columns((pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("Total_Traffic"))
-        .with_columns((pl.col("SV_R1") + pl.col("SV_R2")).alias("Truck_Traffic"))
-        .with_columns((pl.col("Total_Traffic") - pl.col("Truck_Traffic")).alias("Personal_Traffic"))
     )
 
 try:
@@ -168,7 +176,7 @@ fig = go.Figure()
 fig.add_trace(go.Bar(
     x=x_labels,
     y=df_plot["event_cars"].to_list(),
-    name="Cars (Kieler Woche)",
+    name="Passenger Transport (Kieler Woche)",
     marker_color="#4C9BE8",
     offsetgroup=1
 ))
@@ -177,7 +185,7 @@ fig.add_trace(go.Bar(
 fig.add_trace(go.Bar(
     x=x_labels,
     y=df_plot["event_trucks"].to_list(),
-    name="Trucks (Kieler Woche)",
+    name="Freight Transport (Kieler Woche)",
     marker_color="#2b5c8f",
     offsetgroup=2
 ))
@@ -187,7 +195,7 @@ fig.add_trace(go.Bar(
 fig.add_trace(go.Scatter(
     x=x_labels,
     y=df_plot["base_cars"].to_list(),
-    name="Ø Cars (Surrounding Month)",
+    name="Ø Passenger Transport (Surrounding Month)",
     mode="lines+markers",
     line=dict(color="#E85C4C", width=3, dash="dot"),
     marker=dict(size=8, symbol="diamond"),
@@ -198,7 +206,7 @@ fig.add_trace(go.Scatter(
 fig.add_trace(go.Scatter(
     x=x_labels,
     y=df_plot["base_trucks"].to_list(),
-    name="Ø Trucks (Surrounding Month)",
+    name="Ø Freight Transport (Surrounding Month)",
     mode="lines+markers",
     line=dict(color="#F5A623", width=3, dash="dot"),
     marker=dict(size=8, symbol="diamond"),
@@ -241,11 +249,10 @@ total_event_trucks = df_event_daily["daily_trucks"].mean()
 total_base_trucks = df_base_daily["daily_trucks"].mean()
 diff_trucks = ((total_event_trucks / total_base_trucks) - 1) * 100 if total_base_trucks else 0
 
-col3.metric("Ø Cars per Day (Kieler Woche vs. Baseline)", 
+col3.metric("Ø Passenger Transport per Day (Kieler Woche vs. Baseline)", 
           f"{total_event_cars:,.0f}", 
           f"{diff_cars:+.1f}%")
 
-col4.metric("Ø Trucks per Day (Kieler Woche vs. Baseline)", 
+col4.metric("Ø Freight Transport per Day (Kieler Woche vs. Baseline)", 
           f"{total_event_trucks:,.0f}", 
-          f"{diff_trucks:+.1f}%",
-          delta_color="inverse") # "inverse" because an increase in truck traffic is often viewed as a negative/burden
+          f"{diff_trucks:+.1f}%") 
