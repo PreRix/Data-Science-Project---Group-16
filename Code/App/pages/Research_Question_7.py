@@ -1,6 +1,9 @@
 import streamlit as st
 # ==============================
 # hier nötige Imports hinzufügen
+import polars as pl
+import plotly.graph_objects as go
+from datetime import date, timedelta
 # ==============================
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -15,6 +18,10 @@ with col3_top_btn:
 
 st.title("Research Question #7")
 
+# ==============================
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+# ==============================
+
 st.markdown("""
     # *How does the daily passenger transport and freight transport traffic change during Kieler Woche compared to the surrounding month (two weeks before and after)?*
     ## Traffic compared: Kieler Woche vs. Baseline Levels
@@ -22,6 +29,160 @@ st.markdown("""
 
 # ====================================
 # Hier Visualisierungs-Code hinzufügen
+KIELER_WOCHE_PRESETS = {
+    "Kieler Woche 2021": (date(2021, 9, 4), date(2021, 9, 12)),
+    "Kieler Woche 2022": (date(2022, 6, 18), date(2022, 6, 26)),
+    "Kieler Woche 2023": (date(2023, 6, 17), date(2023, 6, 25)),
+    "Kieler Woche 2024": (date(2024, 6, 22), date(2024, 6, 30)),
+    "Kieler Woche 2025": (date(2025, 6, 21), date(2025, 6, 29))
+}
+
+ZST_VARS = {
+    "Kiel-West": "1194",
+    "Rumohr": "1104",
+    "AS Wankendorf": "1156",
+}
+
+BUFFER_DAYS = 14
+
+WEEKDAYS_MAP = {
+    1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu",
+    5: "Fri", 6: "Sat", 7: "Sun"
+}
+
+
+@st.cache_data(show_spinner="Loading Measuring Points data …")
+def load_measuring_points_data(path):
+
+    df = pl.read_csv(path, infer_schema_length=0)
+
+    return (
+        df
+        .with_columns(
+            pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
+        )
+        .with_columns([
+            pl.col("datetime").dt.weekday().alias("weekday"),
+            pl.col("datetime").dt.date().alias("date_only")
+        ])
+        .with_columns([
+            pl.col("KFZ_R1")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64),
+
+            pl.col("KFZ_R2")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64)
+        ])
+        .with_columns(
+            (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("Total_Traffic")
+        )
+    )
+
+
+df_traffic = load_measuring_points_data(CSV_HOLYFILE)
+
+
+col1, col2 = st.columns(2)
+
+zst_label = col1.selectbox(
+    "Counting station",
+    list(ZST_VARS.keys())
+)
+
+zst_id = ZST_VARS[zst_label]
+
+event_preset = col2.selectbox(
+    "Select the year:",
+    list(KIELER_WOCHE_PRESETS.keys())
+)
+
+start_date, end_date = KIELER_WOCHE_PRESETS[event_preset]
+
+
+df_station = df_traffic.filter(pl.col("Zst") == zst_id)
+
+
+baseline_start = start_date - timedelta(days=BUFFER_DAYS)
+baseline_end = end_date + timedelta(days=BUFFER_DAYS)
+
+
+df_daily = (
+    df_station
+    .group_by(["date_only","weekday"])
+    .agg(pl.col("Total_Traffic").sum().alias("daily_traffic"))
+)
+
+
+df_event = df_daily.filter(
+    (pl.col("date_only") >= start_date) &
+    (pl.col("date_only") <= end_date)
+)
+
+df_base = df_daily.filter(
+    ((pl.col("date_only") >= baseline_start) & (pl.col("date_only") < start_date)) |
+    ((pl.col("date_only") > end_date) & (pl.col("date_only") <= baseline_end))
+)
+
+
+df_event_days = df_event.sort("date_only")
+
+
+df_base_wd = (
+    df_base
+    .group_by("weekday")
+    .agg(pl.col("daily_traffic").mean().alias("baseline"))
+)
+
+
+df_plot = df_event_days.join(df_base_wd, on="weekday", how="left")
+
+
+x_labels = [
+    f"{d.strftime('%d.%m.')} ({WEEKDAYS_MAP[w]})"
+    for d, w in zip(df_plot["date_only"], df_plot["weekday"])
+]
+
+
+fig = go.Figure()
+
+fig.add_trace(
+    go.Bar(
+        x=x_labels,
+        y=df_plot["daily_traffic"],
+        name="Traffic (Kieler Woche)",
+        marker_color="#4C9BE8"
+    )
+)
+
+fig.add_trace(
+    go.Scatter(
+        x=x_labels,
+        y=df_plot["baseline"],
+        name="Baseline Traffic",
+        mode="lines+markers",
+        line=dict(color="#E85C4C", width=3, dash="dot"),
+        marker=dict(size=8)
+    )
+)
+
+fig.update_layout(
+    barmode="group",
+    xaxis_title="Weekday",
+    yaxis_title="Number of Vehicles",
+    hovermode="x unified",
+    height=600,
+    legend=dict(
+        orientation="h",
+        y=1.05,
+        x=0.5,
+        xanchor="center"
+    )
+)
+
+st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
