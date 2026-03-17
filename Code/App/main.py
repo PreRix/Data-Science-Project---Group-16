@@ -8,10 +8,11 @@ st.set_page_config(
         "About" : "[Check out our GitHub Repository](https://github.com/PreRix/Data-Science-Project---Group-16)"
     }
 )
+
 pages = {
     "Data-Science-Project": [
         st.Page("pages/homepage.py", title = "🏠 Homepage", default = True),
-        st.Page("pages/Question_Catalog.py", title = "📒 Question Catalaog")
+        st.Page("pages/Question_Catalog.py", title = "📒 Question Catalog")
     ],
     "Questions": [
         st.Page("pages/Research_Question_1.py", title = "📈 RQ1: Weather & Traffic"),
