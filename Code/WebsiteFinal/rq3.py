@@ -11,6 +11,7 @@ st.markdown("**Research Question #3:** How has the total monthly vehicle count n
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
 
+
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
 
@@ -19,8 +20,10 @@ def apply_font(fig):
 
     fig.update_xaxes(title_font_size=28, tickfont_size=22)
     fig.update_yaxes(title_font_size=28, tickfont_size=22)
+
     for annotation in fig.layout.annotations:
         annotation.font.size = 26
+
     return fig
 
 
@@ -105,6 +108,13 @@ df_combined = df_traffic.join(df_reg, on="year", how="left").sort("year")
 df_pd = df_combined.to_pandas()
 
 
+# Achsenbereich definieren
+min_range = 60000
+max_reg = df_pd["registrations"].max()
+max_traffic = df_pd["avg_daily_traffic"].max()
+max_range = max(max_reg, max_traffic)
+
+
 fig = go.Figure()
 
 fig.add_trace(go.Bar(
@@ -138,7 +148,7 @@ fig.update_layout(
     yaxis=dict(
         title=dict(text="Registered Vehicles (Kiel)", font=dict(color="steelblue")),
         tickfont=dict(color="steelblue"),
-        rangemode="tozero"
+        range=[min_range, max_range * 1.1]
     ),
 
     yaxis2=dict(
@@ -147,10 +157,16 @@ fig.update_layout(
         overlaying="y",
         side="right",
         showgrid=False,
-        rangemode="tozero"
+        range=[min_range, max_range * 1.1]
     ),
 
-    legend=dict(x=0.01, y=0.01),
+    legend=dict(
+    x=0.5,
+    y=-0.2,
+    xanchor="center",
+    yanchor="top",
+    orientation="h"
+),
     height=550,
 )
 
