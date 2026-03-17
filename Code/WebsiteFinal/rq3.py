@@ -31,7 +31,6 @@ def apply_font(fig):
 def load_measuring_points_data(path):
     df = (
         pl.read_csv(path, infer_schema_length=0)
-        .filter(pl.col("Zst") == "1194")
         .with_columns(
             pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
         )
@@ -76,7 +75,7 @@ def load_registrations_data(path):
 
 
 try:
-    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
+    df_traffic_raw = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
     st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
@@ -88,38 +87,67 @@ except FileNotFoundError:
     st.stop()
 
 
+ZST_VARS = {
+    
+    "Rumohr": "1104",
+    "AS Wankendorf":      "1156",
+    "Kiel-West": "1194",
+    
+    #"Kiel-Holtenau 1":         "1111",
+    
+    #"Kiel-Holtenau 2":        "1112",
+    #"Gettorf": "1116",
+    #"Raisdorf 1":     "1135",       
+    
+    #"Kiel/Schönkirchen":  "1158",
+    
+}
+
 def yearly_avg_traffic(df):
     daily = (
         df
         .group_by(["year", "day", "Zst"])
         .agg(pl.col("vehicle_count").sum().alias("daily_traffic"))
     )
-
-    return (
-        daily
-        .group_by("year")
+    whole = (daily
+        .group_by("year", "Zst")
         .agg(pl.col("daily_traffic").mean().alias("avg_daily_traffic"))
+        .sort("year"))
+    return (
+        whole
+        .group_by("year")
+        .agg(pl.col("avg_daily_traffic").sum().alias("traf"))
         .sort("year")
     )
 
 
-df_traffic = yearly_avg_traffic(df_traffic)
-df_combined = df_traffic.join(df_reg, on="year", how="left").sort("year")
-df_pd = df_combined.to_pandas()
 
+#col1, col2, col3 = st.columns(3)
+#zst_label  = col1.selectbox("Counting station", list(ZST_VARS))
+#zst_col    = ZST_VARS[zst_label]
+
+target_ids = list(ZST_VARS.values())
+
+df_traffic_zst = df_traffic_raw.filter(pl.col("Zst").is_in(target_ids))
+df_traffic = yearly_avg_traffic(df_traffic_zst)
+df_plot = df_traffic.join(df_reg, on="year", how="left").sort("year")
+#df_pd = df_combined.filter(pl.col("Zst") == zst_col)
+#df_pd = df_combined.to_pandas()
 
 # Achsenbereich definieren
-min_range = 60000
-max_reg = df_pd["registrations"].max()
-max_traffic = df_pd["avg_daily_traffic"].max()
+min_reg = df_plot["registrations"].min()
+min_traffic = df_plot["traf"].min()
+min_range = min(min_reg, min_traffic)
+max_reg = df_plot["registrations"].max()
+max_traffic = df_plot["traf"].max()
 max_range = max(max_reg, max_traffic)
 
 
 fig = go.Figure()
 
 fig.add_trace(go.Bar(
-    x=df_pd["year"],
-    y=df_pd["registrations"],
+    x=df_plot["year"],
+    y=df_plot["registrations"],
     name="Registered Vehicles (Kiel)",
     marker_color="steelblue",
     opacity=0.7,
@@ -127,9 +155,9 @@ fig.add_trace(go.Bar(
 ))
 
 fig.add_trace(go.Scatter(
-    x=df_pd["year"],
-    y=df_pd["avg_daily_traffic"],
-    name="Avg. Daily Traffic (Zst. 1194)",
+    x=df_plot["year"],
+    y=df_plot["traf"],
+    name="Avg. Daily Traffic",
     mode="lines+markers",
     line=dict(color="tomato", width=3),
     marker=dict(size=8),
@@ -138,7 +166,7 @@ fig.add_trace(go.Scatter(
 
 
 fig.update_layout(
-    title="Registered Vehicles vs. Avg. Daily Traffic (Zst. 1194)",
+    title="Registered Vehicles vs. Avg. Daily Traffic",
     xaxis=dict(
         title="Year",
         tickmode="linear",
@@ -146,9 +174,9 @@ fig.update_layout(
     ),
 
     yaxis=dict(
-        title=dict(text="Registered Vehicles (Kiel)", font=dict(color="steelblue")),
+        title=dict(text="Registered Vehicles (SH)", font=dict(color="steelblue")),
         tickfont=dict(color="steelblue"),
-        range=[min_range, max_range * 1.1]
+        range=[min_range * 0.95, max_range * 1.05]
     ),
 
     yaxis2=dict(
@@ -157,7 +185,7 @@ fig.update_layout(
         overlaying="y",
         side="right",
         showgrid=False,
-        range=[min_range, max_range * 1.1]
+        range=[min_range * 0.95, max_range * 1.05]
     ),
 
     legend=dict(
