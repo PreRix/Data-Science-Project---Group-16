@@ -9,7 +9,6 @@ BASE_DIR = "../../data"
 CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
 
 AIR_QUALITY_VARS = {
-    "European AQI": "european_aqi",
     "PM10":         "pm10",
     "PM2.5":        "pm2_5",
     "NO₂":          "nitrogen_dioxide",
