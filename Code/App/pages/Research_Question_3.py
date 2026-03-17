@@ -29,16 +29,20 @@ st.markdown("""
     As the data for registration counts is only available in yearly sample, we had to aggregate the traffic numbers to a yearly value as well.   
     It can be seen that the number in registered vehicles increases each year except between 2024 and 2025. However, the increase is very subtle, which becomes
     apparent when considering the scale of the y-axis. Thus, the registration counts stay pretty stable over the years.
-    The corresponding vehicle counts for traffic load are increasing over all years, but in a similar subtle range.
-    From 2023 to 2024 the number of registered vehicles has the "biggest" increase, while this is the year in which the traffic load has to smallest one.
-    A similar phenomenon can be observed for the time span from 2024 to 2025, where the registration count is decreasing, while the traffic load has an increase.  
+    The corresponding vehicle counts for traffic load are increasing over all years in a noticeable wider range.
+    From 2023 to 2024 the number of registered vehicles has the "biggest" increase, while this is the year in which the average daily traffic load has the smallest one.
+    A similar phenomenon can be observed for the time span from 2024 to 2025, where the registration count is decreasing, while the traffic load has an 
+    increase.  
 
     ####
     ### Conclusion: 
-    The figure shows that traffic volume and vehicle registration counts do not show a strong relationship. A clear correlation can not be derived from the data.  
+    The total yearly vehicle count did steadily increase over the past years; especially from 2022 to 2023 after the Covid19-pandamic.
+    Vehicle registration counts on the other hand stayed pretty consistent over time.
+    The figure shows that traffic volume and vehicle registration counts do not show a strong relationship. A clear correlation can not be derived from the 
+    data.  
     What has to be taken into account as well is the fact that registration count for Kiel does not solely influence the vehicle count on streets around Kiel.
-    Especially on roads like the A215, where one of the measuring stations for vehicle counting is placed, a lot of commuters pass by; so cars get counted while 
-    not being registered for Kiel or vice versa.
+    Especially on roads like the A215, where one of the measuring stations for vehicle counting is placed, a lot of commuters pass by; so cars get counted 
+    while not being registered for Kiel or vice versa.
 """)
 
 st.divider()
