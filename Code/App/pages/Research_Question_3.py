@@ -1,6 +1,8 @@
 import streamlit as st
 # ==============================
 # hier nötige Imports hinzufügen
+import polars as pl
+import plotly.graph_objects as go
 # ==============================
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -15,6 +17,17 @@ with col3_top_btn:
 
 st.title("Research Question #3")
 
+# ==============================
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
+
+ZST_VARS = {
+    "Rumohr": "1104",
+    "AS Wankendorf": "1156",
+    "Kiel-West": "1194",
+}
+# ==============================
+
 st.markdown("""
     # *How has the total yearly vehicle count near Kiel changed in the past five years, and does the trend in registered vehicles per year in Kiel predict this change?*
     ## Long-Term Traffic Growth
@@ -22,6 +35,141 @@ st.markdown("""
 
 # ====================================
 # Hier Visualisierungs-Code hinzufügen
+@st.cache_data(show_spinner="Loading Measuring Points data …")
+def load_measuring_points_data(path):
+
+    df = (
+        pl.read_csv(path, infer_schema_length=0)
+        .with_columns(
+            pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
+        )
+        .with_columns(
+            pl.col("datetime").dt.year().alias("year"),
+            pl.col("datetime").dt.date().alias("day")
+        )
+        .with_columns([
+            pl.col("KFZ_R1")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64),
+
+            pl.col("KFZ_R2")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64)
+        ])
+        .with_columns(
+            (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("vehicle_count")
+        )
+    )
+
+    return df
+
+
+@st.cache_data(show_spinner="Loading Registration data …")
+def load_registrations_data(path):
+
+    return (
+        pl.read_csv(path, infer_schema_length=0)
+        .select([
+            pl.col("Year").cast(pl.Int64).alias("year"),
+            pl.col("VT_Kraftfahrzeuge_insgesamt")
+              .str.replace_all(r"\.", "")
+              .cast(pl.Int64)
+              .alias("registrations")
+        ])
+    )
+
+
+df_traffic_raw = load_measuring_points_data(CSV_HOLYFILE)
+df_reg = load_registrations_data(CSV_REGISTRATION_DATA)
+
+
+target_ids = list(ZST_VARS.values())
+
+df_traffic_zst = df_traffic_raw.filter(pl.col("Zst").is_in(target_ids))
+
+
+daily = (
+    df_traffic_zst
+    .group_by(["year", "day", "Zst"])
+    .agg(pl.col("vehicle_count").sum().alias("daily_traffic"))
+)
+
+yearly = (
+    daily
+    .group_by(["year", "Zst"])
+    .agg(pl.col("daily_traffic").mean().alias("avg_daily_traffic"))
+)
+
+df_traffic = (
+    yearly
+    .group_by("year")
+    .agg(pl.col("avg_daily_traffic").sum().alias("traffic"))
+    .sort("year")
+)
+
+df_plot = df_traffic.join(df_reg, on="year", how="left").sort("year")
+
+
+fig = go.Figure()
+
+fig.add_trace(
+    go.Bar(
+        x=df_plot["year"],
+        y=df_plot["registrations"],
+        name="Registered Vehicles (Kiel)",
+        marker_color="steelblue",
+        opacity=0.7,
+        yaxis="y1"
+    )
+)
+
+fig.add_trace(
+    go.Scatter(
+        x=df_plot["year"],
+        y=df_plot["traffic"],
+        name="Avg. Daily Traffic",
+        mode="lines+markers",
+        line=dict(color="tomato", width=3),
+        marker=dict(size=8),
+        yaxis="y2"
+    )
+)
+
+fig.update_layout(
+    title="Registered Vehicles vs. Avg. Daily Traffic",
+
+    xaxis=dict(
+        title="Year",
+        tickmode="linear",
+        dtick=1
+    ),
+
+    yaxis=dict(
+        title="Registered Vehicles",
+        tickfont=dict(color="steelblue")
+    ),
+
+    yaxis2=dict(
+        title="Avg Vehicles / Day",
+        tickfont=dict(color="tomato"),
+        overlaying="y",
+        side="right",
+        showgrid=False
+    ),
+
+    legend=dict(
+        orientation="h",
+        y=-0.2,
+        x=0.5,
+        xanchor="center"
+    ),
+
+    height=550
+)
+
+st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
