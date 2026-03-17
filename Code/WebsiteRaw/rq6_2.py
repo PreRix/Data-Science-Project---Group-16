@@ -2,6 +2,7 @@ import streamlit as st
 import polars as pl
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import os
 
 # --- CONFIG & PATHS ---
@@ -58,6 +59,7 @@ ZST_VARS = {
     "Rumohr": "1104",
     "AS Wankendorf": "1156",
 }
+# For all of these stations R1 is incoming traffic
 
 col1, col2, col3 = st.columns(3)
 zst_label = col1.selectbox("Select Counting Station", list(ZST_VARS.keys()))
@@ -106,13 +108,11 @@ def get_ratio_matrix(df_subset):
 
 ratio_matrix = get_ratio_matrix(df_filtered)
 
-# --- PLOTTING ---
-st.subheader(f"Directional Distribution: {zst_label}")
-st.markdown("""
-**Legend:** * 🟦 **Blue (> 0.5):** More traffic flowing **Inbound** (Direction 1).
-* ⬜ **White (0.5):** Perfectly balanced traffic.
-* 🟥 **Red (< 0.5):** More traffic flowing **Outbound** (Direction 2).
-""")
+fig_hm = make_subplots(
+    rows=1, cols=1,
+    subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. Blue: higher volume entering Kiel. Red: higher volume leaving Kiel"],
+    horizontal_spacing=0.08
+)
 
 # Diverging colorscale (Red-White-Blue)
 custom_rdbu = [
@@ -123,7 +123,7 @@ custom_rdbu = [
     [1.0, "rgb(33, 102, 172)"]   # Strong Blue (Inbound)
 ]
 
-fig = go.Figure(data=go.Heatmap(
+fig_hm.add_trace(go.Heatmap(
     z=ratio_matrix,
     x=WEEKDAYS,
     y=list(range(24)),
@@ -138,17 +138,17 @@ fig = go.Figure(data=go.Heatmap(
     )
 ))
 
-fig.update_layout(
+fig_hm.update_layout(
     height=600,
     xaxis_title="Day of Week",
     yaxis_title="Hour of Day",
     yaxis=dict(tickmode="linear", dtick=1)
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig_hm, use_container_width=True)
 
 # --- INSIGHTS ---
 avg_in = df_filtered["R1_Inbound"].mean()
 avg_out = df_filtered["R2_Outbound"].mean()
 
-st.info(f"**Quick Stats for {zst_label}:** Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}")
+st.markdown(f"**Quick Stats for {zst_label}:** Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}")
