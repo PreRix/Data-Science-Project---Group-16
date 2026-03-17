@@ -1,14 +1,16 @@
 import streamlit as st
-
-st.image("images/Kiel_Verkehr.png", 
-         caption = "Image created with Nano Banana 2 (Google Gemini)",
-         width = "stretch")
          
 st.title("Welcome to the Website of our Data Science Project!")
 st.markdown("""
     ### The Topic we performed research on:
     ### "The Personal Traffic around Kiel in the past five years *(2021 - 2025)*".
+""")
+
+st.image("images/Kiel_Verkehr.png", 
+         caption = "Image created with Nano Banana 2 (Google Gemini)",
+         width = "stretch")
     
+st.markdown("""
     <br>
     
     #### Please check our [GitHub Repository](https://github.com/PreRix/Data-Science-Project---Group-16) for all the code we used and a description of the data pipeline in the [ReadMe](https://github.com/PreRix/Data-Science-Project---Group-16/blob/main/README.md).
