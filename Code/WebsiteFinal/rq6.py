@@ -5,13 +5,26 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 
-# --- CONFIG & PATHS ---
-BASE_DIR = "../../data"
-CSV_PATH = os.path.join(BASE_DIR, "MergeData", "holy_file.csv")
 
 st.set_page_config(page_title="Traffic Direction Analysis", layout="wide")
+st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
 st.title("Kiel Traffic: Inbound vs. Outbound Ratio")
 
+CSV_PATH = CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+
+def apply_font(fig):
+    fig.update_layout(font_size=22, legend_font_size=22)
+
+    if fig.layout.title.text:
+        fig.update_layout(title_font_size=34)
+
+    fig.update_xaxes(title_font_size=28, tickfont_size=22)
+    fig.update_yaxes(title_font_size=28, tickfont_size=22)
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 26
+    return fig
+
+    
 @st.cache_data(show_spinner="Loading data...")
 def load_traffic_ratio_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
