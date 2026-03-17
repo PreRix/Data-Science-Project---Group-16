@@ -23,6 +23,7 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
+
 @st.cache_data(show_spinner="Loading Measuring Points data …")
 def load_measuring_points_data(path):
     df = (
@@ -42,6 +43,7 @@ def load_measuring_points_data(path):
                 pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
             )
             .alias("KFZ_R1"),
+
             pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
             .then(None)
             .otherwise(
@@ -54,6 +56,7 @@ def load_measuring_points_data(path):
         )
     )
     return df
+
 
 @st.cache_data(show_spinner="Loading Registration data …")
 def load_registrations_data(path):
@@ -68,6 +71,7 @@ def load_registrations_data(path):
         ])
     )
 
+
 try:
     df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
@@ -80,12 +84,14 @@ except FileNotFoundError:
     st.error(f"File not found: {CSV_REGISTRATION_DATA}")
     st.stop()
 
+
 def yearly_avg_traffic(df):
     daily = (
         df
         .group_by(["year", "day", "Zst"])
         .agg(pl.col("vehicle_count").sum().alias("daily_traffic"))
     )
+
     return (
         daily
         .group_by("year")
@@ -93,9 +99,11 @@ def yearly_avg_traffic(df):
         .sort("year")
     )
 
+
 df_traffic = yearly_avg_traffic(df_traffic)
 df_combined = df_traffic.join(df_reg, on="year", how="left").sort("year")
 df_pd = df_combined.to_pandas()
+
 
 fig = go.Figure()
 
@@ -118,23 +126,31 @@ fig.add_trace(go.Scatter(
     yaxis="y2"
 ))
 
+
 fig.update_layout(
     title="Registered Vehicles vs. Avg. Daily Traffic (Zst. 1194)",
-    xaxis=dict(title="Year", tickmode="linear", dtick=1),
+    xaxis=dict(
+        title="Year",
+        tickmode="linear",
+        dtick=1
+    ),
+
     yaxis=dict(
         title=dict(text="Registered Vehicles (Kiel)", font=dict(color="steelblue")),
         tickfont=dict(color="steelblue"),
-        range=[130_000, 133_000],
+        rangemode="tozero"
     ),
+
     yaxis2=dict(
         title=dict(text="Avg. Vehicles / Day", font=dict(color="tomato")),
         tickfont=dict(color="tomato"),
         overlaying="y",
         side="right",
         showgrid=False,
-        range=[60_000, 76_000],
+        rangemode="tozero"
     ),
-    legend=dict(x=0.01, y=0.99),
+
+    legend=dict(x=0.01, y=0.01),
     height=550,
 )
 
