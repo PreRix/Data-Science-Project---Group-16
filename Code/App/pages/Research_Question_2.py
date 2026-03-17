@@ -1,6 +1,10 @@
 import streamlit as st
 # ==============================
 # hier nötige Imports hinzufügen
+import polars as pl
+import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 # ==============================
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -15,6 +19,19 @@ with col3_top_btn:
 
 st.title("Research Question #2")
 
+# ==============================
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+
+AIR_QUALITY_VARS = {
+    "PM10": "pm10",
+    "PM2.5": "pm2_5",
+    "NO₂": "nitrogen_dioxide",
+    "CO": "carbon_monoxide",
+}
+
+YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
+# ==============================
+
 st.markdown("""
     # *To what extend does the hourly NO<sub>2</sub>, CO, PM<sub>2,5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?*
     ## Air Quality & Traffic - Hourly Analysis
@@ -22,6 +39,114 @@ st.markdown("""
 
 # ====================================
 # Hier Visualisierungs-Code hinzufügen
+@st.cache_data(show_spinner="Loading Measuring Points data …")
+def load_measuring_points_data(path):
+
+    df = pl.read_csv(path, infer_schema_length=0)
+
+    return (
+        df
+        .filter(pl.col("Zst").str.strip_chars() == "1194")
+        .with_columns(
+            pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
+        )
+        .with_columns(
+            pl.col("datetime").dt.hour().alias("hour"),
+            pl.col("datetime").dt.year().alias("year")
+        )
+        .with_columns([
+            pl.col("KFZ_R1")
+                .str.strip_chars()
+                .str.extract(r"^(-?\d+)")
+                .cast(pl.Float64),
+
+            pl.col("KFZ_R2")
+                .str.strip_chars()
+                .str.extract(r"^(-?\d+)")
+                .cast(pl.Float64)
+        ])
+        .with_columns((pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("KFZ_total"))
+        .with_columns([
+            pl.col(c).cast(pl.Float64, strict=False)
+            for c in AIR_QUALITY_VARS.values()
+        ])
+    )
+
+df_traffic = load_measuring_points_data(CSV_HOLYFILE)
+
+col1, col2 = st.columns(2)
+
+aq_label = col1.selectbox("Air quality variable", list(AIR_QUALITY_VARS))
+aq_col = AIR_QUALITY_VARS[aq_label]
+
+all_years = sorted(df_traffic["year"].unique().to_list())
+
+years_sel = col2.multiselect(
+    "Years",
+    all_years,
+    default=all_years
+)
+
+kfz_col = "KFZ_total"
+hours = list(range(24))
+
+fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+for i, year in enumerate(years_sel):
+
+    color = YEAR_COLORS[i % len(YEAR_COLORS)]
+
+    subset = df_traffic.filter(pl.col("year") == year)
+
+    hourly = (
+        subset
+        .group_by("hour")
+        .agg(
+            pl.col(aq_col).mean().alias("aq"),
+            pl.col(kfz_col).mean().alias("kfz")
+        )
+        .sort("hour")
+    )
+
+    aq_map = dict(zip(hourly["hour"], hourly["aq"]))
+    kfz_map = dict(zip(hourly["hour"], hourly["kfz"]))
+
+    aq_vals = [aq_map.get(h, np.nan) for h in hours]
+    kfz_vals = [kfz_map.get(h, np.nan) for h in hours]
+
+    fig.add_trace(
+        go.Scatter(
+            x=hours,
+            y=aq_vals,
+            name=f"{aq_label} {year}",
+            mode="lines+markers",
+            line=dict(color=color)
+        ),
+        secondary_y=False
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=hours,
+            y=kfz_vals,
+            name=f"Vehicles {year}",
+            mode="lines",
+            line=dict(color=color, dash="dot"),
+            opacity=0.6
+        ),
+        secondary_y=True
+    )
+
+fig.update_layout(
+    xaxis_title="Hour",
+    hovermode="x unified",
+    height=520
+)
+
+fig.update_yaxes(title_text=aq_label, secondary_y=False)
+fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True)
+
+st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
@@ -59,6 +184,43 @@ st.markdown("""
 
 # ====================================
 # Hier Visualisierungs-Code hinzufügen
+corr_vars = ["KFZ_total"] + list(AIR_QUALITY_VARS.values())
+corr_labels = ["Vehicles"] + list(AIR_QUALITY_VARS.keys())
+
+subset = df_traffic.filter(pl.col("year").is_in(years_sel))
+
+cols = []
+for c in corr_vars:
+
+    s = subset[c].cast(pl.Float64, strict=False).to_numpy().astype(float)
+
+    cols.append(s)
+
+mat = np.column_stack(cols)
+
+mask = ~np.isnan(mat).any(axis=1)
+
+mat = mat[mask]
+
+corr_matrix = np.corrcoef(mat, rowvar=False)
+
+fig_corr = go.Figure(
+    data=go.Heatmap(
+        z=corr_matrix,
+        x=corr_labels,
+        y=corr_labels,
+        zmin=-1,
+        zmax=1,
+        colorscale="RdBu",
+        reversescale=True,
+        text=np.round(corr_matrix,2),
+        texttemplate="%{text}",
+    )
+)
+
+fig_corr.update_layout(height=450)
+
+st.plotly_chart(fig_corr, use_container_width=True)
 # ====================================
 
 st.markdown("""
