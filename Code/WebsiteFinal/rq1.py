@@ -20,7 +20,7 @@ YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
 ZST_VARS = {
     "Kiel-West": "1194",
     "Rumohr": "1104",
-    "AS Wankenforf":      "1156",
+    "AS Wankendorf":      "1156",
     
     #"Kiel-Holtenau 1":         "1111",
     #"Kiel-Holtenau 2":        "1112",
