@@ -36,7 +36,7 @@ st.markdown("""
 
     ####
     ### Conclusion: 
-    The total yearly vehicle count did steadily increase over the past years; especially from 2022 to 2023 after the Covid19-pandamic.
+    The total yearly vehicle count did steadily increase over the past years; especially from 2022 to 2023 after the COVID-19 pandemic.
     Vehicle registration counts on the other hand stayed pretty consistent over time.
     The figure shows that traffic volume and vehicle registration counts do not show a strong relationship. A clear correlation can not be derived from the 
     data.  

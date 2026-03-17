@@ -16,7 +16,7 @@ with col3_top_btn:
 st.title("Research Question #8")
 
 st.markdown("""
-    # *How did the traffic in rush-hours changed on Autobahnen around Kiel because of the mobility change?*
+    # *How did the traffic in rush-hours change on Autobahnen around Kiel over the past five years?*
     ## Average Rush-Hour Traffic on the A215 (AK Kiel-West) on Weekdays only
 """)
 
@@ -25,7 +25,41 @@ st.markdown("""
 # ====================================
 
 st.markdown("""
-    Hier die Beschreibung für Visualisierung 1
+    The two lines in the chart represent the traffic of the two rush-hours each day at the A215, aggregated to an *average day of the month*. No other counting station 
+    displays the commuter traffic better than this one, as the A215 is known for being a main commuter route for Kiel.  
+    For the morning rush-hour we defined the time window from 6-9 a.m.; only considering the traffic coming to Kiel.  
+    For the evening rush-hour we chose 4-6 p.m., while only considering traffic leaving Kiel.  
+    Additionally we only took into account data from weekdays (Monday to Friday), so that data from weekends would not bias the result.  
+    
+    Noticeable is the drop in the month of December for every observed year. This is very likely linked to the Christmas season and holidays. 
+    The month before, November, seems to always have an increase in average vehicle counts. Maybe because people try to get most of the work done before the Christmas
+    break.  
+    As well it can be seen pretty clearly that in August the vehicle counts during morning rush-hour decrease in comparison to the month before and after. This 
+    may be correlated with summer holidays. Interestingly, for the evening rush-hour this pattern does not apply this strong. A reason for that might be 
+    that on summer evenings the traffic is also including tourists coming to Kiel during noon, and leaving in the evening.
+
+    ####
+    ### Conclusion:
+    Both lines show a general increase over the observation period. Especially the evening rush-hour in 2021 is having a massive increase. We think this is
+    because it was the first summer after the second Corona lockdown which ended mid 2021. So people started coming to work again, while social life increased 
+    significantly as well.  
+    We think that in the years after the COVID-19 pandemic many companies slowly went back to normal in-person work; so that homeoffice opportunities mostly got 
+    reduced in the past years. This may be a reason for the trend the data is showing.
+""")
+
+st.divider()
+
+st.markdown("""
+    ## Rush-Hour Traffic for one exemplary month - Feb 2023
+""")
+
+# ====================================
+# Hier Visualisierungs-Code hinzufügen
+# ====================================
+
+st.markdown("""
+    This figure illustrates the development over an exemplary month without holidays or other special events, allowing for a clearer interpretation of the traffic 
+    patterns.
 """)
 
 st.divider()
