@@ -13,7 +13,6 @@ st.markdown("**Research Question #2:** To what extend does the hourly NO2, CO, P
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
 AIR_QUALITY_VARS = {
-    "European AQI": "european_aqi",
     "PM10":         "pm10",
     "PM2.5":        "pm2_5",
     "NO₂":          "nitrogen_dioxide",
