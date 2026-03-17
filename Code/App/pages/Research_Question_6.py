@@ -1,6 +1,10 @@
 import streamlit as st
 # ==============================
 # hier nötige Imports hinzufügen
+import polars as pl
+import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 # ==============================
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -15,6 +19,10 @@ with col3_top_btn:
 
 st.title("Research Question #6")
 
+# ==============================
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+# ==============================
+
 st.markdown("""
     # *How does the ratio of incoming and outgoing traffic around Kiel change during the day?*
     ## Incoming vs. Outgoing Traffic
@@ -22,6 +30,168 @@ st.markdown("""
 
 # ====================================
 # Hier Visualisierungs-Code hinzufügen
+@st.cache_data(show_spinner="Loading data...")
+def load_traffic_ratio_data(path):
+
+    df = pl.read_csv(path, infer_schema_length=0)
+
+    return (
+        df
+        .with_columns(
+            pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
+        )
+        .with_columns([
+            pl.col("datetime").dt.hour().alias("hour"),
+            pl.col("datetime").dt.weekday().alias("weekday"),
+            pl.col("Zst").str.strip_chars()
+        ])
+        .with_columns([
+            pl.col("KFZ_R1")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64)
+            .alias("R1_Inbound"),
+
+            pl.col("KFZ_R2")
+            .str.strip_chars()
+            .str.extract(r"^(-?\d+)")
+            .cast(pl.Float64)
+            .alias("R2_Outbound")
+        ])
+        .with_columns(
+            (pl.col("R1_Inbound") + pl.col("R2_Outbound")).alias("Total_KFZ")
+        )
+        .with_columns(
+            (pl.col("R1_Inbound") / pl.col("Total_KFZ")).alias("Inbound_Ratio")
+        )
+    )
+
+
+df = load_traffic_ratio_data(CSV_HOLYFILE)
+
+
+WEEKDAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+
+ZST_VARS = {
+    "Kiel-West": "1194",
+    "Rumohr": "1104",
+    "AS Wankendorf": "1156",
+}
+
+
+col1, col2, col3 = st.columns(3)
+
+zst_label = col1.selectbox(
+    "Counting Station",
+    list(ZST_VARS)
+)
+
+zst_id = ZST_VARS[zst_label]
+
+
+available_years = sorted(
+    df["datetime"].dt.year().unique().to_list(),
+    reverse=True
+)
+
+selected_year = col2.selectbox(
+    "Year",
+    ["All Years"] + available_years
+)
+
+
+if selected_year == "All Years":
+    df_filtered_time = df
+else:
+    df_filtered_time = df.filter(
+        pl.col("datetime").dt.year() == selected_year
+    )
+
+
+months = [
+    "Full Year","January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+]
+
+selected_month = col3.selectbox("Month", months)
+
+if selected_month != "Full Year":
+
+    month_index = months.index(selected_month)
+
+    df_filtered_time = df_filtered_time.filter(
+        pl.col("datetime").dt.month() == month_index
+    )
+
+
+df_filtered = df_filtered_time.filter(pl.col("Zst") == zst_id)
+
+
+def get_ratio_matrix(df_subset):
+
+    grouped = (
+        df_subset
+        .group_by(["weekday","hour"])
+        .agg(pl.col("Inbound_Ratio").mean())
+    )
+
+    matrix = np.full((24,7), np.nan)
+
+    for row in grouped.iter_rows(named=True):
+
+        d = row["weekday"] - 1
+        h = row["hour"]
+
+        matrix[h,d] = row["Inbound_Ratio"]
+
+    return matrix
+
+
+ratio_matrix = get_ratio_matrix(df_filtered)
+
+
+fig = make_subplots(rows=1, cols=1)
+
+colorscale = [
+    [0.0,"rgb(178,24,43)"],
+    [0.4,"rgb(244,165,130)"],
+    [0.5,"rgb(255,255,255)"],
+    [0.6,"rgb(146,197,222)"],
+    [1.0,"rgb(33,102,172)"]
+]
+
+fig.add_trace(
+    go.Heatmap(
+        z=ratio_matrix,
+        x=WEEKDAYS,
+        y=list(range(24)),
+        colorscale=colorscale,
+        zmin=0.2,
+        zmax=0.8,
+        hovertemplate="<b>%{x} %{y}:00</b><br>Inbound Ratio: %{z:.2%}<extra></extra>",
+        colorbar=dict(
+            title="Inbound Ratio",
+            tickformat=".0%"
+        )
+    )
+)
+
+fig.update_layout(
+    height=600,
+    xaxis_title="Day of Week",
+    yaxis_title="Hour of Day"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+
+avg_in = df_filtered["R1_Inbound"].mean()
+avg_out = df_filtered["R2_Outbound"].mean()
+
+st.markdown(
+    f"**Quick Stats for {zst_label}:** "
+    f"Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}"
+)
 # ====================================
 
 st.markdown("""
