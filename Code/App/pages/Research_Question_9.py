@@ -50,7 +50,7 @@ try:
         .filter(pl.col("Zst") == "1194")
         .select(["datetime", pl.col("KFZ_total").alias("vehicle_count")])
     )
-    df_weather = load_weather_events()
+    df_weather = load_weather()
 except Exception as e:
     st.error(f"Could not load data: {e}")
     st.stop()

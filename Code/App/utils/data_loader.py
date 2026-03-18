@@ -97,7 +97,7 @@ def load_traffic_base(path: str = CSV_TRAFFIC) -> pl.DataFrame:
 
 # ── Registration loader with fuel breakdown (RQ5) ─────────────────────────────
  
-@st.cache_data(show_spinner="Loading registration data ...")
+@st.cache_data(show_spinner="Loading registration data …")
 def load_registrations(path: str = CSV_REGISTRATION) -> pl.DataFrame:
     return (
         pl.read_csv(path, infer_schema_length=0)

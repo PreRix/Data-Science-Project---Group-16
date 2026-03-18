@@ -51,8 +51,8 @@ FUEL_COLORS = {
     "Other":                "#AAAAAA",
 }
 
-BEV_COL         = "PT_Nach Kraftstoffarten_Elektro (BEV)"
-HIDE_THRESHOLD  = 10
+BEV_COL = "PT_Nach Kraftstoffarten_Elektro (BEV)"
+HIDE_THRESHOLD = 10
 
 # ==============================
 # Data collection and help
@@ -70,8 +70,7 @@ def apply_font(fig):
 try:
     _base = load_traffic_base()
 
-    # --- Yearly average vehicle count (Zst 1194, valid rows only) ---
-    # Mirrors what the old load_measuring_points_data did, now as an in-memory op.
+    # Yearly average vehicle count (Zst 1194, valid rows only)
     _veh = (
         _base
         .filter(pl.col("Zst") == "1194")
@@ -82,8 +81,7 @@ try:
     )
     df_traffic = dict(zip(_veh["year"].to_list(), _veh["avg_vehicles"].to_list()))
 
-    # --- Monthly NO₂ averages (Zst 1194) ---
-    # nitrogen_dioxide is already present and cast to Float64 in the base loader.
+    # Monthly NO2 averages (Zst 1194)
     df_no2_monthly = (
         _base
         .filter(pl.col("Zst") == "1194")
@@ -96,18 +94,8 @@ try:
         )
     )
 
+    # Registration data with fuel breakdown — already cleaned by the loader
     df_registrations = load_registrations_fuel()
-
-    # Cast fuel columns from the registration CSV
-    casts = [pl.col("year")] + [
-        pl.col(c).cast(pl.Utf8).str.replace_all(r"\.", "").str.strip_chars()
-          .cast(pl.Int64, strict=False)
-        for c in FUEL_COLS
-        if c in df_registrations.columns
-    ]
-    df_registrations = df_registrations.select(casts).sort("year")
-    # Rename "year" → "Year" to keep the rest of the page unchanged
-    df_registrations = df_registrations.rename({"year": "Year"})
 
 except Exception as e:
     st.error(f"Could not load data: {e}")
@@ -136,8 +124,8 @@ for col, label in FUEL_COLS.items():
         for v, y in zip(values, years)
     ]
     if is_stacked:
-        text_vals  = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
-        text_pos   = "inside"
+        text_vals   = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
+        text_pos    = "inside"
         text_colors = ["white"] * len(years)
     else:
         text_vals   = [f"{p:.1f}%" if p is not None else "" for p in pcts]
@@ -177,9 +165,9 @@ fig.update_layout(
 
 st.plotly_chart(apply_font(fig), width="stretch")
 with st.expander("Raw data table"):
-    table = df_registrations.select(["Year"] + [c for c in FUEL_COLS if c in df_registrations.columns]).rename(
-        {c: l for c, l in FUEL_COLS.items() if c in df_registrations.columns}
-    )
+    table = df_registrations.select(
+        ["Year"] + [c for c in FUEL_COLS if c in df_registrations.columns]
+    ).rename({c: l for c, l in FUEL_COLS.items() if c in df_registrations.columns})
     table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
     st.dataframe(table, width="stretch")
 
@@ -226,7 +214,9 @@ monthly = (
 
 x      = monthly["date_str"].to_list()
 y_raw  = monthly["no2_per_veh"].to_list()
-y_roll = monthly.with_columns(pl.col("no2_per_veh").rolling_mean(window_size=3).alias("r"))["r"].to_list()
+y_roll = monthly.with_columns(
+    pl.col("no2_per_veh").rolling_mean(window_size=3).alias("r")
+)["r"].to_list()
 
 valid_idx, valid_vals = zip(*[(i, v) for i, v in enumerate(y_raw) if v is not None])
 y_trend = np.poly1d(np.polyfit(valid_idx, valid_vals, 1))(range(len(y_raw))).tolist()
@@ -234,19 +224,19 @@ y_trend = np.poly1d(np.polyfit(valid_idx, valid_vals, 1))(range(len(y_raw))).tol
 fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 fig.add_trace(go.Scatter(
-    x=x, y=y_raw, name="NO₂ per Vehicle (monthly)", mode="lines",
+    x=x, y=y_raw, name="NO2 per Vehicle (monthly)", mode="lines",
     line=dict(color="#D44B94", width=1), opacity=1,
-    hovertemplate="Month: %{x|%b %Y}<br>NO₂/vehicle: %{y:.5f}<extra></extra>",
+    hovertemplate="Month: %{x|%b %Y}<br>NO2/vehicle: %{y:.5f}<extra></extra>",
 ), secondary_y=True)
 
 fig.add_trace(go.Scatter(
-    x=x, y=y_roll, name="NO₂ per Vehicle (3-month avg)", mode="lines",
+    x=x, y=y_roll, name="NO2 per Vehicle (3-month avg)", mode="lines",
     line=dict(color="#EA4633", width=2.5),
     hovertemplate="Month: %{x|%b %Y}<br>3-month avg: %{y:.5f}<extra></extra>",
 ), secondary_y=True)
 
 fig.add_trace(go.Scatter(
-    x=x, y=y_trend, name="NO₂ Trend (linear)", mode="lines",
+    x=x, y=y_trend, name="NO2 Trend (linear)", mode="lines",
     line=dict(color="#555555", width=1.5, dash="dash"), hoverinfo="skip",
 ), secondary_y=True)
 
@@ -264,7 +254,7 @@ fig.update_layout(
     plot_bgcolor="white", height=520, hovermode="x unified", margin=dict(t=140, b=60),
 )
 fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
-fig.update_yaxes(title_text="NO₂ per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
+fig.update_yaxes(title_text="NO2 per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
 
 st.plotly_chart(apply_font(fig), width="stretch")
 st.caption(
