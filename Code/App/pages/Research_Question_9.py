@@ -171,22 +171,27 @@ else:
 # ====================================
 
 st.markdown("""
+    ### Definitions:
     Extreme weather events were identified using the following thresholds:
 
     - for rain: >10mm of rain per hour 
     - for snow: >1cm of snowfall per hour
 
-    For each event *hourly traffic volumes* at counting station 1194 ("Autobahn-Kreuz Kiel-West") were analyzed in a time window of two hours before, and four hours 
-    after the start of an extreme weather event. We only took data from this counting station again, as an average over multiple counting stations could cause the 
-    results of local extreme weather to cancel each other out.  
-
+    ####
+    ### Description:
     To allow comparison with normal traffic conditions, a median line was calculated. It represents the typical traffic volume for the same hour of the day 
     when the extreme weather event began, using data from all other days at the counting station.  
     In other words, it shows the *average traffic level* that would normally be expected at that specific hour under normal weather conditions.
     The dots represent the vehicle count during extreme weather in relative percentage to the median line.
+    
+    ####
+    ### How we aggregated the Data:
+    For each event *hourly traffic volumes* at counting station 1194 ("Autobahn-Kreuz Kiel-West") were analyzed in a time window of two hours before, and four hours 
+    after the start of an extreme weather event. We only took data from this counting station again, as an average over multiple counting stations could cause the 
+    results of local extreme weather to cancel each other out.  
 
     ####
-    ### No Conclusion can be made
+    ### No Conclusion can be made:
     As we wanted to analyze how long it takes for traffic volumes to return to baseline levels (represented by the median line), we noticed the fact that local extreme 
     weather events often only last a short period of time.  
     To address the research question we would have needed minutely data of weather and vehicle counts. With the given data, no solid analysis can be performed!
