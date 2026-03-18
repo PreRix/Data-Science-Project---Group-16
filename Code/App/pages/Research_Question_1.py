@@ -149,13 +149,19 @@ st.plotly_chart(fig_hm, use_container_width=True)
 # ====================================
 
 st.markdown("""
-    Two HeatMaps are used to show how the *average vehicle count per hour and weekday* gets impacted by precipitation (rain + snow).  
-    To make such a comparison possible, we had to define *dry day* and  *wet day*:  
+    ### Definitons:
+    To make a comparison possible, we had to define *dry day* and  *wet day*:  
 
     - Dry day: 0mm of precipitation per hour
-    - Wet day: can be adjusted on a scale from 0.1 to 2mm of precipitation per hour  
-    
+    - Wet day: can be adjusted on a scale from 0.1 to 2mm of precipitation per hour 
+
+    ####
+    ### Description:
+    Two HeatMaps are used to show how the *average vehicle count per hour and weekday* gets impacted by precipitation (rain + snow).  
     A thrid HeatMap shows the relative difference from dry to wet day based on the dry day data for the avergage vehicle count.  
+
+    ####
+    ### How we aggregated the Data:
     We only took into account values from counting station 1194 ("Autobahnkreuz Kiel-West") on the A215, 1104 ("Rumohr") on the A215 and 1156 ("AS Wankendorf") 
     on the A21 as these are one of the highly frequented roads; thus, holding the most vehicle counting data.  
     It can be manually selected, which counting station should be displayed.  
@@ -238,18 +244,18 @@ st.plotly_chart(fig_box, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Description:
+    It can be seen, that during weekdays, the temperature does not have so much impact on the traffic distribution, as many people have to go to work, 
+    not matter the temperature.  
+    On the weekend-days, the temperature definitely seems to have an effect, as the traffic distribution increases with temperature.  
+    
+    ####
     ### How we aggregated the Data:
     The BoxPlots are visualizing how traffic volume is affected by temperature.  
     Therefore we categorized the *daily average temperature* into six temperature ranges; each BoxPlot then showing the respective vehicle volume distribution.  
     We used the *average daily vehicle count* at counting station 1194, 1104 and 1156 again. Reasoning for this decision is the same as above.  
     Additionally, a weekly average distribution can be displayed.  
     
-    ####
-    ### Description:
-    It can be seen, that during weekdays, the temperature does not have so much impact on the traffic distribution, as many people have to go to work, 
-    not matter the temperature.  
-    On the weekend-days, the temperature definitely seems to have an effect, as the traffic distribution increases with temperature.  
-
     ####   
     ### Interpretation:
     Precipitation seems to have a small to medium effect on the hourly vehicle counts. Especially during rush-hour times it is visible how the 
