@@ -173,8 +173,8 @@ st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
-    This Bar-Line-Chart illustrates the evolution of *daily average traffic* in comparison to the registered vehicle counts for Kiel *per year* from 2021 to 2025.  
-    As the data for registration counts is only available in yearly sample, we had to aggregate the traffic numbers to a yearly value as well.   
+
+    ### Description:  
     It can be seen that the number in registered vehicles increases each year except between 2024 and 2025. However, the increase is very subtle, which becomes
     apparent when considering the scale of the y-axis. Thus, the registration counts stay pretty stable over the years.
     The corresponding vehicle counts for traffic load are increasing over all years in a noticeable wider range.
@@ -183,7 +183,12 @@ st.markdown("""
     increase.  
 
     ####
-    ### Conclusion: 
+    ### How we aggregated the Data:
+    This Bar-Line-Chart illustrates the evolution of *daily average traffic* in comparison to the registered vehicle counts for Kiel *per year* from 2021 to 2025.  
+    As the data for registration counts is only available in yearly sample, we had to aggregate the traffic numbers to a yearly value as well. 
+
+    ####
+    ### Interpretation: 
     The total yearly vehicle count did steadily increase over the past years; especially from 2022 to 2023 after the COVID-19 pandemic.
     Vehicle registration counts on the other hand stayed pretty consistent over time.
     The figure shows that traffic volume and vehicle registration counts do not show a strong relationship. A clear correlation can not be derived from the 
