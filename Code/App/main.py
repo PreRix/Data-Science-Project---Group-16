@@ -10,9 +10,10 @@ st.set_page_config(
 )
 
 pages = {
-    "Data-Science-Project": [
+    "Home": [
         st.Page("pages/homepage.py", title = "🏠 Homepage", default = True),
-        st.Page("pages/Question_Catalog.py", title = "📒 Question Catalog")
+        st.Page("pages/Question_Catalog.py", title = "📒 Question Catalog"),
+        st.Page("pages/Data_Sources.py", title = "Data Sources")
     ],
     "Questions": [
         st.Page("pages/Research_Question_1.py", title = "📈 RQ1: Weather & Traffic"),
