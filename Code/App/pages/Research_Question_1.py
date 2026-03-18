@@ -102,7 +102,7 @@ except FileNotFoundError:
     st.stop()
     
 # ====================================
-# First Visualisation
+# First visualisation
 
 # selection of zst
 col1, col2, col3 = st.columns(3)

@@ -12,6 +12,13 @@ st.markdown("**Research Question #6:** How does the ratio of incoming/outcoming 
 
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+ZST_VARS = {
+    "Kiel-West": "1194",
+    "Rumohr": "1104",
+    "AS Wankendorf": "1156",
+}
+
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
 
@@ -64,13 +71,6 @@ except FileNotFoundError:
     st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
 
-# --- UI CONTROLS ---
-WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-ZST_VARS = {
-    "Kiel-West": "1194",
-    "Rumohr": "1104",
-    "AS Wankendorf": "1156",
-}
 # For all of these stations R1 is incoming traffic
 
 col1, col2, col3 = st.columns(3)
@@ -159,7 +159,6 @@ fig_hm.update_layout(
 
 st.plotly_chart(apply_font(fig_hm), use_container_width=True)
 
-# --- INSIGHTS ---
 avg_in = df_filtered["R1_Inbound"].mean()
 avg_out = df_filtered["R2_Outbound"].mean()
 
