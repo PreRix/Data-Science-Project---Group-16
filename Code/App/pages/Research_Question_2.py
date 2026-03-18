@@ -150,11 +150,15 @@ st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Description:
     This diagram shows that the hourly data was aggregated into an *average diurnal cycle* for the concentration of air pollutants, while displaying the 
     corresponding *average vehicle count per hour* as well. It can be selected which pollutant should be displayed as well as the year one wants to see 
     (multiple selections possible).
     It can be seen that, interestingly, the concentration of almost all air quality variables is dropping at noon, while the vehicle count starts rising.  
     On the other hand, during night and morning times, these concentrations are increasing.
+    
+    ####
+    ### Most interesting finding:
     At first, this seems to be an error in our data, but some meteorological phenomena actually explain this **interesting** finding:  
     
     1. When the sun sets, the air near the ground gets colder than the air above. The air gets denser and traps the pollutants near the ground, inhibiting
@@ -163,14 +167,16 @@ st.markdown("""
     2. At night time the wind generally subsides, leading to less airflow, and a more stable air layer holding the pollutants and their concentrations higher.  
     During the day, when winds increase, the concentration of pollutants decreases as they mix with fresh air and are more likely to be blown away at the
     local measuring point. 
-    
+
+    ####
+    ### How we aggregated the Data:
     For this analysis, we used data from the vehicle counting station 1194 ("Autobahnkreuz Kiel-West") alone, as it is one of the main routes in the Kiel area, 
     being highly representative for this question. Therefore we retrieved air quality data for the coordinate sector of this station.  
     Furthermore, we want to mention that the available air quality data is **not** provided by a sensor station right next to the road. The data is provided from 
     different sources via Open-Meteo with spatial resolution showing the "general" air quality of the area.
 
     ####   
-    ### Conclusion:
+    ### Interpretation:
     The aggregated diurnal profiles suggest that pollutant concentrations do not directly follow traffic intensity. While traffic 
     is a primary source of emissions, its correlation with observed air quality appears to be masked at a regional scale by meteorological processes such as
     atmospheric stability, vertical mixing and wind conditions.
@@ -224,6 +230,7 @@ st.plotly_chart(fig_corr, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Description:
     Correlation-HeatMaps are used to not only illustrate the correlation between the vehicle count and the different air quality variables, but also the 
     correlation among the air quality variables themselves.  
     The diagonal axis is filled with "1s", as each variable is perfectly correlated with itself. This also confirms that the code is working properly.  
