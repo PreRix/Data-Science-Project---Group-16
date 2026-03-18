@@ -12,7 +12,7 @@ col_img1, col_img2, col_img3 = st.columns([1, 2.5, 1])
 img_path = Path(__file__).parent.parent / "images" / "Kiel_Verkehr.png"
 
 with col_img2:
-    st.image("img_path", 
+    st.image(str(img_path), 
         caption = "Image created with Nano Banana 2 (Google Gemini)",
         width = "content")
     
