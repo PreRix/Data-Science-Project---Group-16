@@ -11,6 +11,21 @@ st.markdown("**Research Question #3:** How has the total monthly vehicle count n
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
 
+ZST_VARS = {
+    
+    "Rumohr": "1104",
+    "AS Wankendorf":      "1156",
+    "Kiel-West": "1194",
+    
+    #"Kiel-Holtenau 1":         "1111",
+    
+    #"Kiel-Holtenau 2":        "1112",
+    #"Gettorf": "1116",
+    #"Raisdorf 1":     "1135",       
+    
+    #"Kiel/Schönkirchen":  "1158",
+    
+}
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -25,7 +40,6 @@ def apply_font(fig):
         annotation.font.size = 26
 
     return fig
-
 
 @st.cache_data(show_spinner="Loading Measuring Points data …")
 def load_measuring_points_data(path):
@@ -59,7 +73,6 @@ def load_measuring_points_data(path):
     )
     return df
 
-
 @st.cache_data(show_spinner="Loading Registration data …")
 def load_registrations_data(path):
     return (
@@ -73,35 +86,17 @@ def load_registrations_data(path):
         ])
     )
 
-
 try:
-    df_traffic_raw = load_measuring_points_data(CSV_HOLYFILE)
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
     st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
 
 try:
-    df_reg = load_registrations_data(CSV_REGISTRATION_DATA)
+    df_registrations = load_registrations_data(CSV_REGISTRATION_DATA)
 except FileNotFoundError:
     st.error(f"File not found: {CSV_REGISTRATION_DATA}")
     st.stop()
-
-
-ZST_VARS = {
-    
-    "Rumohr": "1104",
-    "AS Wankendorf":      "1156",
-    "Kiel-West": "1194",
-    
-    #"Kiel-Holtenau 1":         "1111",
-    
-    #"Kiel-Holtenau 2":        "1112",
-    #"Gettorf": "1116",
-    #"Raisdorf 1":     "1135",       
-    
-    #"Kiel/Schönkirchen":  "1158",
-    
-}
 
 def yearly_avg_traffic(df):
     daily = (
@@ -120,17 +115,15 @@ def yearly_avg_traffic(df):
         .sort("year")
     )
 
-
-
 #col1, col2, col3 = st.columns(3)
 #zst_label  = col1.selectbox("Counting station", list(ZST_VARS))
 #zst_col    = ZST_VARS[zst_label]
 
 target_ids = list(ZST_VARS.values())
 
-df_traffic_zst = df_traffic_raw.filter(pl.col("Zst").is_in(target_ids))
+df_traffic_zst = df_traffic.filter(pl.col("Zst").is_in(target_ids))
 df_traffic = yearly_avg_traffic(df_traffic_zst)
-df_plot = df_traffic.join(df_reg, on="year", how="left").sort("year")
+df_plot = df_traffic.join(df_registrations, on="year", how="left").sort("year")
 #df_pd = df_combined.filter(pl.col("Zst") == zst_col)
 #df_pd = df_combined.to_pandas()
 

@@ -24,7 +24,7 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
     
-@st.cache_data(show_spinner="Loading data...")
+@st.cache_data(show_spinner="Loading Measuring Points data …")
 def load_measuring_points_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
     

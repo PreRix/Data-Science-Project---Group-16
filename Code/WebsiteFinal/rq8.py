@@ -4,14 +4,14 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Traffic Analysis", layout="wide")
 st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
-
 st.title("Rush-Hour Traffic & Home Office Effect (2021–2025)")
+
+st.markdown("**Research Question #8:** How did the traffic in rush-hours changed on Autobahnen (and Bundesstraßen?) around Kiel because of the mobility change?")
 
 CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
 DETAIL_YEAR = 2023
 DETAIL_MONTH = 2
-
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -21,11 +21,20 @@ def apply_font(fig):
     fig.update_yaxes(title_font_size=28, tickfont_size=22)
     return fig
 
+def make_rush_figure(x, y_morning, y_evening, title, x_title):
+    fig = go.Figure([
+        go.Scatter(x=x, y=y_morning, name="Morning Rush – into Kiel (6–9h)",
+                   mode="lines+markers", line=dict(color="steelblue", width=3)),
+        go.Scatter(x=x, y=y_evening, name="Evening Rush – out of Kiel (16–18h)",
+                   mode="lines+markers", line=dict(color="tomato", width=3)),
+    ])
+    fig.update_layout(title=title, xaxis_title=x_title,
+                      yaxis_title="Vehicles during Rush Hour", height=600)
+    return apply_font(fig)
 
 @st.cache_data(show_spinner="Loading Measuring Points data …")
 def load_measuring_points_data(path):
-
-    df = (
+    return (
         pl.read_csv(path, infer_schema_length=0)
         .filter(pl.col("Zst") == "1194")
         .with_columns(
@@ -36,133 +45,79 @@ def load_measuring_points_data(path):
             pl.col("datetime").dt.month().alias("month"),
             pl.col("datetime").dt.hour().alias("hour"),
             pl.col("datetime").dt.weekday().alias("weekday"),
-            pl.col("datetime").dt.date().alias("day")
+            pl.col("datetime").dt.date().alias("day"),
         )
-        .with_columns([
+        .with_columns(
             pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
             .then(None)
             .otherwise(
                 pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
             )
             .alias("KFZ_R1"),
-
             pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
             .then(None)
             .otherwise(
                 pl.col("KFZ_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
             )
             .alias("KFZ_R2"),
-        ])
+        )
         .filter(pl.col("weekday") <= 5)
     )
 
-    return df
-
-
-df_traffic = load_measuring_points_data(CSV_HOLYFILE)
-
-morning = df_traffic.filter(pl.col("hour").is_between(6, 9))
-evening = df_traffic.filter(pl.col("hour").is_between(16, 18))
-
-
-def avg_by_month(df, direction_col):
-
+def monthly_avg(df, col):
+    """Daily-then-monthly average of `col` for rush-hour data."""
     return (
-        df
-        .group_by(["year", "month", "day"])
-        .agg(pl.col(direction_col).sum().alias("daily_rush"))
-        .group_by(["year", "month"])
-        .agg(pl.col("daily_rush").mean().alias("avg_rush"))
+        df.group_by(["year", "month", "day"]).agg(pl.col(col).mean().alias("daily"))
+        .group_by(["year", "month"]).agg(pl.col("daily").mean().alias("avg"))
         .sort(["year", "month"])
         .with_columns(
-            (pl.col("year").cast(pl.Utf8) + "-" + pl.col("month").cast(pl.Utf8).str.zfill(2)).alias("year_month")
+            (pl.col("year").cast(pl.Utf8) + "-" + pl.col("month").cast(pl.Utf8).str.zfill(2))
+            .alias("year_month")
         )
-        .to_pandas()
     )
 
-
-df_morning_month = avg_by_month(morning, "KFZ_R1")
-df_evening_month = avg_by_month(evening, "KFZ_R2")
-
-
-fig1 = go.Figure()
-
-fig1.add_trace(go.Scatter(
-    x=df_morning_month["year_month"],
-    y=df_morning_month["avg_rush"],
-    name="Morning Rush – into Kiel (6–9h)",
-    mode="lines+markers",
-    line=dict(color="steelblue", width=3),
-))
-
-fig1.add_trace(go.Scatter(
-    x=df_evening_month["year_month"],
-    y=df_evening_month["avg_rush"],
-    name="Evening Rush – out of Kiel (16–18h)",
-    mode="lines+markers",
-    line=dict(color="tomato", width=3),
-))
-
-
-fig1.update_layout(
-    title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
-    xaxis_title="Month",
-    yaxis_title="Vehicles during Rush Hour",
-    height=600
-)
-
-st.plotly_chart(apply_font(fig1), use_container_width=True)
-
-
-df_month = df_traffic.filter(
-    (pl.col("year") == DETAIL_YEAR) &
-    (pl.col("month") == DETAIL_MONTH)
-)
-
-
-morning_month = df_month.filter(pl.col("hour").is_between(6, 9))
-evening_month = df_month.filter(pl.col("hour").is_between(16, 18))
-
-
-def avg_by_day(df, direction_col):
-
+def daily_avg(df, col):
+    """Per-day average of `col` within a single month's rush-hour data."""
     return (
-        df
-        .group_by("day")
-        .agg(pl.col(direction_col).sum().alias("daily_rush"))
+        df.group_by("day").agg(pl.col(col).mean().alias("avg"))
         .sort("day")
-        .to_pandas()
     )
 
+try:
+    df = load_measuring_points_data(CSV_HOLYFILE)
+except FileNotFoundError:
+    st.error(f"File not found: {CSV_HOLYFILE}")
+    st.stop()
 
-df_morning_day = avg_by_day(morning_month, "KFZ_R1")
-df_evening_day = avg_by_day(evening_month, "KFZ_R2")
+# ── Chart 1: monthly overview (2021–2025) ────────────────────────────────────
 
+morning_all = df.filter(pl.col("hour").is_between(6, 9))
+evening_all = df.filter(pl.col("hour").is_between(16, 18))
 
-fig2 = go.Figure()
+m = monthly_avg(morning_all, "KFZ_R1")
+e = monthly_avg(evening_all, "KFZ_R2")
 
-fig2.add_trace(go.Scatter(
-    x=df_morning_day["day"],
-    y=df_morning_day["daily_rush"],
-    name="Morning Rush – into Kiel (6–9h)",
-    mode="lines+markers",
-    line=dict(color="steelblue", width=3),
-))
-
-fig2.add_trace(go.Scatter(
-    x=df_evening_day["day"],
-    y=df_evening_day["daily_rush"],
-    name="Evening Rush – out of Kiel (16–18h)",
-    mode="lines+markers",
-    line=dict(color="tomato", width=3),
-))
-
-
-fig2.update_layout(
-    title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
-    xaxis_title="Day of Month",
-    yaxis_title="Vehicles during Rush Hour",
-    height=600
+st.plotly_chart(
+    make_rush_figure(
+        m["year_month"], m["avg"], e["avg"],
+        title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
+        x_title="Month",
+    ),
+    use_container_width=True,
 )
 
-st.plotly_chart(apply_font(fig2), use_container_width=True)
+# ── Chart 2: daily detail for DETAIL_YEAR / DETAIL_MONTH ────────────────────
+
+df_month = df.filter((pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH))
+
+m = daily_avg(df_month.filter(pl.col("hour").is_between(6, 9)),  "KFZ_R1")
+e = daily_avg(df_month.filter(pl.col("hour").is_between(16, 18)), "KFZ_R2")
+
+st.plotly_chart(
+    make_rush_figure(
+        m["day"], m["avg"], e["avg"],
+        title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
+        x_title="Day of Month",
+    ),
+    use_container_width=True,
+)
