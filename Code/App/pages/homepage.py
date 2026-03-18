@@ -9,7 +9,7 @@ st.markdown("""
 col_img1, col_img2, col_img3 = st.columns([1, 2.5, 1])
 
 with col_img2:
-    st.image("images/Kiel_Verkehr.png", 
+    st.image("../images/Kiel_Verkehr.png", 
         caption = "Image created with Nano Banana 2 (Google Gemini)",
         width = "content")
     
