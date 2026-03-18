@@ -121,12 +121,15 @@ st.plotly_chart(fig1, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Definitions + How we aggregated the Data:
     The two lines in the chart represent the traffic of the two rush-hours each day at the A215, aggregated to an *average day of the month*. No other counting station 
     displays the commuter traffic better than this one, as the A215 is known for being a main commuter route for Kiel.  
     For the morning rush-hour we defined the time window from 6-9 a.m.; only considering the traffic coming to Kiel.  
     For the evening rush-hour we chose 4-6 p.m., while only considering traffic leaving Kiel.  
     Additionally we only took into account data from weekdays (Monday to Friday), so that data from weekends would not bias the result.  
-    
+
+    ####
+    ### Description:
     Noticeable is the drop in the month of December for every observed year. This is very likely linked to the Christmas season and holidays. 
     The month before, November, seems to always have an increase in average vehicle counts. Maybe because people try to get most of the work done before the Christmas
     break.  
@@ -135,7 +138,7 @@ st.markdown("""
     that on summer evenings the traffic is also including tourists coming to Kiel during noon, and leaving in the evening.
 
     ####
-    ### Conclusion:
+    ### Interpretation:
     Both lines show a general increase over the observation period. Especially the evening rush-hour in 2021 is having a massive increase. We think this is
     because it was the first summer after the second Corona lockdown which ended mid 2021. So people started coming to work again, while social life increased 
     significantly as well.  
@@ -205,6 +208,7 @@ st.plotly_chart(fig2, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Description:
     This figure illustrates the development over an exemplary month without holidays or other special events, allowing for a clearer interpretation of the traffic 
     patterns.
 """)
