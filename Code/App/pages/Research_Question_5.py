@@ -101,6 +101,7 @@ st.plotly_chart(fig, use_container_width=True)
 # ====================================
 
 st.markdown("""
+    ### Description:
     For the first visualization we decided to show the share of *vehicles per fuel type for each year* using the bar chart above.  
     An initial observation is that the share of conventional fuel vehicles (petrol and diesel) decreases steadily every year.
     On the other hand the number with (partly) electric drivetrains increases every year, which confirms expectations based on political initiatives in recent 
@@ -214,14 +215,18 @@ st.plotly_chart(fig2, use_container_width=True)
 # ====================================
 
 st.markdown("""
-    This visualization shows the average NO<sub>2</sub> emission per vehicle. We calculated this by summing up all NO<sub>2</sub> concentration data for *each year* and dividing it by the total vehicle counting data for all available stations *per year*.  
-    This approach was chosen to normalize the data against fluctuations in traffic volume, providing a more comparable value for the evolution of NO<sub>2</sub> 
-    levels over time.  
+    ### Description: 
     The data shows that the concentrations vary throughout the year; a slight downward trend is only visible when taking a look at the regression line 
     of the data.
 
     ####
-    ### Conclusion:
+    ### How we aggregated the Data:
+    The visualization shows the average NO<sub>2</sub> emission per vehicle. We calculated this by summing up all NO<sub>2</sub> concentration data for *each year* and dividing it by the total vehicle counting data for all available stations *per year*.  
+    This approach was chosen to normalize the data against fluctuations in traffic volume, providing a more comparable value for the evolution of NO<sub>2</sub> 
+    levels over time. 
+
+    ####
+    ### Interpretation:
     As said above, a minor downward trend in NO<sub>2</sub> emissions is noticeable while the number of registered BEV vehicles is increasing.  
     Nevertheless, the data cannot determine whether the growth in battery-electric vehicle share causes the observed decrease in NO<sub>2</sub> levels.  
     This is due to two factors:
