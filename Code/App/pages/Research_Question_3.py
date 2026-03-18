@@ -1,9 +1,12 @@
-import streamlit as st
 # ==============================
-# hier nötige Imports hinzufügen
+# Imports
+
+import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+
 # ==============================
+# Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -17,27 +20,43 @@ with col3_top_btn:
 
 st.title("Research Question #3")
 
-# ==============================
-CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
-CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
-
-ZST_VARS = {
-    "Rumohr": "1104",
-    "AS Wankendorf": "1156",
-    "Kiel-West": "1194",
-}
-# ==============================
-
 st.markdown("""
     # *How has the total yearly vehicle count near Kiel changed in the past five years, and does the trend in registered vehicles per year in Kiel predict this change?*
     ## Long-Term Traffic Growth
 """)
 
+# ==============================
+# Global variables
+
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
+
+ZST_VARS = {
+    
+    "Rumohr": "1104",
+    "AS Wankendorf":      "1156",
+    "Kiel-West": "1194",    
+}
+
 # ====================================
-# Hier Visualisierungs-Code hinzufügen
+# Data collection and help
+
+def apply_font(fig):
+    fig.update_layout(font_size=22, legend_font_size=22)
+
+    if fig.layout.title.text:
+        fig.update_layout(title_font_size=34)
+
+    fig.update_xaxes(title_font_size=28, tickfont_size=22)
+    fig.update_yaxes(title_font_size=28, tickfont_size=22)
+
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 26
+
+    return fig
+
 @st.cache_data(show_spinner="Loading Measuring Points data …")
 def load_measuring_points_data(path):
-
     df = (
         pl.read_csv(path, infer_schema_length=0)
         .with_columns(
@@ -48,27 +67,28 @@ def load_measuring_points_data(path):
             pl.col("datetime").dt.date().alias("day")
         )
         .with_columns([
-            pl.col("KFZ_R1")
-            .str.strip_chars()
-            .str.extract(r"^(-?\d+)")
-            .cast(pl.Float64),
+            pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
+            .then(None)
+            .otherwise(
+                pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
+            )
+            .alias("KFZ_R1"),
 
-            pl.col("KFZ_R2")
-            .str.strip_chars()
-            .str.extract(r"^(-?\d+)")
-            .cast(pl.Float64)
+            pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
+            .then(None)
+            .otherwise(
+                pl.col("KFZ_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
+            )
+            .alias("KFZ_R2"),
         ])
         .with_columns(
             (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("vehicle_count")
         )
     )
-
     return df
-
 
 @st.cache_data(show_spinner="Loading Registration data …")
 def load_registrations_data(path):
-
     return (
         pl.read_csv(path, infer_schema_length=0)
         .select([
@@ -80,66 +100,75 @@ def load_registrations_data(path):
         ])
     )
 
+try:
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
+except FileNotFoundError:
+    st.error(f"File not found: {CSV_HOLYFILE}")
+    st.stop()
 
-df_traffic_raw = load_measuring_points_data(CSV_HOLYFILE)
-df_reg = load_registrations_data(CSV_REGISTRATION_DATA)
+try:
+    df_registrations = load_registrations_data(CSV_REGISTRATION_DATA)
+except FileNotFoundError:
+    st.error(f"File not found: {CSV_REGISTRATION_DATA}")
+    st.stop()
 
+# ====================================
+# First visualisation
+
+def yearly_avg_traffic(df):
+    daily = (
+        df
+        .group_by(["year", "day", "Zst"])
+        .agg(pl.col("vehicle_count").sum().alias("daily_traffic"))
+    )
+    whole = (daily
+        .group_by("year", "Zst")
+        .agg(pl.col("daily_traffic").mean().alias("avg_daily_traffic"))
+        .sort("year"))
+    return (
+        whole
+        .group_by("year")
+        .agg(pl.col("avg_daily_traffic").sum().alias("traf"))
+        .sort("year")
+    )
 
 target_ids = list(ZST_VARS.values())
 
-df_traffic_zst = df_traffic_raw.filter(pl.col("Zst").is_in(target_ids))
+df_traffic_zst = df_traffic.filter(pl.col("Zst").is_in(target_ids))
+df_traffic = yearly_avg_traffic(df_traffic_zst)
+df_plot = df_traffic.join(df_registrations, on="year", how="left").sort("year")
 
-
-daily = (
-    df_traffic_zst
-    .group_by(["year", "day", "Zst"])
-    .agg(pl.col("vehicle_count").sum().alias("daily_traffic"))
-)
-
-yearly = (
-    daily
-    .group_by(["year", "Zst"])
-    .agg(pl.col("daily_traffic").mean().alias("avg_daily_traffic"))
-)
-
-df_traffic = (
-    yearly
-    .group_by("year")
-    .agg(pl.col("avg_daily_traffic").sum().alias("traffic"))
-    .sort("year")
-)
-
-df_plot = df_traffic.join(df_reg, on="year", how="left").sort("year")
-
+# Achsenbereich definieren
+min_reg = df_plot["registrations"].min()
+min_traffic = df_plot["traf"].min()
+min_range = min(min_reg, min_traffic)
+max_reg = df_plot["registrations"].max()
+max_traffic = df_plot["traf"].max()
+max_range = max(max_reg, max_traffic)
 
 fig = go.Figure()
 
-fig.add_trace(
-    go.Bar(
-        x=df_plot["year"],
-        y=df_plot["registrations"],
-        name="Registered Vehicles (Kiel)",
-        marker_color="steelblue",
-        opacity=0.7,
-        yaxis="y1"
-    )
-)
+fig.add_trace(go.Bar(
+    x=df_plot["year"],
+    y=df_plot["registrations"],
+    name="Registered Vehicles (Kiel)",
+    marker_color="steelblue",
+    opacity=0.7,
+    yaxis="y1"
+))
 
-fig.add_trace(
-    go.Scatter(
-        x=df_plot["year"],
-        y=df_plot["traffic"],
-        name="Avg. Daily Traffic",
-        mode="lines+markers",
-        line=dict(color="tomato", width=3),
-        marker=dict(size=8),
-        yaxis="y2"
-    )
-)
+fig.add_trace(go.Scatter(
+    x=df_plot["year"],
+    y=df_plot["traf"],
+    name="Avg. Daily Traffic",
+    mode="lines+markers",
+    line=dict(color="tomato", width=3),
+    marker=dict(size=8),
+    yaxis="y2"
+))
 
 fig.update_layout(
     title="Registered Vehicles vs. Avg. Daily Traffic",
-
     xaxis=dict(
         title="Year",
         tickmode="linear",
@@ -147,30 +176,34 @@ fig.update_layout(
     ),
 
     yaxis=dict(
-        title="Registered Vehicles",
-        tickfont=dict(color="steelblue")
+        title=dict(text="Registered Vehicles (SH)", font=dict(color="steelblue")),
+        tickfont=dict(color="steelblue"),
+        range=[min_range * 0.95, max_range * 1.05]
     ),
 
     yaxis2=dict(
-        title="Avg Vehicles / Day",
+        title=dict(text="Avg. Vehicles / Day", font=dict(color="tomato")),
         tickfont=dict(color="tomato"),
         overlaying="y",
         side="right",
-        showgrid=False
+        showgrid=False,
+        range=[min_range * 0.95, max_range * 1.05]
     ),
 
     legend=dict(
-        orientation="h",
-        y=-0.2,
-        x=0.5,
-        xanchor="center"
-    ),
-
-    height=550
+    x=0.5,
+    y=-0.2,
+    xanchor="center",
+    yanchor="top",
+    orientation="h"
+),
+    height=550,
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(apply_font(fig), use_container_width=True)
+
 # ====================================
+# Text
 
 st.markdown("""
 
@@ -197,6 +230,9 @@ st.markdown("""
     Especially on roads like the A215, where one of the measuring stations for vehicle counting is placed, a lot of commuters pass by; so cars get counted 
     while not being registered for Kiel or vice versa.
 """)
+
+# ==============================
+# Website design
 
 st.divider()
 
