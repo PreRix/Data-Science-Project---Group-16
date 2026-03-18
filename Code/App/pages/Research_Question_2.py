@@ -6,6 +6,7 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from utils.data_loader import load_traffic_base, AIR_QUALITY_VARS
 
 # ==============================
 # Website design
@@ -13,11 +14,11 @@ from plotly.subplots import make_subplots
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
-    if st.button("⬅️ Previous Question", key = "btn_top1"):
+    if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("pages/Research_Question_1.py")
-        
+
 with col3_top_btn:
-    if st.button("Next Question ➡️", key = "btn_top2"):
+    if st.button("Next Question ➡️", key="btn_top2"):
         st.switch_page("pages/Research_Question_3.py")
 
 st.title("Research Question #2")
@@ -30,15 +31,6 @@ st.markdown("""
 # ==============================
 # Global variables
 
-CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
-
-AIR_QUALITY_VARS = {
-    "PM10":         "pm10",
-    "PM2.5":        "pm2_5",
-    "NO₂":          "nitrogen_dioxide",
-    "CO":           "carbon_monoxide",
-}
-
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
 
 # ==============================
@@ -46,57 +38,27 @@ YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
-
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
-
     fig.update_xaxes(title_font_size=28, tickfont_size=22)
     fig.update_yaxes(title_font_size=28, tickfont_size=22)
     for annotation in fig.layout.annotations:
         annotation.font.size = 26
     return fig
 
-@st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_measuring_points_data(path):
-    df = pl.read_csv(path, infer_schema_length=0)
-    return (
-        df
-        .filter(pl.col("Zst").str.strip_chars() == "1194")
-        .with_columns(pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime"))
-        .with_columns(
-            pl.col("datetime").dt.hour().alias("hour"),
-            pl.col("datetime").dt.year().alias("year"),
-        )
-        .with_columns([
-            pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("KFZ_R1"),
-            pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
-              .then(None)
-              .otherwise(pl.col("KFZ_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64))
-              .alias("KFZ_R2"),
-        ])
-        .with_columns((pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("KFZ_total"))
-        .with_columns([
-            pl.col(c).cast(pl.Float64, strict=False).fill_nan(None)
-            for c in AIR_QUALITY_VARS.values()
-        ])
-    )
-
 try:
-    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
-except FileNotFoundError:
-    st.error(f"File not found: {CSV_HOLYFILE}")
+    # Filter to station 1194
+    df_traffic = load_traffic_base().filter(pl.col("Zst").str.strip_chars() == "1194")
+except Exception as e:
+    st.error(f"Could not load traffic data: {e}")
     st.stop()
 
 # ====================================
 # First visualisation
 
-# ── Controls ──────────────────────────────────────────────────────────────────
 col1, col2 = st.columns(2)
-aq_label  = col1.selectbox("Air quality variable", list(AIR_QUALITY_VARS))
-aq_col    = AIR_QUALITY_VARS[aq_label]
+aq_label = col1.selectbox("Air quality variable", list(AIR_QUALITY_VARS))
+aq_col   = AIR_QUALITY_VARS[aq_label]
 
 all_years = sorted(df_traffic["year"].unique().to_list())
 years_sel = col2.multiselect("Years (empty = all)", all_years, default=[])
@@ -109,7 +71,6 @@ if not active_years:
 kfz_col = "KFZ_total"
 hours   = list(range(24))
 
-# ── Line chart ────────────────────────────────────────────────────────────────
 fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 for i, year in enumerate(active_years):
@@ -129,14 +90,12 @@ for i, year in enumerate(active_years):
 
     fig.add_trace(go.Scatter(
         x=hours, y=aq_vals, name=f"{aq_label} {year}",
-        mode="lines+markers", line=dict(color=color, width=2),
-        marker=dict(size=4),
+        mode="lines+markers", line=dict(color=color, width=2), marker=dict(size=4),
     ), secondary_y=False)
 
     fig.add_trace(go.Scatter(
         x=hours, y=kfz_vals, name=f"Vehicles {year}",
-        mode="lines", line=dict(color=color, width=2, dash="dot"),
-        opacity=0.6,
+        mode="lines", line=dict(color=color, width=2, dash="dot"), opacity=0.6,
     ), secondary_y=True)
 
 fig.update_layout(
@@ -147,7 +106,7 @@ fig.update_layout(
 fig.update_yaxes(title_text=aq_label,        secondary_y=False, gridcolor="#eeeeee")
 fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True,  gridcolor="#eeeeee", showgrid=False)
 
-st.plotly_chart(apply_font(fig), width = "stretch")
+st.plotly_chart(apply_font(fig), width="stretch")
 
 # ====================================
 # Text
@@ -196,7 +155,6 @@ st.markdown("""
 
 hm_col1, hm_col2 = st.columns(2)
 
-# Auto-reset to "Overall" when dropping back to a single year
 if len(active_years) < 2 and st.session_state.get("hm_mode") == "Per year (side by side)":
     st.session_state["hm_mode"] = "Overall (all selected years)"
 
@@ -204,8 +162,7 @@ hm_options = ["Overall (all selected years)"]
 if len(active_years) > 1:
     hm_options.append("Per year (side by side)")
 
-hm_mode = hm_col1.radio("Show correlations", hm_options, horizontal=True, key="hm_mode")
-
+hm_mode        = hm_col1.radio("Show correlations", hm_options, horizontal=True, key="hm_mode")
 hm_granularity = hm_col2.radio(
     "Correlate using",
     ["Raw hourly rows", "Hourly means (aggregated)"],
@@ -216,50 +173,31 @@ corr_vars   = [kfz_col] + list(AIR_QUALITY_VARS.values())
 corr_labels = ["Vehicles"] + list(AIR_QUALITY_VARS.keys())
 
 def compute_corr_matrix(subset: pl.DataFrame) -> np.ndarray:
-    """Return a (n_vars × n_vars) Pearson correlation matrix as np.ndarray."""
     if hm_granularity == "Hourly means (aggregated)":
-        subset = (
-            subset.group_by("hour")
-            .agg([pl.col(c).mean() for c in corr_vars])
-        )
-    cols = []
-    for c in corr_vars:
-        s = subset[c].cast(pl.Float64, strict=False).to_numpy().astype(float)
-        cols.append(s)
-    mat = np.column_stack(cols)
-    # Drop rows where any value is NaN
-    mask = ~np.isnan(mat).any(axis=1)
-    mat = mat[mask]
+        subset = subset.group_by("hour").agg([pl.col(c).mean() for c in corr_vars])
+    cols = [subset[c].cast(pl.Float64, strict=False).to_numpy().astype(float) for c in corr_vars]
+    mat  = np.column_stack(cols)
+    mat  = mat[~np.isnan(mat).any(axis=1)]
     if mat.shape[0] < 2:
         return np.full((len(corr_vars), len(corr_vars)), np.nan)
     return np.corrcoef(mat, rowvar=False)
 
-
 def make_heatmap_trace(matrix: np.ndarray, show_colorbar: bool = True) -> go.Heatmap:
     rounded = np.round(matrix, 2)
     return go.Heatmap(
-        z=rounded,
-        x=corr_labels,
-        y=corr_labels,
-        zmin=-1, zmax=1,
-        colorscale="RdBu",
-        reversescale=True,
+        z=rounded, x=corr_labels, y=corr_labels,
+        zmin=-1, zmax=1, colorscale="RdBu", reversescale=True,
         text=[[f"{v:.2f}" if not np.isnan(v) else "n/a" for v in row] for row in rounded],
-        texttemplate="%{text}",
-        textfont=dict(size=15),
+        texttemplate="%{text}", textfont=dict(size=15),
         showscale=show_colorbar,
         colorbar=dict(title="r", thickness=14, len=0.9),
     )
 
-
 if hm_mode == "Overall (all selected years)":
-    subset_all = df_traffic.filter(pl.col("year").is_in(active_years))
-    matrix = compute_corr_matrix(subset_all)
-
+    matrix = compute_corr_matrix(df_traffic.filter(pl.col("year").is_in(active_years)))
     fig_hm = go.Figure(make_heatmap_trace(matrix))
     fig_hm.update_layout(
-        height=450,
-        plot_bgcolor="white",
+        height=450, plot_bgcolor="white",
         margin=dict(l=10, r=10, t=50, b=10),
         yaxis=dict(autorange="reversed"),
         title=dict(
@@ -267,32 +205,30 @@ if hm_mode == "Overall (all selected years)":
             font=dict(size=13),
         ),
     )
-    st.plotly_chart(apply_font(fig_hm), width = "stretch")
+    st.plotly_chart(apply_font(fig_hm), width="stretch")
 
-else:  # Per year side by side
+else:
     n_years = len(active_years)
-    fig_hm = make_subplots(
+    fig_hm  = make_subplots(
         rows=1, cols=n_years,
         subplot_titles=[str(y) for y in active_years],
         horizontal_spacing=0.06,
     )
     for col_idx, year in enumerate(active_years, start=1):
-        subset_yr = df_traffic.filter(pl.col("year") == year)
-        matrix    = compute_corr_matrix(subset_yr)
-        trace     = make_heatmap_trace(matrix, show_colorbar=(col_idx == n_years))
+        matrix = compute_corr_matrix(df_traffic.filter(pl.col("year") == year))
+        trace  = make_heatmap_trace(matrix, show_colorbar=(col_idx == n_years))
         fig_hm.add_trace(trace, row=1, col=col_idx)
 
     fig_hm.update_layout(
-        height=450,
-        plot_bgcolor="white",
+        height=450, plot_bgcolor="white",
         margin=dict(l=10, r=10, t=50, b=10),
     )
     for col_idx in range(1, n_years + 1):
         axis_key = "yaxis" if col_idx == 1 else f"yaxis{col_idx}"
         fig_hm.update_layout(**{axis_key: dict(autorange="reversed")})
-    st.plotly_chart(apply_font(fig_hm), width = "stretch")
+    st.plotly_chart(apply_font(fig_hm), width="stretch")
 
-# ── Summary table ─────────────────────────────────────────────────────────────
+# ── Summary table ──────────────────────────────────────────────────────────────
 with st.expander("Hourly summary table"):
     frames = []
     for year in active_years:
@@ -307,10 +243,12 @@ with st.expander("Hourly summary table"):
         frames.append(pl.DataFrame({
             "Year":     [year] * 24,
             "Hour":     hours,
-            aq_label:   [round(v, 3) if v is not None and not np.isnan(v) else None for v in [aq_map.get(h, float("nan")) for h in hours]],
-            "Vehicles": [round(v, 1) if v is not None and not np.isnan(v) else None for v in [kfz_map.get(h, float("nan")) for h in hours]],
+            aq_label:   [round(v, 3) if v is not None and not np.isnan(v) else None
+                         for v in [aq_map.get(h, float("nan")) for h in hours]],
+            "Vehicles": [round(v, 1) if v is not None and not np.isnan(v) else None
+                         for v in [kfz_map.get(h, float("nan")) for h in hours]],
         }))
-    st.dataframe(pl.concat(frames), width = "stretch")
+    st.dataframe(pl.concat(frames), width="stretch")
 
 # ====================================
 # Text
@@ -332,11 +270,11 @@ st.divider()
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
 
 with col1_bottom_btn:
-    if st.button("⬅️ Previous Question", key = "btn_bottom1"):
+    if st.button("⬅️ Previous Question", key="btn_bottom1"):
         st.switch_page("pages/Research_Question_1.py")
-        
+
 with col3_bottom_btn:
-    if st.button("Next Question ➡️", key = "btn_bottom2"):
+    if st.button("Next Question ➡️", key="btn_bottom2"):
         st.switch_page("pages/Research_Question_3.py")
 
 st.divider()
@@ -344,9 +282,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = "stretch"):
+    if st.button("Go to Imprint", width="stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = "stretch"):
+    if st.button("Back to Homepage 🏠", width="stretch"):
         st.switch_page("pages/homepage.py")

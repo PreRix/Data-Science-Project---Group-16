@@ -4,6 +4,7 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+from utils.data_loader import load_traffic_base
 
 # ==============================
 # Website design
@@ -11,11 +12,11 @@ import plotly.graph_objects as go
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
-    if st.button("⬅️ Previous Question", key = "btn_top1"):
+    if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("pages/Research_Question_7.py")
 
 with col3_top_btn:
-    if st.button("Bonus Question ➡️", key = "btn_top2"):
+    if st.button("Bonus Question ➡️", key="btn_top2"):
         st.switch_page("pages/Research_Question_9.py")
 
 st.title("Research Question #8")
@@ -28,12 +29,10 @@ st.markdown("""
 # ==============================
 # Global variables
 
-CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
-
-DETAIL_YEAR = 2023
+DETAIL_YEAR  = 2023
 DETAIL_MONTH = 2
 
-# ====================================
+# ==============================
 # Data collection and help
 
 def apply_font(fig):
@@ -55,39 +54,21 @@ def make_rush_figure(x, y_morning, y_evening, title, x_title):
                       yaxis_title="Vehicles during Rush Hour", height=600)
     return apply_font(fig)
 
-@st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_measuring_points_data(path):
-    return (
-        pl.read_csv(path, infer_schema_length=0)
+try:
+    # Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
+    df_traffic = (
+        load_traffic_base()
         .filter(pl.col("Zst") == "1194")
-        .with_columns(
-            pl.col("date").str.to_datetime("%d.%m.%Y %H:%M").alias("datetime")
-        )
-        .with_columns(
-            pl.col("datetime").dt.year().alias("year"),
-            pl.col("datetime").dt.month().alias("month"),
-            pl.col("datetime").dt.hour().alias("hour"),
-            pl.col("datetime").dt.weekday().alias("weekday"),
-            pl.col("datetime").dt.date().alias("day"),
-        )
-        .with_columns(
-            pl.when(pl.col("K_KFZ_R1").str.strip_chars().is_in(["a", "d"]))
-            .then(None)
-            .otherwise(
-                pl.col("KFZ_R1").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
-            )
-            .alias("KFZ_R1"),
-            pl.when(pl.col("K_KFZ_R2").str.strip_chars().is_in(["a", "d"]))
-            .then(None)
-            .otherwise(
-                pl.col("KFZ_R2").str.strip_chars().str.extract(r"^(-?\d+)").cast(pl.Float64)
-            )
-            .alias("KFZ_R2"),
-        )
         .filter(pl.col("weekday") <= 5)
     )
+except Exception as e:
+    st.error(f"Could not load traffic data: {e}")
+    st.stop()
 
-def monthly_avg(df, col):
+# ==============================
+# Helper aggregations
+
+def monthly_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
     """Daily-then-monthly average of `col` for rush-hour data."""
     return (
         df.group_by(["year", "month", "day"]).agg(pl.col(col).sum().alias("daily"))
@@ -99,23 +80,15 @@ def monthly_avg(df, col):
         )
     )
 
-def daily_avg(df, col):
+def daily_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
     """Per-day average of `col` within a single month's rush-hour data."""
     return (
         df.group_by("day").agg(pl.col(col).sum().alias("avg"))
         .sort("day")
     )
 
-try:
-    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
-except FileNotFoundError:
-    st.error(f"File not found: {CSV_HOLYFILE}")
-    st.stop()
-
 # ====================================
-# First visualisation
-
-# ── Chart 1: monthly overview (2021–2025) ────────────────────────────────────
+# First visualisation — monthly overview 2021–2025
 
 morning_all = df_traffic.filter(pl.col("hour").is_between(6, 8))
 evening_all = df_traffic.filter(pl.col("hour").is_between(15, 17))
@@ -129,7 +102,7 @@ st.plotly_chart(
         title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
         x_title="Month",
     ),
-    width = "stretch",
+    width="stretch",
 )
 
 # ====================================
@@ -163,18 +136,18 @@ st.markdown("""
 
 st.divider()
 
-st.markdown("""
-    ## Rush-Hour Traffic for one exemplary month - Feb 2023
+st.markdown(f"""
+    ## Rush-Hour Traffic for one exemplary month - Feb {DETAIL_YEAR}
 """)
 
 # ====================================
-# Second visualisation
+# Second visualisation — daily detail for DETAIL_YEAR / DETAIL_MONTH
 
-# ── Chart 2: daily detail for DETAIL_YEAR / DETAIL_MONTH ────────────────────
+df_month = df_traffic.filter(
+    (pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH)
+)
 
-df_month = df_traffic.filter((pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH))
-
-morning = daily_avg(df_month.filter(pl.col("hour").is_between(6, 8)),  "KFZ_R1")
+morning = daily_avg(df_month.filter(pl.col("hour").is_between(6, 8)),   "KFZ_R1")
 evening = daily_avg(df_month.filter(pl.col("hour").is_between(15, 17)), "KFZ_R2")
 
 st.plotly_chart(
@@ -183,8 +156,9 @@ st.plotly_chart(
         title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
         x_title="Day of Month",
     ),
-    width = "stretch",
+    width="stretch",
 )
+
 # ====================================
 # Text
 
@@ -202,11 +176,11 @@ st.divider()
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
 
 with col1_bottom_btn:
-    if st.button("⬅️ Previous Question", key = "btn_bottom1"):
+    if st.button("⬅️ Previous Question", key="btn_bottom1"):
         st.switch_page("pages/Research_Question_7.py")
 
 with col3_bottom_btn:
-    if st.button("Bonus Question ➡️", key = "btn_bottom2"):
+    if st.button("Bonus Question ➡️", key="btn_bottom2"):
         st.switch_page("pages/Research_Question_9.py")
 
 st.divider()
@@ -214,9 +188,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = "stretch"):
+    if st.button("Go to Imprint", width="stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = "stretch"):
+    if st.button("Back to Homepage 🏠", width="stretch"):
         st.switch_page("pages/homepage.py")

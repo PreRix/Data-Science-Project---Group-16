@@ -6,6 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+from utils.data_loader import load_traffic_base, load_registrations
 
 # ==============================
 # Website design
@@ -13,11 +14,11 @@ import numpy as np
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
-    if st.button("⬅️ Previous Question", key = "btn_top1"):
+    if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("pages/Research_Question_4.py")
-        
+
 with col3_top_btn:
-    if st.button("Next Question ➡️", key = "btn_top2"):
+    if st.button("Next Question ➡️", key="btn_top2"):
         st.switch_page("pages/Research_Question_6.py")
 
 st.title("Research Question #5")
@@ -29,10 +30,6 @@ st.markdown("""
 
 # ==============================
 # Global variables
-
-CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
-CSV_REGISTRATION_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
-CSV_AIR_QUALITY = "https://cloud.rz.uni-kiel.de/public.php/dav/files/RC9wT3a5Fo7mwbf/?accept=zip"
 
 FUEL_COLS = {
     "PT_Nach Kraftstoffarten_Benzin":                  "Petrol",
@@ -54,68 +51,44 @@ FUEL_COLORS = {
     "Other":                "#AAAAAA",
 }
 
-BEV_COL = "PT_Nach Kraftstoffarten_Elektro (BEV)"
-HIDE_THRESHOLD = 10
+BEV_COL         = "PT_Nach Kraftstoffarten_Elektro (BEV)"
+HIDE_THRESHOLD  = 10
 
-# ====================================
+# ==============================
 # Data collection and help
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
-
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
-
     fig.update_xaxes(title_font_size=28, tickfont_size=22)
     fig.update_yaxes(title_font_size=28, tickfont_size=22)
     for annotation in fig.layout.annotations:
         annotation.font.size = 26
     return fig
 
-def extract_year(col: str) -> pl.Expr:
-    return pl.col(col).str.slice(6, 4).cast(pl.Int32).alias("year")
+try:
+    _base = load_traffic_base()
 
-@st.cache_data(show_spinner="Loading Measuring Points data …")
-def load_measuring_points_data(path: str) -> dict[int, float]:
-    df = (
-        pl.read_csv(path, infer_schema_length=0, ignore_errors=True)
-        .with_columns([pl.col(c).str.strip_chars() for c in ["K_KFZ_R1", "K_KFZ_R2", "KFZ_R1", "KFZ_R2"]])
-        .filter(~pl.col("K_KFZ_R1").is_in(["a", "d"]) & ~pl.col("K_KFZ_R2").is_in(["a", "d"]))
-        .with_columns([
-            extract_year("date"),
-            pl.col("KFZ_R1").cast(pl.Float64, strict=False).fill_nan(None).alias("kfz_r1"),
-            pl.col("KFZ_R2").cast(pl.Float64, strict=False).fill_nan(None).alias("kfz_r2"),
-        ])
-        .with_columns((pl.col("kfz_r1") + pl.col("kfz_r2")).alias("kfz_total"))
-        .drop_nulls(subset=["kfz_total"])
+    # --- Yearly average vehicle count (Zst 1194, valid rows only) ---
+    # Mirrors what the old load_measuring_points_data did, now as an in-memory op.
+    _veh = (
+        _base
+        .filter(pl.col("Zst") == "1194")
+        .drop_nulls(subset=["KFZ_total"])
+        .group_by("year")
+        .agg(pl.col("KFZ_total").mean().alias("avg_vehicles"))
+        .sort("year")
     )
-    result = (
-        df.group_by("year")
-        .agg(pl.col("kfz_total").mean().alias("avg_vehicles"))
-        .sort("year").to_dict(as_series=False)
-    )
-    return dict(zip(result["year"], result["avg_vehicles"]))
+    df_traffic = dict(zip(_veh["year"].to_list(), _veh["avg_vehicles"].to_list()))
 
-@st.cache_data(show_spinner="Loading Registration data …")
-def load_registrations_data(path: str) -> pl.DataFrame:
-    df = pl.read_csv(path, infer_schema_length=0)
-    casts = [pl.col("Year").cast(pl.Int32)] + [
-        pl.col(c).str.replace_all(r"\.", "").str.strip_chars().cast(pl.Int64, strict=False)
-        for c in FUEL_COLS
-    ]
-    return df.with_columns(casts).sort("Year")
-
-@st.cache_data(show_spinner="Loading Air Quality data …")
-def load_air_quality_data(path: str) -> pl.DataFrame:
-    return (
-        pl.read_csv(path, infer_schema_length=0)
-        .with_columns([
-            pl.col("date").str.slice(6, 4).cast(pl.Int32).alias("year"),
-            pl.col("date").str.slice(3, 2).cast(pl.Int32).alias("month"),
-            pl.col("nitrogen_dioxide").cast(pl.Float64, strict=False).fill_nan(None).alias("no2"),
-        ])
+    # --- Monthly NO₂ averages (Zst 1194) ---
+    # nitrogen_dioxide is already present and cast to Float64 in the base loader.
+    df_no2_monthly = (
+        _base
+        .filter(pl.col("Zst") == "1194")
         .group_by(["year", "month"])
-        .agg(pl.col("no2").mean().alias("avg_no2"))
+        .agg(pl.col("nitrogen_dioxide").mean().alias("avg_no2"))
         .sort(["year", "month"])
         .with_columns(
             (pl.col("year").cast(pl.Utf8) + "-" +
@@ -123,22 +96,21 @@ def load_air_quality_data(path: str) -> pl.DataFrame:
         )
     )
 
-try:
-    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
-except FileNotFoundError:
-    st.error(f"CSV not found: {CSV_HOLYFILE}")
-    st.stop()
+    df_registrations = load_registrations()
 
-try:
-    df_registrations = load_registrations_data(CSV_REGISTRATION_DATA)
-except FileNotFoundError:
-    st.error(f"CSV not found: {CSV_REGISTRATION_DATA}")
-    st.stop()
+    # Cast fuel columns from the registration CSV
+    casts = [pl.col("year")] + [
+        pl.col(c).cast(pl.Utf8).str.replace_all(r"\.", "").str.strip_chars()
+          .cast(pl.Int64, strict=False)
+        for c in FUEL_COLS
+        if c in df_registrations.columns
+    ]
+    df_registrations = df_registrations.select(casts).sort("year")
+    # Rename "year" → "Year" to keep the rest of the page unchanged
+    df_registrations = df_registrations.rename({"year": "Year"})
 
-try:
-    df_no2_monthly = load_air_quality_data(CSV_AIR_QUALITY)
-except FileNotFoundError:
-    st.error(f"CSV not found: {CSV_AIR_QUALITY}")
+except Exception as e:
+    st.error(f"Could not load data: {e}")
     st.stop()
 
 # ====================================
@@ -146,7 +118,6 @@ except FileNotFoundError:
 
 is_stacked = st.radio("Bar mode", ["Stacked", "Grouped"], horizontal=True) == "Stacked"
 
-# --- Prepare data ---
 years = df_registrations["Year"].to_list()
 totals_df = (
     df_registrations
@@ -155,22 +126,24 @@ totals_df = (
 )
 totals = dict(zip(totals_df["Year"], totals_df["total"]))
 
-# --- Build chart ---
 fig = go.Figure()
 for col, label in FUEL_COLS.items():
+    if col not in df_registrations.columns:
+        continue
     values = df_registrations[col].to_list()
     pcts   = [
         round(v / totals[y] * 100, 1) if v is not None and totals.get(y) else None
         for v, y in zip(values, years)
     ]
     if is_stacked:
-        text_vals = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
-        text_pos = "inside"
+        text_vals  = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
+        text_pos   = "inside"
         text_colors = ["white"] * len(years)
     else:
-        text_vals = [f"{p:.1f}%" if p is not None else "" for p in pcts]
-        text_pos = ["inside" if p is not None and p >= HIDE_THRESHOLD else "outside" for p in pcts]
-        text_colors = ["white"  if p is not None and p >= HIDE_THRESHOLD else "#333333" for p in pcts]
+        text_vals   = [f"{p:.1f}%" if p is not None else "" for p in pcts]
+        text_pos    = ["inside"  if p is not None and p >= HIDE_THRESHOLD else "outside" for p in pcts]
+        text_colors = ["white"   if p is not None and p >= HIDE_THRESHOLD else "#333333" for p in pcts]
+
     fig.add_trace(go.Bar(
         name=label, legendgroup=label, showlegend=not is_stacked,
         x=years, y=values, customdata=pcts,
@@ -202,12 +175,13 @@ fig.update_layout(
     plot_bgcolor="white", height=560, hovermode="closest", margin=dict(t=140, b=60),
 )
 
-# --- Render ---
-st.plotly_chart(apply_font(fig), width = "stretch")
+st.plotly_chart(apply_font(fig), width="stretch")
 with st.expander("Raw data table"):
-    table = df_registrations.select(["Year"] + list(FUEL_COLS.keys())).rename(FUEL_COLS)
+    table = df_registrations.select(["Year"] + [c for c in FUEL_COLS if c in df_registrations.columns]).rename(
+        {c: l for c, l in FUEL_COLS.items() if c in df_registrations.columns}
+    )
     table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
-    st.dataframe(table, width = "stretch")
+    st.dataframe(table, width="stretch")
 
 # ====================================
 # Text
@@ -229,7 +203,6 @@ st.markdown("""
 # ====================================
 # Second visualisation
 
-# --- Prepare data ---
 bev_share = {
     row["Year"]: round(row[BEV_COL] / totals[row["Year"]] * 100, 2)
     for row in df_registrations.select(["Year", BEV_COL]).to_dicts()
@@ -242,7 +215,7 @@ if not common_years:
     st.warning("No overlapping years found across the three data sources.")
     st.stop()
 
-veh_df = pl.DataFrame({"year": list(df_traffic.keys()), "avg_vehicles": list(df_traffic.values())})
+veh_df  = pl.DataFrame({"year": list(df_traffic.keys()), "avg_vehicles": list(df_traffic.values())})
 monthly = (
     df_no2_monthly
     .filter(pl.col("year").is_in(common_years))
@@ -258,7 +231,6 @@ y_roll = monthly.with_columns(pl.col("no2_per_veh").rolling_mean(window_size=3).
 valid_idx, valid_vals = zip(*[(i, v) for i, v in enumerate(y_raw) if v is not None])
 y_trend = np.poly1d(np.polyfit(valid_idx, valid_vals, 1))(range(len(y_raw))).tolist()
 
-# --- Build chart ---
 fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 fig.add_trace(go.Scatter(
@@ -294,8 +266,7 @@ fig.update_layout(
 fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
 fig.update_yaxes(title_text="NO₂ per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
 
-# --- Render ---
-st.plotly_chart(apply_font(fig), width = "stretch")
+st.plotly_chart(apply_font(fig), width="stretch")
 st.caption(
     "⚠️ **Data limitation:** NO₂ values are sourced from Open-Meteo, which provides "
     "a model-based atmospheric estimate for the Kiel area rather than a measurement "
@@ -310,10 +281,12 @@ with st.expander("Underlying data"):
         .select(["year", "month", "avg_no2", "avg_vehicles", "no2_per_veh"])
         .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
                  "avg_vehicles": "Avg Vehicles (veh/h)", "no2_per_veh": "NO₂ per Vehicle"})
-        .with_columns([pl.col("Avg NO₂ (µg/m³)").round(2),
-                       pl.col("Avg Vehicles (veh/h)").round(1),
-                       pl.col("NO₂ per Vehicle").round(5)]),
-        width = "stretch",
+        .with_columns([
+            pl.col("Avg NO₂ (µg/m³)").round(2),
+            pl.col("Avg Vehicles (veh/h)").round(1),
+            pl.col("NO₂ per Vehicle").round(5),
+        ]),
+        width="stretch",
     )
 
 # ====================================
@@ -352,11 +325,11 @@ st.divider()
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
 
 with col1_bottom_btn:
-    if st.button("⬅️ Previous Question", key = "btn_bottom1"):
+    if st.button("⬅️ Previous Question", key="btn_bottom1"):
         st.switch_page("pages/Research_Question_4.py")
-        
+
 with col3_bottom_btn:
-    if st.button("Next Question ➡️", key = "btn_bottom2"):
+    if st.button("Next Question ➡️", key="btn_bottom2"):
         st.switch_page("pages/Research_Question_6.py")
 
 st.divider()
@@ -364,9 +337,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = "stretch"):
+    if st.button("Go to Imprint", width="stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = "stretch"):
+    if st.button("Back to Homepage 🏠", width="stretch"):
         st.switch_page("pages/homepage.py")
