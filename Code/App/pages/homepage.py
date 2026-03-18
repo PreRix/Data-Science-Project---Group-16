@@ -8,7 +8,7 @@ st.markdown("""
 
 st.image("images/Kiel_Verkehr.png", 
          caption = "Image created with Nano Banana 2 (Google Gemini)",
-         width = 300)
+         width = "content")
     
 st.markdown("""
     <br>
