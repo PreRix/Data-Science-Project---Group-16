@@ -101,7 +101,7 @@ def load_air_quality_data(path: str) -> pl.DataFrame:
     )
 
 try:
-    df_traffic    = load_measuring_points_data(CSV_HOLYFILE)
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
     st.error(f"CSV not found: {CSV_HOLYFILE}")
     st.stop()

@@ -3,14 +3,14 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import os
-
 
 st.set_page_config(page_title="Traffic Direction Analysis", layout="wide")
 st.markdown("<style>html { font-size: 20px; }</style>", unsafe_allow_html=True)
 st.title("Kiel Traffic: Inbound vs. Outbound Ratio")
 
-CSV_PATH = CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
+st.markdown("**Research Question #6:** How does the ratio of incoming/outcoming traffic around Kiel change during the day?")
+
+CSV_HOLYFILE = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FLqC6en/?accept=zip"
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -23,10 +23,9 @@ def apply_font(fig):
     for annotation in fig.layout.annotations:
         annotation.font.size = 26
     return fig
-
     
 @st.cache_data(show_spinner="Loading data...")
-def load_traffic_ratio_data(path):
+def load_measuring_points_data(path):
     df = pl.read_csv(path, infer_schema_length=0)
     
     return (
@@ -60,9 +59,9 @@ def load_traffic_ratio_data(path):
     )
 
 try:
-    df = load_traffic_ratio_data(CSV_PATH)
+    df_traffic = load_measuring_points_data(CSV_HOLYFILE)
 except FileNotFoundError:
-    st.error(f"File not found: {CSV_PATH}")
+    st.error(f"File not found: {CSV_HOLYFILE}")
     st.stop()
 
 # --- UI CONTROLS ---
@@ -81,14 +80,14 @@ zst_id = ZST_VARS[zst_label]
 
 # --- YEAR & MONTH SELECTOR ---
 
-available_years = sorted(df["datetime"].dt.year().unique().to_list(), reverse=True)
+available_years = sorted(df_traffic["datetime"].dt.year().unique().to_list(), reverse=True)
 selected_year = col2.selectbox("Year", ["All Years"] + available_years)
 
 if selected_year == "All Years":
-    df_filtered_time = df
+    df_filtered_time = df_traffic
     month_options = ["Full Year"]
 else:
-    df_filtered_time = df.filter(pl.col("datetime").dt.year() == selected_year)
+    df_filtered_time = df_traffic.filter(pl.col("datetime").dt.year() == selected_year)
     month_options = ["Full Year"] + [
         "January", "February", "March", "April", "May", "June", 
         "July", "August", "September", "October", "November", "December"
@@ -158,7 +157,7 @@ fig_hm.update_layout(
     yaxis=dict(tickmode="linear", dtick=1)
 )
 
-st.plotly_chart(fig_hm, use_container_width=True)
+st.plotly_chart(apply_font(fig_hm), use_container_width=True)
 
 # --- INSIGHTS ---
 avg_in = df_filtered["R1_Inbound"].mean()
