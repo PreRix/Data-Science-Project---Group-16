@@ -147,7 +147,7 @@ fig.update_layout(
 fig.update_yaxes(title_text=aq_label,        secondary_y=False, gridcolor="#eeeeee")
 fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True,  gridcolor="#eeeeee", showgrid=False)
 
-st.plotly_chart(apply_font(fig), width=True)
+st.plotly_chart(apply_font(fig), width = "stretch")
 
 # ====================================
 # Text
@@ -267,7 +267,7 @@ if hm_mode == "Overall (all selected years)":
             font=dict(size=13),
         ),
     )
-    st.plotly_chart(apply_font(fig_hm), width=True)
+    st.plotly_chart(apply_font(fig_hm), width = "stretch")
 
 else:  # Per year side by side
     n_years = len(active_years)
@@ -290,7 +290,7 @@ else:  # Per year side by side
     for col_idx in range(1, n_years + 1):
         axis_key = "yaxis" if col_idx == 1 else f"yaxis{col_idx}"
         fig_hm.update_layout(**{axis_key: dict(autorange="reversed")})
-    st.plotly_chart(apply_font(fig_hm), width=True)
+    st.plotly_chart(apply_font(fig_hm), width = "stretch")
 
 # ── Summary table ─────────────────────────────────────────────────────────────
 with st.expander("Hourly summary table"):
@@ -310,7 +310,7 @@ with st.expander("Hourly summary table"):
             aq_label:   [round(v, 3) if v is not None and not np.isnan(v) else None for v in [aq_map.get(h, float("nan")) for h in hours]],
             "Vehicles": [round(v, 1) if v is not None and not np.isnan(v) else None for v in [kfz_map.get(h, float("nan")) for h in hours]],
         }))
-    st.dataframe(pl.concat(frames), width=True)
+    st.dataframe(pl.concat(frames), width = "stretch")
 
 # ====================================
 # Text
@@ -344,9 +344,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = True):
+    if st.button("Go to Imprint", width = "stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = True):
+    if st.button("Back to Homepage 🏠", width = "stretch"):
         st.switch_page("pages/homepage.py")

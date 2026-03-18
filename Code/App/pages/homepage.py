@@ -49,16 +49,16 @@ st.markdown("""
 col_qst_btn1, col_qst_btn2, col_qst_btn3, col_qst_btn4 = st.columns([1, 1, 1, 1])
 
 with col_qst_btn2:
-    if st.button("Go to the Question Catalog 📒", width = True):
+    if st.button("Go to the Question Catalog 📒", width = "stretch"):
         st.switch_page("pages/Question_Catalog.py")
 
 with col_qst_btn3:
-    if st.button("Go to the Data Sources  📄", width = True):
+    if st.button("Go to the Data Sources  📄", width = "stretch"):
         st.switch_page("pages/Data_Sources.py")
 st.divider()
 
 col4, col5, col6 = st.columns([1, 0.4, 1])
 
 with col5:
-    if st.button("Go to Imprint", width = True):
+    if st.button("Go to Imprint", width = "stretch"):
         st.switch_page("pages/Imprint.py")

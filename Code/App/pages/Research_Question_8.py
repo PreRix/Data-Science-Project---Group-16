@@ -129,7 +129,7 @@ st.plotly_chart(
         title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
         x_title="Month",
     ),
-    width=True,
+    width = "stretch",
 )
 
 # ====================================
@@ -183,7 +183,7 @@ st.plotly_chart(
         title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
         x_title="Day of Month",
     ),
-    width=True,
+    width = "stretch",
 )
 # ====================================
 # Text
@@ -214,9 +214,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = True):
+    if st.button("Go to Imprint", width = "stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = True):
+    if st.button("Back to Homepage 🏠", width = "stretch"):
         st.switch_page("pages/homepage.py")

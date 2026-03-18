@@ -267,7 +267,7 @@ fig.update_layout(
 fig.update_xaxes(gridcolor="#eeeeee")
 fig.update_yaxes(gridcolor="#eeeeee", zerolinecolor="#cccccc")
 
-st.plotly_chart(apply_font(fig), width=True)
+st.plotly_chart(apply_font(fig), width = "stretch")
 
 total_event_cars = df_event_daily["daily_cars"].mean()
 total_base_cars = df_base_daily["daily_cars"].mean()
@@ -343,9 +343,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = True):
+    if st.button("Go to Imprint", width = "stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = True):
+    if st.button("Back to Homepage 🏠", width = "stretch"):
         st.switch_page("pages/homepage.py")

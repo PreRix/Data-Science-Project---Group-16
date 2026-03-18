@@ -183,7 +183,7 @@ fig_hm.update_layout(
     yaxis=dict(tickmode="linear", dtick=1)
 )
 
-st.plotly_chart(apply_font(fig_hm), width=True)
+st.plotly_chart(apply_font(fig_hm), width = "stretch")
 
 avg_in = df_filtered["R1_Inbound"].mean()
 avg_out = df_filtered["R2_Outbound"].mean()
@@ -234,9 +234,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", width = True):
+    if st.button("Go to Imprint", width = "stretch"):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", width = True):
+    if st.button("Back to Homepage 🏠", width = "stretch"):
         st.switch_page("pages/homepage.py")
