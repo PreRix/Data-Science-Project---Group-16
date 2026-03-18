@@ -16,7 +16,18 @@ AIR_QUALITY_VARS = {
     "CO":    "carbon_monoxide",
 }
 
-# Vehicle classes used by RQ7 (both directions)
+# RQ5
+_FUEL_COLS = [
+    "PT_Nach Kraftstoffarten_Benzin",
+    "PT_Nach Kraftstoffarten_Diesel",
+    "PT_Nach Kraftstoffarten_Hybrid insgesamt",
+    "PT_Nach Kraftstoffarten_Elektro (BEV)",
+    "PT_Nach Kraftstoffarten_Gas (einschl. bivalent)",
+    "PT_Nach Kraftstoffarten_darunter Plug-in-Hybrid",
+    "PT_Nach Kraftstoffarten_sonstige",
+]
+
+# RQ7
 _VEHICLE_CLASSES = ["Pkw", "Mot", "Bus", "PmA"]
 
 # ── Base loader ───────────────────────────────────────────────────────────────
@@ -84,9 +95,9 @@ def load_traffic_base(path: str = CSV_TRAFFIC) -> pl.DataFrame:
         ])
     )
 
-# ── Registration loader ───────────────────────────────────────────────────────
+# ── Registration loader with fuel breakdown (RQ5) ─────────────────────────────
  
-@st.cache_data(show_spinner="Loading registration data …")
+@st.cache_data(show_spinner="Loading registration data ...")
 def load_registrations(path: str = CSV_REGISTRATION) -> pl.DataFrame:
     return (
         pl.read_csv(path, infer_schema_length=0)
@@ -98,6 +109,24 @@ def load_registrations(path: str = CSV_REGISTRATION) -> pl.DataFrame:
               .alias("registrations"),
         ])
     )
+
+@st.cache_data(show_spinner="Loading registration data (fuel breakdown) …")
+def load_registrations_fuel(path: str = CSV_REGISTRATION) -> pl.DataFrame:
+    """
+    Returns the registration CSV with Year + all per-fuel-type columns,
+    numeric strings cleaned (dots removed) and cast to Int64.
+    Used by RQ5.
+    """
+    df = pl.read_csv(path, infer_schema_length=0)
+    fuel_cols_present = [c for c in _FUEL_COLS if c in df.columns]
+    casts = (
+        [pl.col("Year").cast(pl.Int64).alias("Year")]
+        + [
+            pl.col(c).str.replace_all(r"\.", "").str.strip_chars().cast(pl.Int64, strict=False)
+            for c in fuel_cols_present
+        ]
+    )
+    return df.select(casts).sort("Year")
 
 # ── Extreme-weather / events weather loader (RQ9 - Bonus) ─────────────────────
 

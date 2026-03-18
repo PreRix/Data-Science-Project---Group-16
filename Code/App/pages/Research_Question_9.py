@@ -4,7 +4,7 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import load_traffic_base, load_weather_events
+from utils.data_loader import load_traffic_base, load_weather
 
 # ==============================
 # Website design

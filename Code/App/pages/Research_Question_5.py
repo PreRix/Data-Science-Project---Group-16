@@ -6,7 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-from utils.data_loader import load_traffic_base, load_registrations
+from utils.data_loader import load_traffic_base, load_registrations_fuel
 
 # ==============================
 # Website design
@@ -96,7 +96,7 @@ try:
         )
     )
 
-    df_registrations = load_registrations()
+    df_registrations = load_registrations_fuel()
 
     # Cast fuel columns from the registration CSV
     casts = [pl.col("year")] + [
