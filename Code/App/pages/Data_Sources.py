@@ -1,3 +1,5 @@
+import streamlit as st
+
 st.title("The Data we used")
 st.write("Here you can find all raw data we used for this project. Expand on the data you want to know more about.")
 
@@ -51,3 +53,16 @@ with st.expander("Kieler Woche Data"):
         we collected the data ourselves from the official Kieler Woche website, together with the provided estimated visitor counts for each year and wrote them into a .csv-file.
     """)
     st.info("**Source:** https://www.kieler-woche.de/de/medien/meldung.php")
+
+
+st.divider()
+
+col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
+
+with col5_bottom_btn:
+    if st.button("Go to Imprint", use_container_width = True):
+        st.switch_page("pages/Imprint.py")
+
+with col6_bottom_btn:
+    if st.button("Back to Homepage 🏠", use_container_width = True):
+        st.switch_page("pages/homepage.py")
