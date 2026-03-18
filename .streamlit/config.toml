@@ -1,0 +1,8 @@
+[theme]
+base = "light"
+
+[server]
+headless = true          # recommended for cloud deployments
+
+[runner]
+magicEnabled = false     # disables "magic" auto-display of variables (cleaner behavior)
