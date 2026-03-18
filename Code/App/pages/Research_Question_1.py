@@ -218,7 +218,7 @@ fig_hm.update_layout(
     height=500,
     coloraxis=dict(colorscale="Viridis", colorbar_title="Ø Vehicles",colorbar=dict(
         title="Vehicles",
-        x=0.62,
+        x=0.63,
         thickness=12,
         len=0.8
     )),
