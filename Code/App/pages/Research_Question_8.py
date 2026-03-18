@@ -112,8 +112,8 @@ st.markdown("""
     ### Definitions + How we aggregated the Data:
     The two lines in the chart represent the traffic of the two rush-hours each day at the A215, aggregated to an *average day of the month*. No other counting station 
     displays the commuter traffic better than this one, as the A215 is known for being a main commuter route for Kiel.  
-    For the morning rush-hour we defined the time window from 6-9 a.m.; only considering the traffic coming to Kiel.  
-    For the evening rush-hour we chose 4-6 p.m., while only considering traffic leaving Kiel.  
+    For the morning rush-hour we defined the time window from 6-8 a.m.; only considering the traffic coming to Kiel.  
+    For the evening rush-hour we chose 3-5 p.m., while only considering traffic leaving Kiel.  
     Additionally we only took into account data from weekdays (Monday to Friday), so that data from weekends would not bias the result.  
 
     ####
