@@ -41,11 +41,12 @@ st.markdown("""
     7. How does the Kieler Woche influence truck traffic and personal traffic volume at nearby counting stations in Kiel, and how does this period compare to typical weeks during the same season?
 
     8. How did the traffic in rush-hours changed on Autobahnen around Kiel because of the mobility change?
-""")
+""", unsafe_allow_html=True)
 
 st.markdown("""
     ###   
 """)
+
 col_qst_btn1, col_qst_btn2, col_qst_btn3, col_qst_btn4 = st.columns([1, 1, 1, 1])
 
 with col_qst_btn2:

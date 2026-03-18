@@ -25,7 +25,7 @@ st.title("Research Question #5")
 st.markdown("""
     # *Using yearly registration data for Kiel to derive the estimated share of battery-electric vehicles in the regional fleet from 2021 to 2025, is there a measurable downward trend in NO<sub>2</sub> levels on high-traffic roads near Kiel?*
     ## Vehicle Registrations in Kiel - by Fuel Type 
-""")
+""", unsafe_allow_html=True)
 
 # ==============================
 # Global variables
@@ -224,7 +224,7 @@ st.divider()
 
 st.markdown("""
     ## Battery-Electric Vehicle (BEV) Share vs. Average NO<sub>2</sub> emission per Vehicle
-""")
+""", unsafe_allow_html=True)
 
 # ====================================
 # Second visualisation
@@ -342,7 +342,7 @@ st.markdown("""
     To answer the question: Yes, a measurable downward trend can be spotted, and it correlates with the increasing numbers of BEV registrations.  
     But no, it can not be determined if this actually is a causation.
     
-""")
+""", unsafe_allow_html=True)
 
 # ====================================
 # Website design
