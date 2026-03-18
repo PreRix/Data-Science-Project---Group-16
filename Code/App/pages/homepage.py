@@ -51,7 +51,7 @@ with col_qst_btn2:
 
 with col_qst_btn3:
     if st.button("Go to the Data Sources  📄", use_container_width = True):
-        st.switch_page("pages/Question_Catalog.py")
+        st.switch_page("pages/Data_Sources.py")
 st.divider()
 
 col4, col5, col6 = st.columns([1, 0.4, 1])
