@@ -127,6 +127,7 @@ for col, year in zip(cols, years):
 # ====================================
 
 st.markdown("""
+    ### How we aggregated the Data:
     For this question we decided to use a pie chart for every year.  
     The data we used is from the counting station 1194 alone at the A215 because, as concluded in RQ4, this station is highly representative of commuter traffic 
     and traffic in general. 
@@ -136,7 +137,7 @@ st.markdown("""
     five.
 
     ####
-    ### Conclusion:
+    ### Description + Interpretation:
     It can be seen that the average weekday is always making 40-41% of traffic of the week. This is highly likely due to people working in and around 
     Kiel.  
     Saturdays stay consistent as well, accounting for 32-34% of the weekly traffic, while Sundays account for 25-27%.  
