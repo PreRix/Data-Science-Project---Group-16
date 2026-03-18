@@ -203,11 +203,11 @@ fig.update_layout(
 )
 
 # --- Render ---
-st.plotly_chart(apply_font(fig), use_container_width=True)
+st.plotly_chart(apply_font(fig), width=True)
 with st.expander("Raw data table"):
     table = df_registrations.select(["Year"] + list(FUEL_COLS.keys())).rename(FUEL_COLS)
     table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
-    st.dataframe(table, use_container_width=True)
+    st.dataframe(table, width=True)
 
 # ====================================
 # Text
@@ -295,7 +295,7 @@ fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
 fig.update_yaxes(title_text="NO₂ per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
 
 # --- Render ---
-st.plotly_chart(apply_font(fig), use_container_width=True)
+st.plotly_chart(apply_font(fig), width=True)
 st.caption(
     "⚠️ **Data limitation:** NO₂ values are sourced from Open-Meteo, which provides "
     "a model-based atmospheric estimate for the Kiel area rather than a measurement "
@@ -313,7 +313,7 @@ with st.expander("Underlying data"):
         .with_columns([pl.col("Avg NO₂ (µg/m³)").round(2),
                        pl.col("Avg Vehicles (veh/h)").round(1),
                        pl.col("NO₂ per Vehicle").round(5)]),
-        use_container_width=True,
+        width=True,
     )
 
 # ====================================
@@ -364,9 +364,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", use_container_width = True):
+    if st.button("Go to Imprint", width = True):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", use_container_width = True):
+    if st.button("Back to Homepage 🏠", width = True):
         st.switch_page("pages/homepage.py")

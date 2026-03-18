@@ -15,7 +15,7 @@ with col2:
         **Lenn Bartens**  
         Student of Business Informatics  
         Contact: stu247567@mail.uni-kiel.de
-    """, unsafe_allow_html = True)
+    """)
 
 st.divider()
 
@@ -30,7 +30,7 @@ with col2_2:
         **Felix Klinger**  
         Student of Business Informatics  
         Contact: stu246657@mail.uni-kiel.de
-    """, unsafe_allow_html = True)
+    """)
 
 st.divider()
 
@@ -45,7 +45,7 @@ with col2_3:
         **Moritz Hänsel**  
         Student of Business Informatics  
         Contact: stu244864@mail.uni-kiel.de
-    """, unsafe_allow_html = True)
+    """)
 
 st.divider()
 
@@ -60,7 +60,7 @@ with col2_4:
         **Anthime Willmann**  
         Student of Computer Science  
         Contact: stu247423@mail.uni-kiel.de
-    """, unsafe_allow_html = True)
+    """)
 
 st.divider()
 st.divider()
@@ -83,5 +83,5 @@ st.divider()
 col_left, col_middle, col_right = st.columns([1, 0.4, 1])
 
 with col_middle:
-    if st.button("Back to Homepage 🏠", use_container_width = True):
+    if st.button("Back to Homepage 🏠", width = True):
         st.switch_page("pages/homepage.py")

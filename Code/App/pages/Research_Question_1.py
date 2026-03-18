@@ -230,7 +230,7 @@ fig_hm.update_layout(
 # Reverse Y-axis so 0:00 is at the bottom
 fig_hm.update_yaxes(autorange=False, range=[0, 23])
 
-st.plotly_chart(apply_font(fig_hm),  use_container_width=True)
+st.plotly_chart(apply_font(fig_hm), width=True)
 
 # ====================================
 # Text
@@ -333,7 +333,7 @@ fig_box.update_layout(
 )
 fig_box.update_xaxes(gridcolor="#eeeeee")
 
-st.plotly_chart(apply_font(fig_box), use_container_width=True)
+st.plotly_chart(apply_font(fig_box), width=True)
 
 # ====================================
 # Text
@@ -374,9 +374,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", use_container_width = True):
+    if st.button("Go to Imprint", width = True):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", use_container_width = True):
+    if st.button("Back to Homepage 🏠", width = True):
         st.switch_page("pages/homepage.py")

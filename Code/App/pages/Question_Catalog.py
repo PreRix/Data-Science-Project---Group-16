@@ -10,34 +10,34 @@ st.markdown("""
 col1_btn, col2_btn, col3_btn, col4_btn = st.columns([1, 1, 1, 1], gap = "large")
 
 with col1_btn:
-    if st.button("📈 RQ1: Weather & Traffic", use_container_width = True):
+    if st.button("📈 RQ1: Weather & Traffic", width = True):
         st.switch_page("pages/Research_Question_1.py")
 
-    if st.button("📈 RQ5: Electric Vehicles & Emissions", use_container_width = True):
+    if st.button("📈 RQ5: Electric Vehicles & Emissions", width = True):
         st.switch_page("pages/Research_Question_5.py")
 
-    if st.button("📈 BONUS RQ: Extreme Weather & Traffic", use_container_width = True):
+    if st.button("📈 BONUS RQ: Extreme Weather & Traffic", width = True):
         st.switch_page("pages/Research_Question_9.py")
 
 with col2_btn:
-    if st.button("📈 RQ2: Air Quality & Traffic", use_container_width = True):
+    if st.button("📈 RQ2: Air Quality & Traffic", width = True):
         st.switch_page("pages/Research_Question_2.py")
 
-    if st.button("📈 RQ6: Incoming vs. Outgoing Traffic", use_container_width = True):
+    if st.button("📈 RQ6: Incoming vs. Outgoing Traffic", width = True):
         st.switch_page("pages/Research_Question_6.py")
 
 with col3_btn:
-    if st.button("📈 RQ3: Long-term Traffic Growth", use_container_width = True):
+    if st.button("📈 RQ3: Long-term Traffic Growth", width = True):
         st.switch_page("pages/Research_Question_3.py")
 
-    if st.button("📈 RQ7: Kieler Woche Traffic", use_container_width = True):
+    if st.button("📈 RQ7: Kieler Woche Traffic", width = True):
         st.switch_page("pages/Research_Question_7.py")
 
 with col4_btn:
-    if st.button("📈 RQ4: Weekend vs. Weekday Traffic", use_container_width = True):
+    if st.button("📈 RQ4: Weekend vs. Weekday Traffic", width = True):
         st.switch_page("pages/Research_Question_4.py")
 
-    if st.button("📈 RQ8: Rush-Hour Traffic", use_container_width = True):
+    if st.button("📈 RQ8: Rush-Hour Traffic", width = True):
         st.switch_page("pages/Research_Question_8.py")
 
 st.divider()
@@ -45,9 +45,9 @@ st.divider()
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
-    if st.button("Go to Imprint", use_container_width = True):
+    if st.button("Go to Imprint", width = True):
         st.switch_page("pages/Imprint.py")
 
 with col6_bottom_btn:
-    if st.button("Back to Homepage 🏠", use_container_width = True):
+    if st.button("Back to Homepage 🏠", width = True):
         st.switch_page("pages/homepage.py")
