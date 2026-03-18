@@ -194,7 +194,6 @@ def build_registration_chart(df: pl.DataFrame, is_stacked: bool) -> tuple[go.Fig
     )
     return fig, totals
 
-
 # ── Chart 2: BEV share vs NO₂ per vehicle ────────────────────────────────────
 
 def build_bev_no2_chart(
