@@ -263,13 +263,13 @@ fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 fig.add_trace(go.Scatter(
     x=x, y=y_raw, name="NO₂ per Vehicle (monthly)", mode="lines",
-    line=dict(color="#E85C4C", width=1), opacity=0.3,
+    line=dict(color="#D44B94", width=1), opacity=1,
     hovertemplate="Month: %{x|%b %Y}<br>NO₂/vehicle: %{y:.5f}<extra></extra>",
 ), secondary_y=True)
 
 fig.add_trace(go.Scatter(
     x=x, y=y_roll, name="NO₂ per Vehicle (3-month avg)", mode="lines",
-    line=dict(color="#E85C4C", width=2.5),
+    line=dict(color="#EA4633", width=2.5),
     hovertemplate="Month: %{x|%b %Y}<br>3-month avg: %{y:.5f}<extra></extra>",
 ), secondary_y=True)
 

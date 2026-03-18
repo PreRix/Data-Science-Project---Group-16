@@ -230,7 +230,7 @@ fig.add_trace(go.Scatter(
     y=df_plot["base_cars"].to_list(),
     name="Ø Passenger Transport (Surrounding Month)",
     mode="lines+markers",
-    line=dict(color="#E85C4C", width=3, dash="dot"),
+    line=dict(color="#EA4633", width=3, dash="dot"),
     marker=dict(size=8, symbol="diamond"),
     yaxis="y"
 ))
@@ -241,7 +241,7 @@ fig.add_trace(go.Scatter(
     y=df_plot["base_trucks"].to_list(),
     name="Ø Freight Transport (Surrounding Month)",
     mode="lines+markers",
-    line=dict(color="#F5A623", width=3, dash="dot"),
+    line=dict(color="#D44B94", width=3, dash="dot"),
     marker=dict(size=8, symbol="diamond"),
     yaxis="y"
 ))

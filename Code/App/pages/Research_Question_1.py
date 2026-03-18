@@ -217,9 +217,9 @@ fig_hm.add_trace(go.Heatmap(
 fig_hm.update_layout(
     height=500,
     coloraxis=dict(colorscale="Viridis", colorbar_title="Ø Vehicles",colorbar=dict(
-        title="Vehicles", 
-        x=0.64,          
-        thickness=12, 
+        title="Vehicles",
+        x=0.62,
+        thickness=12,
         len=0.8
     )),
     yaxis=dict(title="Hour (0-23)", tickmode="linear", dtick=2),
