@@ -30,5 +30,6 @@ pages = {
         st.Page("pages/Imprint.py", title = "🧑‍🧑‍🧒‍🧒 Imprint")
     ]
 }
+
 pg = st.navigation(pages, position = "sidebar")
 pg.run()

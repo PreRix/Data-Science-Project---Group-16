@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
          
 st.title("Welcome to the Website of our Data Science Project!")
 st.markdown("""
@@ -8,8 +9,10 @@ st.markdown("""
 
 col_img1, col_img2, col_img3 = st.columns([1, 2.5, 1])
 
+img_path = Path(__file__).parent.parent / "images" / "Kiel_Verkehr.png"
+
 with col_img2:
-    st.image("images/Kiel_Verkehr.png", 
+    st.image("img_path", 
         caption = "Image created with Nano Banana 2 (Google Gemini)",
         width = "content")
     
