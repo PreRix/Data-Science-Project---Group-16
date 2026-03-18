@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
 
 st.title("The Data we used")
 st.write("Here you can find all raw data we used for this project. Expand on the data you want to know more about.")
@@ -14,8 +15,10 @@ with st.expander("Vehicle Counting Data"):
         The BASt is the national research center for transportaion and traffic in Germany. Therefore we declare the data as reliable.
         For understanding the datasets a data description in form of a PDF file is provded on the BASt website.
     """)
-  
-    st.image("images/BASt_example.png", caption = "Sample for BASt data structure", width = "stretch")
+
+    img_path = Path(__file__).parent.parent / "images" / "BASt_example.png"
+
+    st.image(str(img_path), caption = "Sample for BASt data structure", width = "stretch")
     st.info("**Source:** https://www.bast.de/DE/Publikationen/Daten/Verkehrstechnik/DZ-Richtung.html?nn=427910")
 
 with st.expander("Vehicle Registration Counts"):
