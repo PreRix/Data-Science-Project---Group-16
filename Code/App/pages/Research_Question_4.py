@@ -102,7 +102,7 @@ except Exception as e:
 st.markdown("""
     ### How we aggregated the Data:
     For this question we decided to use a pie chart for every year.  
-    The data we used is from the counting station 1194 alone at the A215 because, as concluded in RQ?XY?, this station is highly representative of commuter traffic 
+    The data we used is from the counting station 1194 alone at the A215 because, as concluded in RQ2, this station is highly representative of commuter traffic 
     and traffic in general. 
     As well, there might be differences for the counting stations for the different days of the week, so effects we aim to capture in the analysis could 
     potentially cancel each other out.  
