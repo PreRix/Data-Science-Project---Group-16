@@ -184,7 +184,7 @@ st.markdown("""
     ### Description:
     For the first visualization we decided to show the share of *vehicles per fuel type for each year* using the bar chart above.  
     An initial observation is that the share of conventional fuel vehicles (petrol and diesel) decreases steadily every year.
-    On the other hand the number with (partly) electric drivetrains increases every year, which confirms expectations based on political initiatives in recent 
+    On the other hand the number of vehicles with (partly) electric drivetrains increases every year, which confirms expectations based on political initiatives in recent 
     years.
 """)
 
