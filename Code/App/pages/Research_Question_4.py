@@ -22,7 +22,7 @@ with col3_top_btn:
 st.title("Research Question #4")
 
 st.markdown("""
-    # *How do Saturday and Sunday volumes near Kiel compare to weekday volumes, and has this weekend-to-weekday ration changed significantly over the five-year observation period?*
+    # *How do Saturday and Sunday volumes near Kiel compare to weekday volumes, and has this weekend-to-weekday ratio changed significantly over the five-year observation period?*
     ## Weekend vs. Weekday Traffic Load on the A215 (AK Kiel-West)
 """)
 
@@ -93,11 +93,11 @@ for col, year in zip(cols, years):
 st.markdown("""
     ### How we aggregated the Data:
     For this question we decided to use a pie chart for every year.  
-    The data we used is from the counting station 1194 alone at the A215 because, as concluded in RQ4, this station is highly representative of commuter traffic 
+    The data we used is from the counting station 1194 alone at the A215 because, as concluded in RQ?XY?, this station is highly representative of commuter traffic 
     and traffic in general. 
     As well, there might be differences for the counting stations for the different days of the week, so effects we aim to capture in the analysis could 
     potentially cancel each other out.  
-    To correctly illustrate the traffic volume of a weekday, the average of the data from monday to friday were summed up *per day and year* and then divided by 
+    To correctly illustrate the traffic volume of a weekday, the average of the data from Monday to Friday were summed up *per day and year* and then divided by 
     five.
 
     ####
@@ -105,7 +105,7 @@ st.markdown("""
     It can be seen that the average weekday is always making 40-41% of traffic of the week. This is highly likely due to people working in and around 
     Kiel.  
     Saturdays stay consistent as well, accounting for 32-34% of the weekly traffic, while Sundays account for 25-27%.  
-    We assume the average traffic on Saturdays to be greater than on Sundays because of many shops and businesses remain open that day; thus people are 
+    We assume the average traffic on Saturdays to be greater than on Sundays because many shops and businesses remain open that day; thus people are 
     visiting, or working at those places.  
 
     As said before, the numbers are equally the same for each year, so no significant change has occured over the years.

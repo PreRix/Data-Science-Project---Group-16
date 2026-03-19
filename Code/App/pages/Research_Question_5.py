@@ -102,7 +102,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# First visualization
 
 is_stacked = st.radio("Bar mode", ["Stacked", "Grouped"], horizontal=True) == "Stacked"
 
@@ -189,7 +189,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====================================
-# Second visualisation
+# Second visualization
 
 bev_share = {
     row["Year"]: round(row[BEV_COL] / totals[row["Year"]] * 100, 2)

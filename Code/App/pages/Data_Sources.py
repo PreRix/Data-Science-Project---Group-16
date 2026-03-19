@@ -12,8 +12,8 @@ with st.expander("Vehicle Counting Data"):
         Furthermore the vehicle count is given per direction of travel and info about the counted vehicle type is given.
         
 
-        The BASt is the national research center for transportaion and traffic in Germany. Therefore we declare the data as reliable.
-        For understanding the datasets a data description in form of a PDF file is provded on the BASt website.
+        The BASt is the national research center for transportation and traffic in Germany. Therefore we declare the data as reliable.
+        For understanding the datasets a data description in form of a PDF file is provided on the BASt website.
     """)
 
     img_path = Path(__file__).parent.parent / "images" / "BASt_example.png"
@@ -23,10 +23,10 @@ with st.expander("Vehicle Counting Data"):
 
 with st.expander("Vehicle Registration Counts"):
     st.markdown("""
-        To retrive information about the vehicle registration counts for Kiel, we took the yearly registration reports from the "Kraftfahrt Bundesamt" (KBA). 
+        To retrieve information about the vehicle registration counts for Kiel, we took the yearly registration reports from the "Kraftfahrt Bundesamt" (KBA). 
         These are provided in Excel files containing the count of all registered vehicles in Germany. The counts are also differentiated into engine types.
 
-        The KBA is a German federal agency under the jurisdiction of the Ministry for Digtial and Transport. Therefore the data is trustworthy and of quality.
+        The KBA is a German federal agency under the jurisdiction of the Ministry for Digital and Transport. Therefore the data is trustworthy and of quality.
     """)
     st.info("**Source:** https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz1_b_uebersicht.html?nn=835828")
 
@@ -52,7 +52,7 @@ with st.expander("Weather & Air Quality Data"):
 
 with st.expander("Kieler Woche Data"):
     st.markdown("""
-        The Kieler Woche data we wanted to retrive was mainly the dates, from when to when the Kieler Woche took place each year. As there is no dataset or API holding this information, 
+        The Kieler Woche data we wanted to retrieve was mainly the dates, from when to when the Kieler Woche took place each year. As there is no dataset or API holding this information, 
         we collected the data ourselves from the official Kieler Woche website, together with the provided estimated visitor counts for each year and wrote them into a .csv-file.
     """)
     st.info("**Source:** https://www.kieler-woche.de/de/medien/meldung.php")

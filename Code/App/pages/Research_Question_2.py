@@ -24,7 +24,7 @@ with col3_top_btn:
 st.title("Research Question #2")
 
 st.markdown("""
-    # *To what extend does the hourly NO<sub>2</sub>, CO, PM<sub>2,5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?*
+    # *To what extent does the hourly NO<sub>2</sub>, CO, PM<sub>2,5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?*
     ## Air Quality & Traffic - Hourly Analysis
 """, unsafe_allow_html=True)
 
@@ -54,7 +54,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# First visualization
 
 col1, col2 = st.columns(2)
 aq_label = col1.selectbox("Air quality variable", list(AIR_QUALITY_VARS))
@@ -151,7 +151,7 @@ st.markdown("""
 """)
 
 # ====================================
-# Second visualisation
+# Second visualization
 
 hm_col1, hm_col2 = st.columns(2)
 
@@ -258,7 +258,7 @@ st.markdown("""
     Correlation-HeatMaps are used to not only illustrate the correlation between the vehicle count and the different air quality variables, but also the 
     correlation among the air quality variables themselves.  
     The diagonal axis is filled with "1s", as each variable is perfectly correlated with itself. This also confirms that the code is working properly.  
-    For the vehicle count, we can observe that it is negativeley correlated with all selected air quality variables.  
+    For the vehicle count, we can observe that it is negatively correlated with all selected air quality variables.  
     This confirms the observations that can be made from the figure above with numerical values as well.
 """)
 

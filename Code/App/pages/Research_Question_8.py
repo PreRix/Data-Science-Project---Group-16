@@ -88,7 +88,7 @@ def daily_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
     )
 
 # ====================================
-# First visualisation — monthly overview 2021–2025
+# First visualization — monthly overview 2021–2025
 
 morning_all = df_traffic.filter(pl.col("hour").is_between(6, 8))
 evening_all = df_traffic.filter(pl.col("hour").is_between(15, 17))
@@ -130,7 +130,7 @@ st.markdown("""
     Both lines show a general increase over the observation period. Especially the evening rush-hour in 2021 is having a massive increase. We think this is
     because it was the first summer after the second Corona lockdown which ended mid 2021. So people started coming to work again, while social life increased 
     significantly as well.  
-    We think that in the years after the COVID-19 pandemic many companies slowly went back to normal in-person work; so that homeoffice opportunities mostly got 
+    We think that in the years after the COVID-19 pandemic many companies slowly went back to normal in-person work; so that home office opportunities mostly got 
     reduced in the past years. This may be a reason for the trend the data is showing.
 """)
 
@@ -141,7 +141,7 @@ st.markdown(f"""
 """)
 
 # ====================================
-# Second visualisation — daily detail for DETAIL_YEAR / DETAIL_MONTH
+# Second visualization — daily detail for DETAIL_YEAR / DETAIL_MONTH
 
 df_month = df_traffic.filter(
     (pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH)

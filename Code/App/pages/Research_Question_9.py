@@ -58,7 +58,7 @@ except Exception as e:
 df = df_traffic.join(df_weather, on="datetime", how="left")
 
 # ====================================
-# First visualisation
+# First visualization
 
 # Per-hour median vehicle count as the baseline
 hourly_baseline = (

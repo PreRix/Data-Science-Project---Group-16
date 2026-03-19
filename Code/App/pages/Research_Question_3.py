@@ -56,7 +56,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# First visualization
 
 def yearly_avg_traffic(df: pl.DataFrame) -> pl.DataFrame:
     daily = (

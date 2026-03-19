@@ -73,7 +73,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# First visualization
 
 col1, col2, col3 = st.columns(3)
 zst_label = col1.selectbox("Select Counting Station", list(ZST_VARS.keys()))

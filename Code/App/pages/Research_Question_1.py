@@ -60,7 +60,7 @@ except Exception as e:
     st.stop()
      
 # ====================================
-# First visualisatio
+# First visualization
 
 col1, col2, col3 = st.columns(3)
 zst_label = col1.selectbox("Counting station", list(ZST_VARS))
@@ -168,7 +168,7 @@ st.plotly_chart(apply_font(fig_hm), width="stretch")
 # Text
 
 st.markdown("""
-    ### Definitons:
+    ### Definitions:
     To make a comparison possible, we had to define *dry day* and  *wet day*:  
 
     - Dry day: 0mm of precipitation per hour
@@ -177,7 +177,7 @@ st.markdown("""
     ####
     ### Description:
     Two HeatMaps are used to show how the *average vehicle count per hour and weekday* gets impacted by precipitation (rain + snow).  
-    A thrid HeatMap shows the relative difference from dry to wet day based on the dry day data for the avergage vehicle count.  
+    A third HeatMap shows the relative difference from dry to wet day based on the dry day data for the average vehicle count.  
 
     ####
     ### How we aggregated the Data:
@@ -195,7 +195,7 @@ st.markdown("""
 """)
 
 # ====================================
-# Second visualisation
+# Second visualization
 
 # Dropdown menu to filter by a specific weekday or use the whole week
 weekday_options = {
@@ -266,7 +266,7 @@ st.plotly_chart(apply_font(fig_box), width="stretch")
 st.markdown("""
     ### Description:
     It can be seen, that during weekdays, the temperature does not have so much impact on the traffic distribution, as many people have to go to work, 
-    not matter the temperature.  
+    no matter the temperature.  
     On the weekend-days, the temperature definitely seems to have an effect, as the traffic distribution increases with temperature.  
     
     ####

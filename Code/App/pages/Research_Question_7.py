@@ -81,7 +81,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# First visualization
 
 col1, col2, col3, col4 = st.columns(4)
 options   = ["All stations"] + list(ZST_VARS.keys())
