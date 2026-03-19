@@ -117,7 +117,7 @@ try:
 
     fig_hm = make_subplots(
         rows=1, cols=1,
-        subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. Blue: higher volume entering Kiel. Red: higher volume leaving Kiel"],
+        subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. <br> Blue: higher volume entering Kiel. <br> Red: higher volume leaving Kiel"],
     )
 
     custom_rdbu = [
@@ -136,7 +136,7 @@ try:
     ))
 
     fig_hm.update_layout(
-        height=600,
+        height=800,
         xaxis_title="Day of Week",
         yaxis_title="Hour of Day",
         yaxis=dict(tickmode="linear", dtick=1),
