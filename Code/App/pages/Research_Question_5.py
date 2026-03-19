@@ -267,10 +267,10 @@ try:
             monthly
             .select(["year", "month", "avg_no2", "avg_vehicles", "avg_no2_per_veh"])
             .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
-                    "avg_vehicles": "Avg Vehicles", "avg_no2_per_veh": "NO₂ per Vehicle"})
+                    "avg_vehicles": "Avg Vehicles/h", "avg_no2_per_veh": "NO₂ per Vehicle"})
             .with_columns([
                 pl.col("Avg NO₂ (µg/m³)").round(2),
-                pl.col("Avg Vehicles").round(1),
+                pl.col("Avg Vehicles/h").round(1),
                 pl.col("NO₂ per Vehicle").round(5),
             ]),
             width="stretch",
