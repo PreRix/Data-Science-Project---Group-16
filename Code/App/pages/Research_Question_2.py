@@ -102,7 +102,14 @@ try:
     fig.update_layout(
         xaxis=dict(title="Hour", tickmode="linear", dtick=1, range=[0, 23]),
         hovermode="x unified", plot_bgcolor="white", height=520,
-        legend=dict(orientation="h", y=1.08),
+        legend=dict(orientation="h",
+            yanchor="bottom",
+            y=1.02,             
+            xanchor="center",
+            x=0.5,              
+            font=dict(size=10),
+            traceorder="normal"
+        ),
     )
     fig.update_yaxes(title_text=aq_label,        secondary_y=False, gridcolor="#eeeeee")
     fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True,  gridcolor="#eeeeee", showgrid=False)
