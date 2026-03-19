@@ -24,7 +24,7 @@ with col3_top_btn:
 st.title("Research Question #2")
 
 st.markdown("""
-    # *To what extent does the hourly NO<sub>2</sub>, CO, PM<sub>2,5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?*
+    # *To what extent does the hourly NO<sub>2</sub>, CO, PM<sub>2.5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?*
     ## Air Quality & Traffic - Hourly Analysis
 """, unsafe_allow_html=True)
 
