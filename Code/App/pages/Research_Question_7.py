@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from datetime import date, timedelta
 from utils.data_loader import load_traffic_base
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -27,7 +27,7 @@ st.markdown("""
     ## Traffic compared: Kieler Woche vs. Baseline Levels
 """)
 
-# ==============================
+# ====================================
 # Global variables
 
 KIELER_WOCHE_PRESETS = {
@@ -47,7 +47,7 @@ ZST_VARS = {
 BUFFER_DAYS  = 14
 WEEKDAYS_MAP = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -83,115 +83,121 @@ except Exception as e:
 # ====================================
 # First visualization
 
-col1, col2, col3, col4 = st.columns(4)
-options   = ["All stations"] + list(ZST_VARS.keys())
-zst_label = col1.selectbox("Counting station", options)
-zst_choice = list(ZST_VARS.values()) if zst_label == "All stations" else [ZST_VARS[zst_label]]
+try:
+    col1, col2, col3, col4 = st.columns(4)
+    options   = ["All stations"] + list(ZST_VARS.keys())
+    zst_label = col1.selectbox("Counting station", options)
+    zst_choice = list(ZST_VARS.values()) if zst_label == "All stations" else [ZST_VARS[zst_label]]
 
-df_station = df_traffic.filter(pl.col("Zst").is_in(zst_choice))
+    df_station = df_traffic.filter(pl.col("Zst").is_in(zst_choice))
 
-with col2:
-    event_preset = st.selectbox("Select the year:", list(KIELER_WOCHE_PRESETS.keys()))
-    start_date, end_date = KIELER_WOCHE_PRESETS[event_preset]
+    with col2:
+        event_preset = st.selectbox("Select the year:", list(KIELER_WOCHE_PRESETS.keys()))
+        start_date, end_date = KIELER_WOCHE_PRESETS[event_preset]
 
-baseline_start = start_date - timedelta(days=BUFFER_DAYS)
-baseline_end   = end_date   + timedelta(days=BUFFER_DAYS)
+    baseline_start = start_date - timedelta(days=BUFFER_DAYS)
+    baseline_end   = end_date   + timedelta(days=BUFFER_DAYS)
 
-df_daily_sums = (
-    df_station.group_by(["day", "weekday"])
-    .agg([
-        pl.col("Personal_Traffic").sum().alias("daily_cars"),
-        pl.col("Truck_Traffic").sum().alias("daily_trucks"),
-    ])
-)
+    df_daily_sums = (
+        df_station.group_by(["day", "weekday"])
+        .agg([
+            pl.col("Personal_Traffic").sum().alias("daily_cars"),
+            pl.col("Truck_Traffic").sum().alias("daily_trucks"),
+        ])
+    )
 
-df_event_daily = df_daily_sums.filter(
-    (pl.col("day") >= start_date) & (pl.col("day") <= end_date)
-)
-df_base_daily = df_daily_sums.filter(
-    ((pl.col("day") >= baseline_start) & (pl.col("day") < start_date)) |
-    ((pl.col("day") > end_date)        & (pl.col("day") <= baseline_end))
-)
+    df_event_daily = df_daily_sums.filter(
+        (pl.col("day") >= start_date) & (pl.col("day") <= end_date)
+    )
+    df_base_daily = df_daily_sums.filter(
+        ((pl.col("day") >= baseline_start) & (pl.col("day") < start_date)) |
+        ((pl.col("day") > end_date)        & (pl.col("day") <= baseline_end))
+    )
 
-df_event_9days = (
-    df_event_daily.sort("day")
-    .select(["day", "weekday",
-             pl.col("daily_cars").alias("event_cars"),
-             pl.col("daily_trucks").alias("event_trucks")])
-)
+    df_event_9days = (
+        df_event_daily.sort("day")
+        .select(["day", "weekday",
+                pl.col("daily_cars").alias("event_cars"),
+                pl.col("daily_trucks").alias("event_trucks")])
+    )
 
-df_base_wd = (
-    df_base_daily.group_by("weekday")
-    .agg([
-        pl.col("daily_cars").mean().alias("base_cars"),
-        pl.col("daily_trucks").mean().alias("base_trucks"),
-    ])
-)
+    df_base_wd = (
+        df_base_daily.group_by("weekday")
+        .agg([
+            pl.col("daily_cars").mean().alias("base_cars"),
+            pl.col("daily_trucks").mean().alias("base_trucks"),
+        ])
+    )
 
-df_plot = df_event_9days.join(df_base_wd, on="weekday", how="left").sort("day")
+    df_plot = df_event_9days.join(df_base_wd, on="weekday", how="left").sort("day")
 
-x_labels = [
-    f"{d.strftime('%d.%m.')} ({WEEKDAYS_MAP[w]})"
-    for d, w in zip(df_plot["day"], df_plot["weekday"])
-]
+    x_labels = [
+        f"{d.strftime('%d.%m.')} ({WEEKDAYS_MAP[w]})"
+        for d, w in zip(df_plot["day"], df_plot["weekday"])
+    ]
 
-fig = go.Figure()
+    fig = go.Figure()
 
-fig.add_trace(go.Bar(
-    x=x_labels, y=df_plot["event_cars"].to_list(),
-    name="Passenger Transport (Kieler Woche)",
-    marker_color="#4C9BE8", offsetgroup=1,
-))
-fig.add_trace(go.Bar(
-    x=x_labels, y=df_plot["event_trucks"].to_list(),
-    name="Freight Transport (Kieler Woche)",
-    marker_color="#2b5c8f", offsetgroup=2,
-))
-fig.add_trace(go.Scatter(
-    x=x_labels, y=df_plot["base_cars"].to_list(),
-    name="Ø Passenger Transport (Surrounding Month)",
-    mode="lines+markers",
-    line=dict(color="#EA4633", width=3, dash="dot"),
-    marker=dict(size=8, symbol="diamond"),
-))
-fig.add_trace(go.Scatter(
-    x=x_labels, y=df_plot["base_trucks"].to_list(),
-    name="Ø Freight Transport (Surrounding Month)",
-    mode="lines+markers",
-    line=dict(color="#2BF15D", width=3, dash="dot"),
-    marker=dict(size=8, symbol="diamond"),
-))
+    fig.add_trace(go.Bar(
+        x=x_labels, y=df_plot["event_cars"].to_list(),
+        name="Passenger Transport (Kieler Woche)",
+        marker_color="#4C9BE8", offsetgroup=1,
+    ))
+    fig.add_trace(go.Bar(
+        x=x_labels, y=df_plot["event_trucks"].to_list(),
+        name="Freight Transport (Kieler Woche)",
+        marker_color="#2b5c8f", offsetgroup=2,
+    ))
+    fig.add_trace(go.Scatter(
+        x=x_labels, y=df_plot["base_cars"].to_list(),
+        name="Ø Passenger Transport (Surrounding Month)",
+        mode="lines+markers",
+        line=dict(color="#EA4633", width=3, dash="dot"),
+        marker=dict(size=8, symbol="diamond"),
+    ))
+    fig.add_trace(go.Scatter(
+        x=x_labels, y=df_plot["base_trucks"].to_list(),
+        name="Ø Freight Transport (Surrounding Month)",
+        mode="lines+markers",
+        line=dict(color="#2BF15D", width=3, dash="dot"),
+        marker=dict(size=8, symbol="diamond"),
+    ))
 
-fig.update_layout(
-    barmode="group",
-    xaxis_title="Weekday",
-    yaxis_title="Number of Vehicles (Daily Sum)",
-    hovermode="x unified",
-    height=600,
-    plot_bgcolor="white",
-    legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5),
-    margin=dict(t=100),
-)
-fig.update_xaxes(gridcolor="#eeeeee")
-fig.update_yaxes(gridcolor="#eeeeee", zerolinecolor="#cccccc")
+    fig.update_layout(
+        barmode="group",
+        xaxis_title="Weekday",
+        yaxis_title="Number of Vehicles (Daily Sum)",
+        hovermode="x unified",
+        height=600,
+        plot_bgcolor="white",
+        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5),
+        margin=dict(t=100),
+    )
+    fig.update_xaxes(gridcolor="#eeeeee")
+    fig.update_yaxes(gridcolor="#eeeeee", zerolinecolor="#cccccc")
 
-st.plotly_chart(apply_font(fig), width="stretch")
+    st.plotly_chart(apply_font(fig), width="stretch")
 
-total_event_cars   = df_event_daily["daily_cars"].mean()
-total_base_cars    = df_base_daily["daily_cars"].mean()
-diff_cars          = ((total_event_cars / total_base_cars) - 1) * 100 if total_base_cars else 0
-total_event_trucks = df_event_daily["daily_trucks"].mean()
-total_base_trucks  = df_base_daily["daily_trucks"].mean()
-diff_trucks        = ((total_event_trucks / total_base_trucks) - 1) * 100 if total_base_trucks else 0
+    total_event_cars   = df_event_daily["daily_cars"].mean()
+    total_base_cars    = df_base_daily["daily_cars"].mean()
+    diff_cars          = ((total_event_cars / total_base_cars) - 1) * 100 if total_base_cars else 0
+    total_event_trucks = df_event_daily["daily_trucks"].mean()
+    total_base_trucks  = df_base_daily["daily_trucks"].mean()
+    diff_trucks        = ((total_event_trucks / total_base_trucks) - 1) * 100 if total_base_trucks else 0
 
-col3.metric(
-    "Ø Passenger Transport per Day (Kieler Woche vs. Baseline)",
-    f"{total_event_cars:,.0f}", f"{diff_cars:+.1f}%",
-)
-col4.metric(
-    "Ø Freight Transport per Day (Kieler Woche vs. Baseline)",
-    f"{total_event_trucks:,.0f}", f"{diff_trucks:+.1f}%",
-)
+    col3.metric(
+        "Ø Passenger Transport per Day (Kieler Woche vs. Baseline)",
+        f"{total_event_cars:,.0f}", f"{diff_cars:+.1f}%",
+    )
+    col4.metric(
+        "Ø Freight Transport per Day (Kieler Woche vs. Baseline)",
+        f"{total_event_trucks:,.0f}", f"{diff_trucks:+.1f}%",
+    )
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

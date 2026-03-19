@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -6,7 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from utils.data_loader import load_traffic_base, load_registrations
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -26,7 +26,7 @@ st.markdown("""
     ## Long-Term Traffic Growth
 """)
 
-# ==============================
+# ====================================
 # Global variables
 
 ZST_VARS = {
@@ -35,7 +35,7 @@ ZST_VARS = {
     "Kiel-West":     "1194",
 }
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -56,7 +56,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualization
+# Helper aggregations
 
 def yearly_avg_traffic(df: pl.DataFrame) -> pl.DataFrame:
     daily = (
@@ -74,49 +74,58 @@ def yearly_avg_traffic(df: pl.DataFrame) -> pl.DataFrame:
         .sort("year")
     )
 
-target_ids  = list(ZST_VARS.values())
-df_filtered = df_raw.filter(pl.col("Zst").is_in(target_ids))
-df_traffic  = yearly_avg_traffic(df_filtered)
-df_plot     = df_traffic.join(df_registrations, on="year", how="left").sort("year")
+# ====================================
+# First visualization
 
-min_range = min(df_plot["registrations"].min(), df_plot["traf"].min())
-max_range = max(df_plot["registrations"].max(), df_plot["traf"].max())
+try:
+    target_ids  = list(ZST_VARS.values())
+    df_filtered = df_raw.filter(pl.col("Zst").is_in(target_ids))
+    df_traffic  = yearly_avg_traffic(df_filtered)
+    df_plot     = df_traffic.join(df_registrations, on="year", how="left").sort("year")
 
-fig = go.Figure()
+    min_range = min(df_plot["registrations"].min(), df_plot["traf"].min())
+    max_range = max(df_plot["registrations"].max(), df_plot["traf"].max())
 
-fig.add_trace(go.Bar(
-    x=df_plot["year"], y=df_plot["registrations"],
-    name="Registered Vehicles (Kiel)",
-    marker_color="steelblue", opacity=0.7, yaxis="y1",
-))
+    fig = go.Figure()
 
-fig.add_trace(go.Scatter(
-    x=df_plot["year"], y=df_plot["traf"],
-    name="Avg. Daily Traffic",
-    mode="lines+markers",
-    line=dict(color="tomato", width=3), marker=dict(size=8),
-    yaxis="y2",
-))
+    fig.add_trace(go.Bar(
+        x=df_plot["year"], y=df_plot["registrations"],
+        name="Registered Vehicles (Kiel)",
+        marker_color="steelblue", opacity=0.7, yaxis="y1",
+    ))
 
-fig.update_layout(
-    title="Registered Vehicles vs. Avg. Daily Traffic",
-    xaxis=dict(title="Year", tickmode="linear", dtick=1),
-    yaxis=dict(
-        title=dict(text="Registered Vehicles (SH)", font=dict(color="steelblue")),
-        tickfont=dict(color="steelblue"),
-        range=[min_range * 0.95, max_range * 1.05],
-    ),
-    yaxis2=dict(
-        title=dict(text="Avg. Vehicles / Day", font=dict(color="tomato")),
-        tickfont=dict(color="tomato"),
-        overlaying="y", side="right", showgrid=False,
-        range=[min_range * 0.95, max_range * 1.05],
-    ),
-    legend=dict(x=0.5, y=-0.2, xanchor="center", yanchor="top", orientation="h"),
-    height=550,
-)
+    fig.add_trace(go.Scatter(
+        x=df_plot["year"], y=df_plot["traf"],
+        name="Avg. Daily Traffic",
+        mode="lines+markers",
+        line=dict(color="tomato", width=3), marker=dict(size=8),
+        yaxis="y2",
+    ))
 
-st.plotly_chart(apply_font(fig), width="stretch")
+    fig.update_layout(
+        title="Registered Vehicles vs. Avg. Daily Traffic",
+        xaxis=dict(title="Year", tickmode="linear", dtick=1),
+        yaxis=dict(
+            title=dict(text="Registered Vehicles (SH)", font=dict(color="steelblue")),
+            tickfont=dict(color="steelblue"),
+            range=[min_range * 0.95, max_range * 1.05],
+        ),
+        yaxis2=dict(
+            title=dict(text="Avg. Vehicles / Day", font=dict(color="tomato")),
+            tickfont=dict(color="tomato"),
+            overlaying="y", side="right", showgrid=False,
+            range=[min_range * 0.95, max_range * 1.05],
+        ),
+        legend=dict(x=0.5, y=-0.2, xanchor="center", yanchor="top", orientation="h"),
+        height=550,
+    )
+
+    st.plotly_chart(apply_font(fig), width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text
@@ -147,7 +156,7 @@ st.markdown("""
     while not being registered for Kiel or vice versa.
 """)
 
-# ==============================
+# ====================================
 # Website design
 
 st.divider()

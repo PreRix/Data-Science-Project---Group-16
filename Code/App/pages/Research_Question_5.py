@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 import numpy as np
 from utils.data_loader import load_traffic_base, load_registrations_fuel
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -28,7 +28,7 @@ st.markdown("""
     ## Vehicle Registrations in Kiel - by Fuel Type 
 """, unsafe_allow_html=True)
 
-# ==============================
+# ====================================
 # Global variables
 
 FUEL_COLS = {
@@ -54,7 +54,7 @@ FUEL_COLORS = {
 BEV_COL = "PT_Nach Kraftstoffarten_Elektro (BEV)"
 HIDE_THRESHOLD = 10
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -104,72 +104,78 @@ except Exception as e:
 # ====================================
 # First visualization
 
-is_stacked = st.radio("Bar mode", ["Stacked", "Grouped"], horizontal=True) == "Stacked"
+try:
+    is_stacked = st.radio("Bar mode", ["Stacked", "Grouped"], horizontal=True) == "Stacked"
 
-years = df_registrations["Year"].to_list()
-totals_df = (
-    df_registrations
-    .with_columns(pl.sum_horizontal(list(FUEL_COLS.keys())).alias("total"))
-    .select(["Year", "total"]).to_dict(as_series=False)
-)
-totals = dict(zip(totals_df["Year"], totals_df["total"]))
+    years = df_registrations["Year"].to_list()
+    totals_df = (
+        df_registrations
+        .with_columns(pl.sum_horizontal(list(FUEL_COLS.keys())).alias("total"))
+        .select(["Year", "total"]).to_dict(as_series=False)
+    )
+    totals = dict(zip(totals_df["Year"], totals_df["total"]))
 
-fig = go.Figure()
-for col, label in FUEL_COLS.items():
-    if col not in df_registrations.columns:
-        continue
-    values = df_registrations[col].to_list()
-    pcts   = [
-        round(v / totals[y] * 100, 1) if v is not None and totals.get(y) else None
-        for v, y in zip(values, years)
-    ]
-    if is_stacked:
-        text_vals   = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
-        text_pos    = "inside"
-        text_colors = ["white"] * len(years)
-    else:
-        text_vals   = [f"{p:.1f}%" if p is not None else "" for p in pcts]
-        text_pos    = ["inside"  if p is not None and p >= HIDE_THRESHOLD else "outside" for p in pcts]
-        text_colors = ["white"   if p is not None and p >= HIDE_THRESHOLD else "#333333" for p in pcts]
-
-    fig.add_trace(go.Bar(
-        name=label, legendgroup=label, showlegend=not is_stacked,
-        x=years, y=values, customdata=pcts,
-        marker_color=FUEL_COLORS[label],
-        text=text_vals, textposition=text_pos,
-        insidetextanchor="middle", textfont=dict(size=15, color=text_colors),
-        hovertemplate=f"<b>{label}</b><br>Year: %{{x}}<br>Count: %{{y:,}}<br>Share: %{{customdata:.1f}}%<extra></extra>",
-        cliponaxis=False,
-    ))
-
-if is_stacked:
+    fig = go.Figure()
     for col, label in FUEL_COLS.items():
-        fig.add_trace(go.Scatter(
-            x=[None], y=[None], mode="markers",
-            marker=dict(size=10, color=FUEL_COLORS[label], symbol="square"),
-            name=label, legendgroup=label,
+        if col not in df_registrations.columns:
+            continue
+        values = df_registrations[col].to_list()
+        pcts   = [
+            round(v / totals[y] * 100, 1) if v is not None and totals.get(y) else None
+            for v, y in zip(values, years)
+        ]
+        if is_stacked:
+            text_vals   = [f"{p:.1f}%" if p is not None and p >= HIDE_THRESHOLD else "" for p in pcts]
+            text_pos    = "inside"
+            text_colors = ["white"] * len(years)
+        else:
+            text_vals   = [f"{p:.1f}%" if p is not None else "" for p in pcts]
+            text_pos    = ["inside"  if p is not None and p >= HIDE_THRESHOLD else "outside" for p in pcts]
+            text_colors = ["white"   if p is not None and p >= HIDE_THRESHOLD else "#333333" for p in pcts]
+
+        fig.add_trace(go.Bar(
+            name=label, legendgroup=label, showlegend=not is_stacked,
+            x=years, y=values, customdata=pcts,
+            marker_color=FUEL_COLORS[label],
+            text=text_vals, textposition=text_pos,
+            insidetextanchor="middle", textfont=dict(size=15, color=text_colors),
+            hovertemplate=f"<b>{label}</b><br>Year: %{{x}}<br>Count: %{{y:,}}<br>Share: %{{customdata:.1f}}%<extra></extra>",
+            cliponaxis=False,
         ))
-    fig.update_layout(annotations=[
-        dict(x=yr, y=total, text=f"<b>{total:,}</b>", showarrow=False,
-             yanchor="bottom", yshift=2, font=dict(size=12, color="#333333"))
-        for yr, total in totals.items()
-    ])
 
-fig.update_layout(
-    barmode="stack" if is_stacked else "group",
-    xaxis=dict(title="Year", tickmode="array", tickvals=years, ticktext=[str(y) for y in years]),
-    yaxis=dict(title="Registration Count"),
-    legend=dict(orientation="h", y=1.12, x=0, traceorder="normal"),
-    plot_bgcolor="white", height=560, hovermode="closest", margin=dict(t=140, b=60),
-)
+    if is_stacked:
+        for col, label in FUEL_COLS.items():
+            fig.add_trace(go.Scatter(
+                x=[None], y=[None], mode="markers",
+                marker=dict(size=10, color=FUEL_COLORS[label], symbol="square"),
+                name=label, legendgroup=label,
+            ))
+        fig.update_layout(annotations=[
+            dict(x=yr, y=total, text=f"<b>{total:,}</b>", showarrow=False,
+                yanchor="bottom", yshift=2, font=dict(size=12, color="#333333"))
+            for yr, total in totals.items()
+        ])
 
-st.plotly_chart(apply_font(fig), width="stretch")
-with st.expander("Raw data table"):
-    table = df_registrations.select(
-        ["Year"] + [c for c in FUEL_COLS if c in df_registrations.columns]
-    ).rename({c: l for c, l in FUEL_COLS.items() if c in df_registrations.columns})
-    table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
-    st.dataframe(table, width="stretch")
+    fig.update_layout(
+        barmode="stack" if is_stacked else "group",
+        xaxis=dict(title="Year", tickmode="array", tickvals=years, ticktext=[str(y) for y in years]),
+        yaxis=dict(title="Registration Count"),
+        legend=dict(orientation="h", y=1.12, x=0, traceorder="normal"),
+        plot_bgcolor="white", height=560, hovermode="closest", margin=dict(t=140, b=60),
+    )
+
+    st.plotly_chart(apply_font(fig), width="stretch")
+    with st.expander("Raw data table"):
+        table = df_registrations.select(
+            ["Year"] + [c for c in FUEL_COLS if c in df_registrations.columns]
+        ).rename({c: l for c, l in FUEL_COLS.items() if c in df_registrations.columns})
+        table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
+        st.dataframe(table, width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text
@@ -191,93 +197,99 @@ st.markdown("""
 # ====================================
 # Second visualization
 
-bev_share = {
-    row["Year"]: round(row[BEV_COL] / totals[row["Year"]] * 100, 2)
-    for row in df_registrations.select(["Year", BEV_COL]).to_dicts()
-    if totals.get(row["Year"]) and row[BEV_COL] is not None
-}
+try:
+    bev_share = {
+        row["Year"]: round(row[BEV_COL] / totals[row["Year"]] * 100, 2)
+        for row in df_registrations.select(["Year", BEV_COL]).to_dicts()
+        if totals.get(row["Year"]) and row[BEV_COL] is not None
+    }
 
-common_years = sorted(set(bev_share) & set(df_traffic) & set(df_no2_monthly["year"].to_list()))
+    common_years = sorted(set(bev_share) & set(df_traffic) & set(df_no2_monthly["year"].to_list()))
 
-if not common_years:
-    st.warning("No overlapping years found across the three data sources.")
-    st.stop()
+    if not common_years:
+        st.warning("No overlapping years found across the three data sources.")
+        st.stop()
 
-veh_df  = pl.DataFrame({"year": list(df_traffic.keys()), "avg_vehicles": list(df_traffic.values())})
-monthly = (
-    df_no2_monthly
-    .filter(pl.col("year").is_in(common_years))
-    .join(veh_df, on="year", how="left")
-    .with_columns((pl.col("avg_no2") / pl.col("avg_vehicles")).alias("no2_per_veh"))
-    .sort(["year", "month"])
-)
-
-x      = monthly["date_str"].to_list()
-y_raw  = monthly["no2_per_veh"].to_list()
-y_roll = monthly.with_columns(
-    pl.col("no2_per_veh").rolling_mean(window_size=3).alias("r")
-)["r"].to_list()
-
-valid_idx, valid_vals = zip(*[(i, v) for i, v in enumerate(y_raw) if v is not None])
-y_trend = np.poly1d(np.polyfit(valid_idx, valid_vals, 1))(range(len(y_raw))).tolist()
-
-fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-fig.add_trace(go.Scatter(
-    x=x, y=y_raw, name="NO2 per Vehicle (monthly)", mode="lines",
-    line=dict(color="#D44B94", width=1), opacity=1,
-    hovertemplate="Month: %{x|%b %Y}<br>NO2/vehicle: %{y:.5f}<extra></extra>",
-), secondary_y=True)
-
-fig.add_trace(go.Scatter(
-    x=x, y=y_roll, name="NO2 per Vehicle (3-month avg)", mode="lines",
-    line=dict(color="#EA4633", width=2.5),
-    hovertemplate="Month: %{x|%b %Y}<br>3-month avg: %{y:.5f}<extra></extra>",
-), secondary_y=True)
-
-fig.add_trace(go.Scatter(
-    x=x, y=y_trend, name="NO2 Trend (linear)", mode="lines",
-    line=dict(color="#555555", width=1.5, dash="dash"), hoverinfo="skip",
-), secondary_y=True)
-
-fig.add_trace(go.Scatter(
-    x=[f"{yr}-01-01" for yr in common_years],
-    y=[bev_share[yr] for yr in common_years],
-    name="BEV Share (% of fleet)", mode="markers",
-    marker=dict(size=12, color="#00C2B2", symbol="diamond"),
-    hovertemplate="Year: %{x|%Y}<br>BEV Share: %{y:.2f}%<extra></extra>",
-), secondary_y=False)
-
-fig.update_layout(
-    legend=dict(orientation="h", y=1.15, x=0),
-    xaxis=dict(title="", type="date", tickformat="%Y", dtick="M12"),
-    plot_bgcolor="white", height=520, hovermode="x unified", margin=dict(t=140, b=60),
-)
-fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
-fig.update_yaxes(title_text="NO2 per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
-
-st.plotly_chart(apply_font(fig), width="stretch")
-st.caption(
-    "⚠️ **Data limitation:** NO₂ values are sourced from Open-Meteo, which provides "
-    "a model-based atmospheric estimate for the Kiel area rather than a measurement "
-    "from a specific road-side sensor. As a result, the NO₂ signal may not fully reflect "
-    "conditions at individual traffic counting station locations and should be interpreted "
-    "as a regional proxy only."
-)
-
-with st.expander("Underlying data"):
-    st.dataframe(
-        monthly
-        .select(["year", "month", "avg_no2", "avg_vehicles", "no2_per_veh"])
-        .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
-                 "avg_vehicles": "Avg Vehicles (veh/h)", "no2_per_veh": "NO₂ per Vehicle"})
-        .with_columns([
-            pl.col("Avg NO₂ (µg/m³)").round(2),
-            pl.col("Avg Vehicles (veh/h)").round(1),
-            pl.col("NO₂ per Vehicle").round(5),
-        ]),
-        width="stretch",
+    veh_df  = pl.DataFrame({"year": list(df_traffic.keys()), "avg_vehicles": list(df_traffic.values())})
+    monthly = (
+        df_no2_monthly
+        .filter(pl.col("year").is_in(common_years))
+        .join(veh_df, on="year", how="left")
+        .with_columns((pl.col("avg_no2") / pl.col("avg_vehicles")).alias("no2_per_veh"))
+        .sort(["year", "month"])
     )
+
+    x      = monthly["date_str"].to_list()
+    y_raw  = monthly["no2_per_veh"].to_list()
+    y_roll = monthly.with_columns(
+        pl.col("no2_per_veh").rolling_mean(window_size=3).alias("r")
+    )["r"].to_list()
+
+    valid_idx, valid_vals = zip(*[(i, v) for i, v in enumerate(y_raw) if v is not None])
+    y_trend = np.poly1d(np.polyfit(valid_idx, valid_vals, 1))(range(len(y_raw))).tolist()
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(go.Scatter(
+        x=x, y=y_raw, name="NO2 per Vehicle (monthly)", mode="lines",
+        line=dict(color="#D44B94", width=1), opacity=1,
+        hovertemplate="Month: %{x|%b %Y}<br>NO2/vehicle: %{y:.5f}<extra></extra>",
+    ), secondary_y=True)
+
+    fig.add_trace(go.Scatter(
+        x=x, y=y_roll, name="NO2 per Vehicle (3-month avg)", mode="lines",
+        line=dict(color="#EA4633", width=2.5),
+        hovertemplate="Month: %{x|%b %Y}<br>3-month avg: %{y:.5f}<extra></extra>",
+    ), secondary_y=True)
+
+    fig.add_trace(go.Scatter(
+        x=x, y=y_trend, name="NO2 Trend (linear)", mode="lines",
+        line=dict(color="#555555", width=1.5, dash="dash"), hoverinfo="skip",
+    ), secondary_y=True)
+
+    fig.add_trace(go.Scatter(
+        x=[f"{yr}-01-01" for yr in common_years],
+        y=[bev_share[yr] for yr in common_years],
+        name="BEV Share (% of fleet)", mode="markers",
+        marker=dict(size=12, color="#00C2B2", symbol="diamond"),
+        hovertemplate="Year: %{x|%Y}<br>BEV Share: %{y:.2f}%<extra></extra>",
+    ), secondary_y=False)
+
+    fig.update_layout(
+        legend=dict(orientation="h", y=1.15, x=0),
+        xaxis=dict(title="", type="date", tickformat="%Y", dtick="M12"),
+        plot_bgcolor="white", height=520, hovermode="x unified", margin=dict(t=140, b=60),
+    )
+    fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
+    fig.update_yaxes(title_text="NO2 per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
+
+    st.plotly_chart(apply_font(fig), width="stretch")
+    st.caption(
+        "⚠️ **Data limitation:** NO₂ values are sourced from Open-Meteo, which provides "
+        "a model-based atmospheric estimate for the Kiel area rather than a measurement "
+        "from a specific road-side sensor. As a result, the NO₂ signal may not fully reflect "
+        "conditions at individual traffic counting station locations and should be interpreted "
+        "as a regional proxy only."
+    )
+
+    with st.expander("Underlying data"):
+        st.dataframe(
+            monthly
+            .select(["year", "month", "avg_no2", "avg_vehicles", "no2_per_veh"])
+            .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
+                    "avg_vehicles": "Avg Vehicles (veh/h)", "no2_per_veh": "NO₂ per Vehicle"})
+            .with_columns([
+                pl.col("Avg NO₂ (µg/m³)").round(2),
+                pl.col("Avg Vehicles (veh/h)").round(1),
+                pl.col("NO₂ per Vehicle").round(5),
+            ]),
+            width="stretch",
+        )
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

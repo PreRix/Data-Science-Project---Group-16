@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -6,7 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from utils.data_loader import load_traffic_base
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -26,13 +26,13 @@ st.markdown("""
     ## Average Rush-Hour Traffic on the A215 (AK Kiel-West) on Weekdays only
 """)
 
-# ==============================
+# ====================================
 # Global variables
 
 DETAIL_YEAR  = 2023
 DETAIL_MONTH = 2
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -65,7 +65,7 @@ except Exception as e:
     st.error(f"Could not load traffic data: {e}")
     st.stop()
 
-# ==============================
+# ====================================
 # Helper aggregations
 
 def monthly_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
@@ -90,20 +90,26 @@ def daily_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
 # ====================================
 # First visualization — monthly overview 2021–2025
 
-morning_all = df_traffic.filter(pl.col("hour").is_between(6, 8))
-evening_all = df_traffic.filter(pl.col("hour").is_between(15, 17))
+try:
+    morning_all = df_traffic.filter(pl.col("hour").is_between(6, 8))
+    evening_all = df_traffic.filter(pl.col("hour").is_between(15, 17))
 
-morning = monthly_avg(morning_all, "KFZ_R1")
-evening = monthly_avg(evening_all, "KFZ_R2")
+    morning = monthly_avg(morning_all, "KFZ_R1")
+    evening = monthly_avg(evening_all, "KFZ_R2")
 
-st.plotly_chart(
-    make_rush_figure(
-        morning["year_month"], morning["avg"], evening["avg"],
-        title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
-        x_title="Month",
-    ),
-    width="stretch",
-)
+    st.plotly_chart(
+        make_rush_figure(
+            morning["year_month"], morning["avg"], evening["avg"],
+            title="Monthly Avg. Rush-Hour Traffic on A215 – AK Kiel-West (2021–2025)",
+            x_title="Month",
+        ),
+        width="stretch",
+    )
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text
@@ -143,21 +149,27 @@ st.markdown(f"""
 # ====================================
 # Second visualization — daily detail for DETAIL_YEAR / DETAIL_MONTH
 
-df_month = df_traffic.filter(
-    (pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH)
-)
+try:
+    df_month = df_traffic.filter(
+        (pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH)
+    )
 
-morning = daily_avg(df_month.filter(pl.col("hour").is_between(6, 8)),   "KFZ_R1")
-evening = daily_avg(df_month.filter(pl.col("hour").is_between(15, 17)), "KFZ_R2")
+    morning = daily_avg(df_month.filter(pl.col("hour").is_between(6, 8)),   "KFZ_R1")
+    evening = daily_avg(df_month.filter(pl.col("hour").is_between(15, 17)), "KFZ_R2")
 
-st.plotly_chart(
-    make_rush_figure(
-        morning["day"], morning["avg"], evening["avg"],
-        title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
-        x_title="Day of Month",
-    ),
-    width="stretch",
-)
+    st.plotly_chart(
+        make_rush_figure(
+            morning["day"], morning["avg"], evening["avg"],
+            title=f"Daily Rush-Hour Traffic – {DETAIL_YEAR}-{str(DETAIL_MONTH).zfill(2)}",
+            x_title="Day of Month",
+        ),
+        width="stretch",
+    )
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -6,7 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from utils.data_loader import load_traffic_base, load_weather
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -22,7 +22,7 @@ st.markdown("""
     ## Relative Traffic around Extreme Weather Events 
 """)
 
-# ==============================
+# ====================================
 # Global variables
 
 RAIN_THRESHOLD = 10.0
@@ -30,7 +30,7 @@ SNOW_THRESHOLD = 1.0
 WINDOW_BEFORE  = 2
 WINDOW_AFTER   = 4
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -60,83 +60,89 @@ df = df_traffic.join(df_weather, on="datetime", how="left")
 # ====================================
 # First visualization
 
-# Per-hour median vehicle count as the baseline
-hourly_baseline = (
-    df
-    .with_columns(pl.col("datetime").dt.hour().alias("hour"))
-    .group_by("hour")
-    .agg(pl.col("vehicle_count").median().alias("baseline"))
-)
-
-offsets = list(range(-WINDOW_BEFORE, WINDOW_AFTER + 1))
-
-df_events = (
-    df
-    .filter(
-        (pl.col("precipitation") > RAIN_THRESHOLD) |
-        (pl.col("snowfall") > SNOW_THRESHOLD)
-    )
-    .select("datetime")
-    .with_columns(pl.lit(offsets).alias("offset"))
-    .explode("offset")
-    .with_columns(
-        (pl.col("datetime") + pl.duration(hours=pl.col("offset"))).alias("target_datetime")
-    )
-    .join(
-        df.select(["datetime", "vehicle_count"]),
-        left_on="target_datetime", right_on="datetime", how="left",
-    )
-    .with_columns(pl.col("target_datetime").dt.hour().alias("hour"))
-    .join(hourly_baseline, on="hour", how="left")
-    .filter(pl.col("vehicle_count").is_not_null() & pl.col("baseline").is_not_null())
-    .with_columns(
-        (pl.col("vehicle_count") / pl.col("baseline") * 100).alias("relative_count")
-    )
-    .select(["offset", "relative_count"])
-)
-
-if df_events.is_empty():
-    st.warning("No data found in the event window.")
-else:
-    median_line = (
-        df_events.group_by("offset")
-        .agg(pl.col("relative_count").median())
-        .sort("offset")
+try:
+    # Per-hour median vehicle count as the baseline
+    hourly_baseline = (
+        df
+        .with_columns(pl.col("datetime").dt.hour().alias("hour"))
+        .group_by("hour")
+        .agg(pl.col("vehicle_count").median().alias("baseline"))
     )
 
-    fig = go.Figure()
+    offsets = list(range(-WINDOW_BEFORE, WINDOW_AFTER + 1))
 
-    fig.add_trace(go.Scatter(
-        x=df_events["offset"].to_list(),
-        y=df_events["relative_count"].to_list(),
-        mode="markers",
-        marker=dict(color="steelblue", size=4, opacity=0.25),
-        name="Individual Events",
-    ))
-    fig.add_trace(go.Scatter(
-        x=median_line["offset"].to_list(),
-        y=median_line["relative_count"].to_list(),
-        mode="lines+markers",
-        line=dict(color="tomato", width=3),
-        marker=dict(size=7),
-        name="Median",
-    ))
-
-    fig.add_vline(x=0, line_dash="dash",  line_color="white", opacity=0.5)
-    fig.add_hline(y=100, line_dash="dot", line_color="gray",  opacity=0.5)
-
-    fig.update_layout(
-        title=(
-            f"Relative Traffic around Extreme Weather Events "
-            f"(Zst. 1194, Rain >{RAIN_THRESHOLD}mm/h or Snow >{SNOW_THRESHOLD}cm/h)"
-        ),
-        xaxis=dict(title="Hours relative to Event Start", tickmode="linear", dtick=1),
-        yaxis=dict(title="Relative Vehicle Count (% of Hourly Median)"),
-        legend=dict(x=0.01, y=0.99),
-        height=550,
+    df_events = (
+        df
+        .filter(
+            (pl.col("precipitation") > RAIN_THRESHOLD) |
+            (pl.col("snowfall") > SNOW_THRESHOLD)
+        )
+        .select("datetime")
+        .with_columns(pl.lit(offsets).alias("offset"))
+        .explode("offset")
+        .with_columns(
+            (pl.col("datetime") + pl.duration(hours=pl.col("offset"))).alias("target_datetime")
+        )
+        .join(
+            df.select(["datetime", "vehicle_count"]),
+            left_on="target_datetime", right_on="datetime", how="left",
+        )
+        .with_columns(pl.col("target_datetime").dt.hour().alias("hour"))
+        .join(hourly_baseline, on="hour", how="left")
+        .filter(pl.col("vehicle_count").is_not_null() & pl.col("baseline").is_not_null())
+        .with_columns(
+            (pl.col("vehicle_count") / pl.col("baseline") * 100).alias("relative_count")
+        )
+        .select(["offset", "relative_count"])
     )
 
-    st.plotly_chart(apply_font(fig), width="stretch")
+    if df_events.is_empty():
+        st.warning("No data found in the event window.")
+    else:
+        median_line = (
+            df_events.group_by("offset")
+            .agg(pl.col("relative_count").median())
+            .sort("offset")
+        )
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=df_events["offset"].to_list(),
+            y=df_events["relative_count"].to_list(),
+            mode="markers",
+            marker=dict(color="steelblue", size=4, opacity=0.25),
+            name="Individual Events",
+        ))
+        fig.add_trace(go.Scatter(
+            x=median_line["offset"].to_list(),
+            y=median_line["relative_count"].to_list(),
+            mode="lines+markers",
+            line=dict(color="tomato", width=3),
+            marker=dict(size=7),
+            name="Median",
+        ))
+
+        fig.add_vline(x=0, line_dash="dash",  line_color="white", opacity=0.5)
+        fig.add_hline(y=100, line_dash="dot", line_color="gray",  opacity=0.5)
+
+        fig.update_layout(
+            title=(
+                f"Relative Traffic around Extreme Weather Events "
+                f"(Zst. 1194, Rain >{RAIN_THRESHOLD}mm/h or Snow >{SNOW_THRESHOLD}cm/h)"
+            ),
+            xaxis=dict(title="Hours relative to Event Start", tickmode="linear", dtick=1),
+            yaxis=dict(title="Relative Vehicle Count (% of Hourly Median)"),
+            legend=dict(x=0.01, y=0.99),
+            height=550,
+        )
+
+        st.plotly_chart(apply_font(fig), width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

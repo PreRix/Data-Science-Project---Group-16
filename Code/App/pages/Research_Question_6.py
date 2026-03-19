@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from utils.data_loader import load_traffic_base
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -28,7 +28,7 @@ st.markdown("""
     ## Incoming vs. Outgoing Traffic
 """)
 
-# ==============================
+# ====================================
 # Global variables
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -38,7 +38,7 @@ ZST_VARS = {
     "AS Wankendorf": "1156",
 }
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -75,77 +75,83 @@ except Exception as e:
 # ====================================
 # First visualization
 
-col1, col2, col3 = st.columns(3)
-zst_label = col1.selectbox("Select Counting Station", list(ZST_VARS.keys()))
-zst_id    = ZST_VARS[zst_label]
+try:
+    col1, col2, col3 = st.columns(3)
+    zst_label = col1.selectbox("Select Counting Station", list(ZST_VARS.keys()))
+    zst_id    = ZST_VARS[zst_label]
 
-available_years  = sorted(df_traffic["datetime"].dt.year().unique().to_list(), reverse=True)
-selected_year    = col2.selectbox("Year", ["All Years"] + available_years)
+    available_years  = sorted(df_traffic["datetime"].dt.year().unique().to_list(), reverse=True)
+    selected_year    = col2.selectbox("Year", ["All Years"] + available_years)
 
-if selected_year == "All Years":
-    df_filtered_time = df_traffic
-    month_options    = ["Full Year"]
-else:
-    df_filtered_time = df_traffic.filter(pl.col("datetime").dt.year() == selected_year)
-    month_options    = ["Full Year"] + [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+    if selected_year == "All Years":
+        df_filtered_time = df_traffic
+        month_options    = ["Full Year"]
+    else:
+        df_filtered_time = df_traffic.filter(pl.col("datetime").dt.year() == selected_year)
+        month_options    = ["Full Year"] + [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December",
+        ]
+
+    selected_month = col3.selectbox("Month", month_options)
+
+    if selected_month != "Full Year":
+        month_idx        = month_options.index(selected_month)
+        df_filtered_time = df_filtered_time.filter(pl.col("datetime").dt.month() == month_idx)
+
+    df_filtered = df_filtered_time.filter(pl.col("Zst") == zst_id)
+
+    def get_ratio_matrix(df_subset: pl.DataFrame) -> np.ndarray:
+        grouped = (
+            df_subset.group_by(["weekday", "hour"])
+            .agg(pl.col("Inbound_Ratio").mean().alias("avg_ratio"))
+        )
+        matrix = np.full((24, 7), np.nan)
+        for row in grouped.iter_rows(named=True):
+            d = row["weekday"] - 1
+            h = row["hour"]
+            matrix[h, d] = row["avg_ratio"]
+        return matrix
+
+    ratio_matrix = get_ratio_matrix(df_filtered)
+
+    fig_hm = make_subplots(
+        rows=1, cols=1,
+        subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. Blue: higher volume entering Kiel. Red: higher volume leaving Kiel"],
+    )
+
+    custom_rdbu = [
+        [0.0, "rgb(178, 24, 43)"],
+        [0.4, "rgb(244, 165, 130)"],
+        [0.5, "rgb(255, 255, 255)"],
+        [0.6, "rgb(146, 197, 222)"],
+        [1.0, "rgb(33, 102, 172)"],
     ]
 
-selected_month = col3.selectbox("Month", month_options)
+    fig_hm.add_trace(go.Heatmap(
+        z=ratio_matrix, x=WEEKDAYS, y=list(range(24)),
+        colorscale=custom_rdbu, zmin=0.2, zmax=0.8,
+        hovertemplate="<b>%{x} at %{y}:00</b><br>Inbound Ratio: %{z:.2%}<extra></extra>",
+        colorbar=dict(title="Ratio Inbound", tickformat=".0%"),
+    ))
 
-if selected_month != "Full Year":
-    month_idx        = month_options.index(selected_month)
-    df_filtered_time = df_filtered_time.filter(pl.col("datetime").dt.month() == month_idx)
-
-df_filtered = df_filtered_time.filter(pl.col("Zst") == zst_id)
-
-def get_ratio_matrix(df_subset: pl.DataFrame) -> np.ndarray:
-    grouped = (
-        df_subset.group_by(["weekday", "hour"])
-        .agg(pl.col("Inbound_Ratio").mean().alias("avg_ratio"))
+    fig_hm.update_layout(
+        height=600,
+        xaxis_title="Day of Week",
+        yaxis_title="Hour of Day",
+        yaxis=dict(tickmode="linear", dtick=1),
     )
-    matrix = np.full((24, 7), np.nan)
-    for row in grouped.iter_rows(named=True):
-        d = row["weekday"] - 1
-        h = row["hour"]
-        matrix[h, d] = row["avg_ratio"]
-    return matrix
 
-ratio_matrix = get_ratio_matrix(df_filtered)
+    st.plotly_chart(apply_font(fig_hm), width="stretch")
 
-fig_hm = make_subplots(
-    rows=1, cols=1,
-    subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. Blue: higher volume entering Kiel. Red: higher volume leaving Kiel"],
-)
+    avg_in  = df_filtered["R1_Inbound"].mean()
+    avg_out = df_filtered["R2_Outbound"].mean()
+    st.markdown(f"**Quick Stats for {zst_label}:** Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}")
 
-custom_rdbu = [
-    [0.0, "rgb(178, 24, 43)"],
-    [0.4, "rgb(244, 165, 130)"],
-    [0.5, "rgb(255, 255, 255)"],
-    [0.6, "rgb(146, 197, 222)"],
-    [1.0, "rgb(33, 102, 172)"],
-]
-
-fig_hm.add_trace(go.Heatmap(
-    z=ratio_matrix, x=WEEKDAYS, y=list(range(24)),
-    colorscale=custom_rdbu, zmin=0.2, zmax=0.8,
-    hovertemplate="<b>%{x} at %{y}:00</b><br>Inbound Ratio: %{z:.2%}<extra></extra>",
-    colorbar=dict(title="Ratio Inbound", tickformat=".0%"),
-))
-
-fig_hm.update_layout(
-    height=600,
-    xaxis_title="Day of Week",
-    yaxis_title="Hour of Day",
-    yaxis=dict(tickmode="linear", dtick=1),
-)
-
-st.plotly_chart(apply_font(fig_hm), width="stretch")
-
-avg_in  = df_filtered["R1_Inbound"].mean()
-avg_out = df_filtered["R2_Outbound"].mean()
-st.markdown(f"**Quick Stats for {zst_label}:** Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}")
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from utils.data_loader import load_traffic_base
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -24,7 +24,7 @@ st.markdown("""
     ## Traffic Volume: Dry vs. Wet
     """)
 
-# ==============================
+# ====================================
 # Global variables
 
 COL_PRECIP = "precipitation" 
@@ -62,107 +62,113 @@ except Exception as e:
 # ====================================
 # First visualization
 
-col1, col2, col3 = st.columns(3)
-zst_label = col1.selectbox("Counting station", list(ZST_VARS))
-zst_col   = ZST_VARS[zst_label]
+try:
+    col1, col2, col3 = st.columns(3)
+    zst_label = col1.selectbox("Counting station", list(ZST_VARS))
+    zst_col   = ZST_VARS[zst_label]
 
-rain_threshold = col3.slider(
-    "Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=2.0, value=1.0, step=0.1
-)
-
-cond_dry = pl.col(COL_PRECIP) == 0
-cond_wet = pl.col(COL_PRECIP) > rain_threshold
-
-df_selected = df_traffic.filter(pl.col("Zst") == zst_col)
-st.markdown("Average *Vehicle Count* per hour and weekday.")
-
-def get_heatmap_matrices(df_subset: pl.DataFrame):
-    if df_subset.height == 0:
-        return np.full((24, 7), np.nan), np.full((24, 7), np.nan)
-    grouped = (
-        df_subset.group_by(["weekday", "hour"])
-        .agg(
-            pl.col("KFZ_total").mean().alias("mean_kfz"),
-            pl.len().alias("count"),
-        )
+    rain_threshold = col3.slider(
+        "Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=2.0, value=1.0, step=0.1
     )
-    matrix_mean  = np.full((24, 7), np.nan)
-    matrix_count = np.full((24, 7), np.nan)
-    for row in grouped.iter_rows(named=True):
-        w = row["weekday"] - 1
-        h = row["hour"]
-        matrix_mean[h, w]  = row["mean_kfz"]
-        matrix_count[h, w] = row["count"]
-    return matrix_mean, matrix_count
 
-matrix_dry_mean,  matrix_dry_count  = get_heatmap_matrices(df_selected.filter(cond_dry))
-matrix_wet_mean,  matrix_wet_count  = get_heatmap_matrices(df_selected.filter(cond_wet))
+    cond_dry = pl.col(COL_PRECIP) == 0
+    cond_wet = pl.col(COL_PRECIP) > rain_threshold
 
-with np.errstate(divide="ignore", invalid="ignore"):
-    matrix_change_rel = ((matrix_wet_mean / matrix_dry_mean) - 1) * 100
-    matrix_change_abs = matrix_wet_mean - matrix_dry_mean
+    df_selected = df_traffic.filter(pl.col("Zst") == zst_col)
+    st.markdown("Average *Vehicle Count* per hour and weekday.")
 
-global_min = np.nanmin([np.nanmin(matrix_dry_mean), np.nanmin(matrix_wet_mean)])
-global_max = np.nanmax([np.nanmax(matrix_dry_mean), np.nanmax(matrix_wet_mean)])
+    def get_heatmap_matrices(df_subset: pl.DataFrame):
+        if df_subset.height == 0:
+            return np.full((24, 7), np.nan), np.full((24, 7), np.nan)
+        grouped = (
+            df_subset.group_by(["weekday", "hour"])
+            .agg(
+                pl.col("KFZ_total").mean().alias("mean_kfz"),
+                pl.len().alias("count"),
+            )
+        )
+        matrix_mean  = np.full((24, 7), np.nan)
+        matrix_count = np.full((24, 7), np.nan)
+        for row in grouped.iter_rows(named=True):
+            w = row["weekday"] - 1
+            h = row["hour"]
+            matrix_mean[h, w]  = row["mean_kfz"]
+            matrix_count[h, w] = row["count"]
+        return matrix_mean, matrix_count
 
-fig_hm = make_subplots(
-    rows=1, cols=3,
-    subplot_titles=(
-        "Average traffic on a Dry Day (== 0 mm/h)",
-        "Average traffic on a Wet Day",
-        "Change between Dry and Wet day",
-    ),
-    horizontal_spacing=0.08,
-)
+    matrix_dry_mean,  matrix_dry_count  = get_heatmap_matrices(df_selected.filter(cond_dry))
+    matrix_wet_mean,  matrix_wet_count  = get_heatmap_matrices(df_selected.filter(cond_wet))
 
-hover_template = "<b>%{x}, %{y}:00</b><br>Ø Vehicles: %{z:.0f}<br>Occurrences (Days): %{customdata}<extra></extra>"
+    with np.errstate(divide="ignore", invalid="ignore"):
+        matrix_change_rel = ((matrix_wet_mean / matrix_dry_mean) - 1) * 100
+        matrix_change_abs = matrix_wet_mean - matrix_dry_mean
 
-custom_scale = [
-    [0.0,  "rgb(179, 0, 0)"],
-    [0.3,  "rgb(253, 141, 60)"],
-    [0.48, "rgb(255, 245, 235)"],
-    [0.5,  "rgb(255, 255, 255)"],
-    [0.52, "rgb(247, 247, 247)"],
-    [0.7,  "rgb(146, 197, 222)"],
-    [1.0,  "rgb(5, 48, 97)"],
-]
+    global_min = np.nanmin([np.nanmin(matrix_dry_mean), np.nanmin(matrix_wet_mean)])
+    global_max = np.nanmax([np.nanmax(matrix_dry_mean), np.nanmax(matrix_wet_mean)])
 
-fig_hm.add_trace(go.Heatmap(
-    z=matrix_dry_mean, x=WEEKDAYS, y=list(range(24)),
-    customdata=matrix_dry_count, hovertemplate=hover_template,
-    colorscale="Viridis", zmin=global_min, zmax=global_max,
-    coloraxis="coloraxis",
-    colorbar=dict(title="Vehicles", x=0.23, thickness=15, len=0.8),
-), row=1, col=1)
+    fig_hm = make_subplots(
+        rows=1, cols=3,
+        subplot_titles=(
+            "Average traffic on a Dry Day (== 0 mm/h)",
+            "Average traffic on a Wet Day",
+            "Change between Dry and Wet day",
+        ),
+        horizontal_spacing=0.08,
+    )
 
-fig_hm.add_trace(go.Heatmap(
-    z=matrix_wet_mean, x=WEEKDAYS, y=list(range(24)),
-    customdata=matrix_wet_count, hovertemplate=hover_template,
-    colorscale="Viridis", zmin=global_min, zmax=global_max,
-    coloraxis="coloraxis",
-), row=1, col=2)
+    hover_template = "<b>%{x}, %{y}:00</b><br>Ø Vehicles: %{z:.0f}<br>Occurrences (Days): %{customdata}<extra></extra>"
 
-fig_hm.add_trace(go.Heatmap(
-    z=matrix_change_rel, x=WEEKDAYS, y=list(range(24)),
-    customdata=matrix_change_abs,
-    hovertemplate="<b>%{x}, %{y}:00</b><br>Change: %{z:.1f}%<br>Abs. Value: %{customdata:.0f}<extra></extra>",
-    colorscale=custom_scale, zmid=0, zmin=-50, zmax=50,
-    colorbar=dict(title="Change %", x=1.0),
-), row=1, col=3)
+    custom_scale = [
+        [0.0,  "rgb(179, 0, 0)"],
+        [0.3,  "rgb(253, 141, 60)"],
+        [0.48, "rgb(255, 245, 235)"],
+        [0.5,  "rgb(255, 255, 255)"],
+        [0.52, "rgb(247, 247, 247)"],
+        [0.7,  "rgb(146, 197, 222)"],
+        [1.0,  "rgb(5, 48, 97)"],
+    ]
 
-fig_hm.update_layout(
-    height=500,
-    coloraxis=dict(
-        colorscale="Viridis",
-        colorbar=dict(title="Vehicles", x=0.63, thickness=12, len=0.8),
-    ),
-    yaxis=dict(title="Hour (0-23)", tickmode="linear", dtick=2),
-    yaxis2=dict(tickmode="linear", dtick=2),
-    plot_bgcolor="white",
-)
-fig_hm.update_yaxes(autorange=False, range=[0, 23])
+    fig_hm.add_trace(go.Heatmap(
+        z=matrix_dry_mean, x=WEEKDAYS, y=list(range(24)),
+        customdata=matrix_dry_count, hovertemplate=hover_template,
+        colorscale="Viridis", zmin=global_min, zmax=global_max,
+        coloraxis="coloraxis",
+        colorbar=dict(title="Vehicles", x=0.23, thickness=15, len=0.8),
+    ), row=1, col=1)
 
-st.plotly_chart(apply_font(fig_hm), width="stretch")
+    fig_hm.add_trace(go.Heatmap(
+        z=matrix_wet_mean, x=WEEKDAYS, y=list(range(24)),
+        customdata=matrix_wet_count, hovertemplate=hover_template,
+        colorscale="Viridis", zmin=global_min, zmax=global_max,
+        coloraxis="coloraxis",
+    ), row=1, col=2)
+
+    fig_hm.add_trace(go.Heatmap(
+        z=matrix_change_rel, x=WEEKDAYS, y=list(range(24)),
+        customdata=matrix_change_abs,
+        hovertemplate="<b>%{x}, %{y}:00</b><br>Change: %{z:.1f}%<br>Abs. Value: %{customdata:.0f}<extra></extra>",
+        colorscale=custom_scale, zmid=0, zmin=-50, zmax=50,
+        colorbar=dict(title="Change %", x=1.0),
+    ), row=1, col=3)
+
+    fig_hm.update_layout(
+        height=500,
+        coloraxis=dict(
+            colorscale="Viridis",
+            colorbar=dict(title="Vehicles", x=0.63, thickness=12, len=0.8),
+        ),
+        yaxis=dict(title="Hour (0-23)", tickmode="linear", dtick=2),
+        yaxis2=dict(tickmode="linear", dtick=2),
+        plot_bgcolor="white",
+    )
+    fig_hm.update_yaxes(autorange=False, range=[0, 23])
+
+    st.plotly_chart(apply_font(fig_hm), width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text
@@ -197,68 +203,74 @@ st.markdown("""
 # ====================================
 # Second visualization
 
-# Dropdown menu to filter by a specific weekday or use the whole week
-weekday_options = {
-    "Whole Week": None,
-    "Monday": 1,
-    "Tuesday": 2,
-    "Wednesday": 3,
-    "Thursday": 4,
-    "Friday": 5,
-    "Saturday": 6,
-    "Sunday": 7
-}
+try:
+    # Dropdown menu to filter by a specific weekday or use the whole week
+    weekday_options = {
+        "Whole Week": None,
+        "Monday": 1,
+        "Tuesday": 2,
+        "Wednesday": 3,
+        "Thursday": 4,
+        "Friday": 5,
+        "Saturday": 6,
+        "Sunday": 7
+    }
 
-col_box1, col_box2 = st.columns([1, 3])
-with col_box1:
-    selected_day_name = st.selectbox("Filter by Weekday:", list(weekday_options.keys()))
-    selected_day_val  = weekday_options[selected_day_name]
+    col_box1, col_box2 = st.columns([1, 3])
+    with col_box1:
+        selected_day_name = st.selectbox("Filter by Weekday:", list(weekday_options.keys()))
+        selected_day_val  = weekday_options[selected_day_name]
 
-df_daily = (
-    df_selected
-    .group_by("day")
-    .agg([
-        pl.col(COL_TEMP).mean().alias("daily_mean_temp"),
-        pl.col("KFZ_total").sum().alias("daily_total_kfz"),
-        pl.col("weekday").first().alias("weekday"),
-    ])
-)
+    df_daily = (
+        df_selected
+        .group_by("day")
+        .agg([
+            pl.col(COL_TEMP).mean().alias("daily_mean_temp"),
+            pl.col("KFZ_total").sum().alias("daily_total_kfz"),
+            pl.col("weekday").first().alias("weekday"),
+        ])
+    )
 
-if selected_day_val is not None:
-    df_daily = df_daily.filter(pl.col("weekday") == selected_day_val)
+    if selected_day_val is not None:
+        df_daily = df_daily.filter(pl.col("weekday") == selected_day_val)
 
-df_temp = df_daily.with_columns(
-    pl.when(pl.col("daily_mean_temp") < 0).then(pl.lit("< 0°C"))
-    .when((pl.col("daily_mean_temp") >= 0)  & (pl.col("daily_mean_temp") < 5)).then(pl.lit("0 - 5°C"))
-    .when((pl.col("daily_mean_temp") >= 5)  & (pl.col("daily_mean_temp") < 10)).then(pl.lit("5 - 10°C"))
-    .when((pl.col("daily_mean_temp") >= 10) & (pl.col("daily_mean_temp") < 15)).then(pl.lit("10 - 15°C"))
-    .when((pl.col("daily_mean_temp") >= 15) & (pl.col("daily_mean_temp") < 20)).then(pl.lit("15 - 20°C"))
-    .otherwise(pl.lit("> 20°C"))
-    .alias("temp_category")
-)
+    df_temp = df_daily.with_columns(
+        pl.when(pl.col("daily_mean_temp") < 0).then(pl.lit("< 0°C"))
+        .when((pl.col("daily_mean_temp") >= 0)  & (pl.col("daily_mean_temp") < 5)).then(pl.lit("0 - 5°C"))
+        .when((pl.col("daily_mean_temp") >= 5)  & (pl.col("daily_mean_temp") < 10)).then(pl.lit("5 - 10°C"))
+        .when((pl.col("daily_mean_temp") >= 10) & (pl.col("daily_mean_temp") < 15)).then(pl.lit("10 - 15°C"))
+        .when((pl.col("daily_mean_temp") >= 15) & (pl.col("daily_mean_temp") < 20)).then(pl.lit("15 - 20°C"))
+        .otherwise(pl.lit("> 20°C"))
+        .alias("temp_category")
+    )
 
-temp_categories = ["< 0°C", "0 - 5°C", "5 - 10°C", "10 - 15°C", "15 - 20°C", "> 20°C"]
-fig_box = go.Figure()
+    temp_categories = ["< 0°C", "0 - 5°C", "5 - 10°C", "10 - 15°C", "15 - 20°C", "> 20°C"]
+    fig_box = go.Figure()
 
-for cat in temp_categories:
-    subset = df_temp.filter(pl.col("temp_category") == cat)["daily_total_kfz"].to_list()
-    fig_box.add_trace(go.Box(
-        x=subset, name=cat,
-        boxpoints="outliers",
-        marker_color="#4C9BE8",
-        line_color="#2b5c8f",
-    ))
+    for cat in temp_categories:
+        subset = df_temp.filter(pl.col("temp_category") == cat)["daily_total_kfz"].to_list()
+        fig_box.add_trace(go.Box(
+            x=subset, name=cat,
+            boxpoints="outliers",
+            marker_color="#4C9BE8",
+            line_color="#2b5c8f",
+        ))
 
-fig_box.update_layout(
-    xaxis_title=f"Daily Total Vehicles ({selected_day_name})",
-    yaxis_title="Daily Average Temperature",
-    height=450,
-    plot_bgcolor="white",
-    showlegend=False,
-)
-fig_box.update_xaxes(gridcolor="#eeeeee")
+    fig_box.update_layout(
+        xaxis_title=f"Daily Total Vehicles ({selected_day_name})",
+        yaxis_title="Daily Average Temperature",
+        height=450,
+        plot_bgcolor="white",
+        showlegend=False,
+    )
+    fig_box.update_xaxes(gridcolor="#eeeeee")
 
-st.plotly_chart(apply_font(fig_box), width="stretch")
+    st.plotly_chart(apply_font(fig_box), width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text

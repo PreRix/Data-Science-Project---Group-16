@@ -1,4 +1,4 @@
-# ==============================
+# ====================================
 # Imports
 
 import streamlit as st
@@ -6,7 +6,7 @@ import polars as pl
 import plotly.express as px
 from utils.data_loader import load_traffic_base
 
-# ==============================
+# ====================================
 # Website design
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
@@ -26,7 +26,7 @@ st.markdown("""
     ## Weekend vs. Weekday Traffic Load on the A215 (AK Kiel-West)
 """)
 
-# ==============================
+# ====================================
 # Data collection and help
 
 def apply_font(fig):
@@ -51,7 +51,7 @@ except Exception as e:
     st.stop()
 
 # ====================================
-# First visualisation
+# Helper aggregations
 
 def weekday_share(df: pl.DataFrame) -> pl.DataFrame:
     daily = (
@@ -70,22 +70,31 @@ def weekday_share(df: pl.DataFrame) -> pl.DataFrame:
         .sort(["year", "day_type"])
     )
 
-df_share = weekday_share(df_traffic)
-years    = sorted(df_share["year"].unique().to_list())
-cols     = st.columns(len(years))
+# ====================================
+# First visualisation
 
-for col, year in zip(cols, years):
-    with col:
-        df_year = df_share.filter(pl.col("year") == year)
-        fig = px.pie(
-            df_year.to_pandas(),
-            values="vehicle_count",
-            names="day_type",
-            title=str(year),
-            category_orders={"day_type": ["Weekday", "Saturday", "Sunday"]},
-        )
-        fig.update_traces(textposition="inside", textinfo="percent+label")
-        st.plotly_chart(apply_font(fig), width="stretch")
+try:
+    df_share = weekday_share(df_traffic)
+    years    = sorted(df_share["year"].unique().to_list())
+    cols     = st.columns(len(years))
+
+    for col, year in zip(cols, years):
+        with col:
+            df_year = df_share.filter(pl.col("year") == year)
+            fig = px.pie(
+                df_year.to_pandas(),
+                values="vehicle_count",
+                names="day_type",
+                title=str(year),
+                category_orders={"day_type": ["Weekday", "Saturday", "Sunday"]},
+            )
+            fig.update_traces(textposition="inside", textinfo="percent+label")
+            st.plotly_chart(apply_font(fig), width="stretch")
+
+except Exception as e:
+    st.warning("Something went wrong while loading — restarting...")
+    st.session_state.clear()
+    st.rerun()
 
 # ====================================
 # Text
@@ -111,7 +120,7 @@ st.markdown("""
     As said before, the numbers are equally the same for each year, so no significant change has occured over the years.
 """)
 
-# ==============================
+# ====================================
 # Website design
 
 st.divider()
