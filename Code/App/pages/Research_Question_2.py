@@ -134,7 +134,7 @@ st.markdown("""
     ####
     ### Most interesting finding:
     It can be seen that, interestingly, the concentration of almost all air quality variables is dropping at noon, while the vehicle count starts rising.  
-    On the other hand, during night and morning times, these concentrations are increasing.  
+    On the other hand, during evening and morning times, these concentrations are increasing.  
     At first, this seems to be an error in our data, but some meteorological phenomena actually explain this **interesting** finding:  
     
     1. When the sun sets, the air near the ground gets colder than the air above. The air gets denser and traps the pollutants near the ground, inhibiting
