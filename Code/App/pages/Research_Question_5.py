@@ -277,7 +277,7 @@ try:
             monthly
             .select(["year", "month", "avg_no2", "avg_vehicles", "no2_per_veh"])
             .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
-                    "avg_vehicles": "Avg Vehicles (veh/h)", "no2_per_veh": "NO₂ per Vehicle"})
+                    "avg_vehicles": "Avg Vehicles (veh)", "no2_per_veh": "NO₂ per Vehicle"})
             .with_columns([
                 pl.col("Avg NO₂ (µg/m³)").round(2),
                 pl.col("Avg Vehicles (veh/h)").round(1),
@@ -301,7 +301,7 @@ st.markdown("""
 
     ####
     ### How we aggregated the Data:
-    The visualization shows the average NO<sub>2</sub> emission per vehicle. We calculated this by summing up all NO<sub>2</sub> concentration data for *each year* and dividing it by the total vehicle counting data for all available stations *per year*.  
+    The visualization shows the average NO<sub>2</sub> emission per vehicle. We calculated this by summing up all NO<sub>2</sub> concentration data for *each month* and dividing it by the total vehicle counting data for all available stations *per year*.  
     This approach was chosen to normalize the data against fluctuations in traffic volume, providing a more comparable value for the evolution of NO<sub>2</sub> 
     levels over time. 
 
