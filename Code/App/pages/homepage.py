@@ -26,9 +26,9 @@ st.markdown("""
     
     1. How do precipitation and temperature affect the hourly vehicle counts near Kiel between 2021 and 2025?
     
-    2. To what extent does the hourly NO<sub>2</sub>, CO, PM<sub>2,5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?
+    2. To what extent does the hourly NO<sub>2</sub>, CO, PM<sub>2.5</sub> and PM<sub>10</sub> concentration in Kiel correlate with vehicle count?
     
-    3. How has the total monthly vehicle count near Kiel changed in the past five years, and does the trend in registered vehicles per year in Kiel predict this change?
+    3. How has the total yearly vehicle count near Kiel changed in the past five years, and does the trend in registered vehicles per year in Kiel predict this change?
     
     4. How do Saturday and Sunday volumes near Kiel compare to weekday volumes, and has this weekend-to-weekday ratio changed significantly over the five-year observation period?
     
@@ -36,11 +36,13 @@ st.markdown("""
     on 
     high-traffic roads near Kiel?
 
-    6. How do extreme weather events affect hourly traffic volumes at selected counting stations near Kiel, and how long does it take for traffic to return to normal levels?
+    6. How does the ratio of incoming and outgoing traffic around Kiel change during the day?
 
-    7. How does the Kieler Woche influence truck traffic and personal traffic volume at nearby counting stations in Kiel, and how does this period compare to typical weeks during the same season?
+    7. How does the daily passenger transport and freight transport traffic change during the Kieler Woche compared to the surrounding month (two weeks before and after)?
 
-    8. How did the traffic in rush-hours change on Autobahnen around Kiel because of the mobility change?
+    8. How did the traffic in rush-hours change on Autobahnen around Kiel over the past five years?  
+
+    9. How do extreme weather events affect hourly traffic volumes at selected counting stations near Kiel, and how long does it take for traffic to return to normal levels?
 """, unsafe_allow_html=True)
 
 st.markdown("""
