@@ -55,7 +55,7 @@ BEV_COL = "PT_Nach Kraftstoffarten_Elektro (BEV)"
 HIDE_THRESHOLD = 10
 
 # ====================================
-# Data collection and help
+# Data collection and helpers
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -70,23 +70,21 @@ def apply_font(fig):
 try:
     _base = load_traffic_base()
 
-    # Yearly average vehicle count (Zst 1194, valid rows only)
-    _veh = (
+    # Compute NO2/vehicle ratio at hourly level, then aggregate to monthly means
+    df_monthly = (
         _base
         .filter(pl.col("Zst") == "1194")
-        .drop_nulls(subset=["KFZ_total"])
-        .group_by("year")
-        .agg(pl.col("KFZ_total").mean().alias("avg_vehicles"))
-        .sort("year")
-    )
-    df_traffic = dict(zip(_veh["year"].to_list(), _veh["avg_vehicles"].to_list()))
-
-    # Monthly NO2 averages (Zst 1194)
-    df_no2_monthly = (
-        _base
-        .filter(pl.col("Zst") == "1194")
+        .drop_nulls(subset=["KFZ_total", "nitrogen_dioxide"])
+        .filter(pl.col("KFZ_total") > 0)
+        .with_columns(
+            (pl.col("nitrogen_dioxide") / pl.col("KFZ_total")).alias("no2_per_veh")
+        )
         .group_by(["year", "month"])
-        .agg(pl.col("nitrogen_dioxide").mean().alias("avg_no2"))
+        .agg(
+            pl.col("no2_per_veh").mean().alias("avg_no2_per_veh"),
+            pl.col("nitrogen_dioxide").mean().alias("avg_no2"),
+            pl.col("KFZ_total").mean().alias("avg_vehicles"),
+        )
         .sort(["year", "month"])
         .with_columns(
             (pl.col("year").cast(pl.Utf8) + "-" +
@@ -94,7 +92,6 @@ try:
         )
     )
 
-    # Registration data with fuel breakdown — already cleaned by the loader
     df_registrations = load_registrations_fuel()
 
 except Exception as e:
@@ -204,25 +201,18 @@ try:
         if totals.get(row["Year"]) and row[BEV_COL] is not None
     }
 
-    common_years = sorted(set(bev_share) & set(df_traffic) & set(df_no2_monthly["year"].to_list()))
+    common_years = sorted(set(bev_share) & set(df_monthly["year"].to_list()))
 
     if not common_years:
-        st.warning("No overlapping years found across the three data sources.")
+        st.warning("No overlapping years found across the data sources.")
         st.stop()
 
-    veh_df  = pl.DataFrame({"year": list(df_traffic.keys()), "avg_vehicles": list(df_traffic.values())})
-    monthly = (
-        df_no2_monthly
-        .filter(pl.col("year").is_in(common_years))
-        .join(veh_df, on="year", how="left")
-        .with_columns((pl.col("avg_no2") / pl.col("avg_vehicles")).alias("no2_per_veh"))
-        .sort(["year", "month"])
-    )
+    monthly = df_monthly.filter(pl.col("year").is_in(common_years))
 
     x      = monthly["date_str"].to_list()
-    y_raw  = monthly["no2_per_veh"].to_list()
+    y_raw  = monthly["avg_no2_per_veh"].to_list()
     y_roll = monthly.with_columns(
-        pl.col("no2_per_veh").rolling_mean(window_size=3).alias("r")
+        pl.col("avg_no2_per_veh").rolling_mean(window_size=3).alias("r")
     )["r"].to_list()
 
     valid_idx, valid_vals = zip(*[(i, v) for i, v in enumerate(y_raw) if v is not None])
@@ -275,9 +265,9 @@ try:
     with st.expander("Underlying data"):
         st.dataframe(
             monthly
-            .select(["year", "month", "avg_no2", "avg_vehicles", "no2_per_veh"])
+            .select(["year", "month", "avg_no2", "avg_vehicles", "avg_no2_per_veh"])
             .rename({"year": "Year", "month": "Month", "avg_no2": "Avg NO₂ (µg/m³)",
-                    "avg_vehicles": "Avg Vehicles (veh/h)", "no2_per_veh": "NO₂ per Vehicle"})
+                    "avg_vehicles": "Avg Vehicles (veh/h)", "avg_no2_per_veh": "NO₂ per Vehicle"})
             .with_columns([
                 pl.col("Avg NO₂ (µg/m³)").round(2),
                 pl.col("Avg Vehicles (veh/h)").round(1),
@@ -301,9 +291,8 @@ st.markdown("""
 
     ####
     ### How we aggregated the Data:
-    The visualization shows the average NO<sub>2</sub> emission per vehicle. We calculated this by summing up all NO<sub>2</sub> concentration data for *each month* and dividing it by the total vehicle counting data for all available stations *per year*.  
-    This approach was chosen to normalize the data against fluctuations in traffic volume, providing a more comparable value for the evolution of NO<sub>2</sub> 
-    levels over time. 
+    The visualization shows the average NO<sub>2</sub> emission per vehicle. For each hour at station 1194, we divided the NO₂ concentration by the vehicle count to get an hourly NO₂-per-vehicle ratio. These hourly ratios were then averaged across all hours within each calendar month.  
+    This approach avoids the distortion introduced by averaging numerator and denominator separately before dividing, and normalizes the NO₂ signal against traffic volume at the finest available granularity.
 
     ####
     ### Interpretation:
