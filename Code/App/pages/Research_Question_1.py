@@ -159,6 +159,7 @@ try:
         ),
         yaxis=dict(title="Hour (0-23)", tickmode="linear", dtick=2),
         yaxis2=dict(tickmode="linear", dtick=2),
+        yaxis3=dict(tickmode="linear", dtick=2),
         plot_bgcolor="white",
     )
     fig_hm.update_yaxes(autorange=False, range=[0, 23])
