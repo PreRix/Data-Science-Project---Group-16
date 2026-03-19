@@ -51,7 +51,10 @@ def make_rush_figure(x, y_morning, y_evening, title, x_title):
                    mode="lines+markers", line=dict(color="tomato", width=3)),
     ])
     fig.update_layout(title=title, xaxis_title=x_title,
-                      yaxis_title="Vehicles during Rush Hour", height=600)
+                      yaxis_title="Vehicles during Rush Hour", 
+                      height=600, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                      margin=dict(t=100)
+                     )
     return apply_font(fig)
 
 try:
