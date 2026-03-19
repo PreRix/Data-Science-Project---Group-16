@@ -140,9 +140,12 @@ st.markdown("""
     1. When the sun sets, the air near the ground gets colder than the air above. The air gets denser and traps the pollutants near the ground, inhibiting
     vertical dispersion.  
     When the sun starts heating up the Earth's surface, the pollutants get carried up with the warmer air and mix with fresh air.
-    2. At night time the wind generally subsides, leading to less airflow, and a more stable air layer holding the pollutants and their concentrations higher.  
+    2. In the evening the wind generally subsides, leading to less airflow, and a more stable air layer holding the pollutants and their concentrations higher.  
     During the day, when winds increase, the concentration of pollutants decreases as they mix with fresh air and are more likely to be blown away at the
-    local measuring point. 
+    local measuring point.   
+
+    The increase in pollutant levels in the morning seems to be correlated with the rise in traffic volume, before the two reasons from above start affecting 
+    the concentration.
 
     ####
     ### How we aggregated the Data:
