@@ -121,12 +121,13 @@ st.markdown("""
     ### Description:
     This diagram shows that the hourly data was aggregated into an *average diurnal cycle* for the concentration of air pollutants, while displaying the 
     corresponding *average vehicle count per hour* as well. It can be selected which pollutant should be displayed as well as the year one wants to see 
-    (multiple selections possible).
-    It can be seen that, interestingly, the concentration of almost all air quality variables is dropping at noon, while the vehicle count starts rising.  
-    On the other hand, during night and morning times, these concentrations are increasing.
+    (multiple selections possible).  
+    
     
     ####
     ### Most interesting finding:
+    It can be seen that, interestingly, the concentration of almost all air quality variables is dropping at noon, while the vehicle count starts rising.  
+    On the other hand, during night and morning times, these concentrations are increasing.  
     At first, this seems to be an error in our data, but some meteorological phenomena actually explain this **interesting** finding:  
     
     1. When the sun sets, the air near the ground gets colder than the air above. The air gets denser and traps the pollutants near the ground, inhibiting
