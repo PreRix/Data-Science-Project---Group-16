@@ -231,7 +231,7 @@ try:
             margin=dict(l=10, r=10, t=50, b=10),
         )
         for col_idx in range(1, n_years + 1):
-            axis_key = "yaxis" if col_idx == 1 else f"yaxis{col_idx}"
+            axis_key = "yaxis" if col_idx == 1 else f"yaxis{col_idx}µg/m³"
             fig_hm.update_layout(**{axis_key: dict(autorange="reversed")})
         st.plotly_chart(apply_font(fig_hm), width="stretch")
 
