@@ -104,9 +104,9 @@ try:
         hovermode="x unified", plot_bgcolor="white", height=520,
         legend=dict(orientation="h",
             yanchor="bottom",
-            y=1.02,             
+            y=1.02,
             xanchor="center",
-            x=0.5,              
+            x=0.5,
             font=dict(size=10),
             traceorder="normal"
         ),
@@ -168,8 +168,6 @@ st.markdown("""
 # Second visualization
 
 try:
-    hm_col1, hm_col2 = st.columns(2)
-
     if len(active_years) < 2 and st.session_state.get("hm_mode") == "Per year (side by side)":
         st.session_state["hm_mode"] = "Overall (all selected years)"
 
@@ -177,19 +175,13 @@ try:
     if len(active_years) > 1:
         hm_options.append("Per year (side by side)")
 
-    hm_mode        = hm_col1.radio("Show correlations", hm_options, horizontal=True, key="hm_mode")
-    hm_granularity = hm_col2.radio(
-        "Correlate using",
-        ["Raw hourly rows", "Hourly means (aggregated)"],
-        horizontal=True,
-    )
+    hm_mode = st.radio("Show correlations", hm_options, horizontal=True, key="hm_mode")
 
     corr_vars   = [kfz_col] + list(AIR_QUALITY_VARS.values())
     corr_labels = ["Vehicles"] + list(AIR_QUALITY_VARS.keys())
 
     def compute_corr_matrix(subset: pl.DataFrame) -> np.ndarray:
-        if hm_granularity == "Hourly means (aggregated)":
-            subset = subset.group_by("hour").agg([pl.col(c).mean() for c in corr_vars])
+        subset = subset.group_by("hour").agg([pl.col(c).mean() for c in corr_vars])
         cols = [subset[c].cast(pl.Float64, strict=False).to_numpy().astype(float) for c in corr_vars]
         mat  = np.column_stack(cols)
         mat  = mat[~np.isnan(mat).any(axis=1)]
