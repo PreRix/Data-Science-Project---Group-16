@@ -111,7 +111,7 @@ try:
             traceorder="normal"
         ),
     )
-    fig.update_yaxes(title_text=f"{aq_label}µg/m³",        secondary_y=False, gridcolor="#eeeeee")
+    fig.update_yaxes(title_text=f"{aq_label} (µg/m³)",        secondary_y=False, gridcolor="#eeeeee")
     fig.update_yaxes(title_text="Vehicles/hour", secondary_y=True,  gridcolor="#eeeeee", showgrid=False)
 
     st.plotly_chart(apply_font(fig), width="stretch")
