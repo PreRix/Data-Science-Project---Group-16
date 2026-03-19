@@ -128,8 +128,6 @@ try:
 
         fig.update_layout(
             title=(
-                f"Relative Traffic around Extreme Weather Events "
-                f"(Zst. 1194, Rain >{RAIN_THRESHOLD}mm/h or Snow >{SNOW_THRESHOLD}cm/h)"
             ),
             xaxis=dict(title="Hours relative to Event Start", tickmode="linear", dtick=1),
             yaxis=dict(title="Relative Vehicle Count (% of Hourly Median)"),
