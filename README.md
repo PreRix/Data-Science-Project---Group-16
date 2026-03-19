@@ -36,13 +36,13 @@ The data we used is freely available and is stored [here](https://cloud.rz.uni-k
 ### BASt Data:
 We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding meta-data file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
 As we only consider data for Schleswig-Holstein, we aggregated each data file to only contain rows with information corresponding to Schleswig-Holstein.
-To make sure the data is consistant, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
+To make sure the data is consistent, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
 In the next step we merged all files to one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates for the counting stations given in the meta-data files to another encoding, so that they can be used for the API requests on weather and air quality. [Here](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb) you can find the code.  
-Next we cutted the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) with [this code](Code/CSV-Transformation/filter_kiel_measuring_points.ipynb).
+Next we cut the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) with [this code](Code/CSV-Transformation/filter_kiel_measuring_points.ipynb).
 
-*For these aggregation files its important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
+*For these aggregation files it's important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
 
 In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.  
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
@@ -52,14 +52,14 @@ We currently (10.03.26) don't know what is meant with a value being "estimated" 
 
 
 ### KBA Data:
-The data for yearly vehicle registration counts in Germany are provided in Excel files. The naming of the columns did not stay consistant over the five year observation span. Thus we had to normalize the columns in each file, so that columns covering the same information have the same name. We did that so we were able to later join all files into one .csv-file. 
+The data for yearly vehicle registration counts in Germany are provided in Excel files. The naming of the columns did not stay consistent over the five year observation span. Thus we had to normalize the columns in each file, so that columns covering the same information have the same name. We did that so we were able to later join all files into one .csv-file. 
 We then collected only the rows that are giving information about Kiel registration counts. 
-After that the single files got merged into on .csv-file containing all registration count for Kiel from the years 2021 to 2025.
+After that the single files got merged into one .csv-file containing all registration counts for Kiel from the years 2021 to 2025.
 The code for that can be found [here](Code/CSV-Transformation/KBA_data_combination.ipynb).
 
 
 ### Open-Meteo Weather Data:
-We choose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the follwing variables:
+We chose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the following variables:
 - daily:
   - weather code
   - temperature mean
@@ -76,17 +76,17 @@ We choose the Open-meteo Weather API to collect historical weather data for the 
   - wind gusts
   - relative humidity
 
-We retrived the hourly data by requesting the values for the location coordinates of our selected BASt counting stations and created one .csv-file for the data.
+We retrieved the hourly data by requesting the values for the location coordinates of our selected BASt counting stations and created one .csv-file for the data.
 The same procedure was performed for the daily data.
 The code for the API requests is stored [here](Code/API-requests/openmeteo_weather_API.ipynb).
 
 
 ### Open-Meteo Air Quality Data:
-We choose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrive data for corresponding variables.
-A list of the variables we requested from the API can be found [here](https://cloud.rz.uni-kiel.de/index.php/s/2jW9kXWdny9T8td) with an explaination on why we decided that way.
-We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retived the data by the coordinates of the BASt counting stations.
+We chose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrieve data for corresponding variables.
+A list of the variables we requested from the API can be found [here](https://cloud.rz.uni-kiel.de/index.php/s/2jW9kXWdny9T8td) with an explanation on why we decided that way.
+We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retrieved the data by the coordinates of the BASt counting stations.
 A .csv-file containing all data was created then.
-[This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requestes and collect the data.
+[This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requests and collect the data.
 
 
 ### OpenLigaDB Data:
@@ -98,7 +98,7 @@ Thus, we collected the data where Holstein Kiel is listed as the first team for 
 
 ### Kieler Woche Data:
 As well as football matches we wanted to take the Kieler Woche into account as a big event which might influence the traffic around Kiel.
-The data we needed is not available via an API nor given in some data files. Therefore we went on the internet and collected this few data ourselvs and wrote them into a .csv-file containing the dates from when to when the Kieler Woche took place from 2021 to 2025, as well as the estimated visitor counts. 
+The data we needed is not available via an API nor given in some data files. Therefore we went on the internet and collected these few data points ourselves and wrote them into a .csv-file containing the dates from when to when the Kieler Woche took place from 2021 to 2025, as well as the estimated visitor counts. 
 
 -----
 
@@ -111,25 +111,25 @@ The code can be found [here](Code/CSV-Transformation/holy_file_generator.ipynb).
 -----
 
 ## Selection of the traffic counting stations
-To get a first idea of where the counting stations in and around Kiel are located, we exported one examplary Meta-Data file from BASt to Google MyMaps
+To get a first idea of where the counting stations in and around Kiel are located, we exported one exemplary Meta-Data file from BASt to Google MyMaps
 and identified "the most relevant" measuring points by eye and feeling.
 
 ![](measuring_points_map_kiel.png)
 
 Because this is no scientific way of selecting the measuring points providing data the whole project relies on, 
-we created a coordinate frame (bounding box) for the Kiel region (+ extra radius for surrounding area) and identiefied the traffic measuring points that are 
+we created a coordinate frame (bounding box) for the Kiel region (+ extra radius for surrounding area) and identified the traffic measuring points that are 
 located within this frame.
 
 This coordinate frame has the following coordinates:
 - min_latitude: 54.068086300000004
-- max_latidude: 54.61594389999999
+- max_latitude: 54.61594389999999
 
 - min_longitude: 9.8472391
 - max_longitude: 10.404307
 
-The data for the bounding box was retrived from the OpenStreetMap API using the script in [this Jupyter Notebook](<Code/API-requests/openstreetmap.org API.ipynb>).
+The data for the bounding box was retrieved from the OpenStreetMap API using the script in [this Jupyter Notebook](<Code/API-requests/openstreetmap.org API.ipynb>).
 
-The counting stations within this frame then got analyized by us in terms of usefullness for our project.
+The counting stations within this frame then got analyzed by us in terms of usefulness for our project.
 We selected the following stations as relevant:
 - **1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
 - **1111: "Kiel-Holtenau I" on the B503** -> counting station on the Holtenauer bridge to count vehicles to the North of Kiel. This station is before a road branches off to Holstein Stadion.
