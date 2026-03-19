@@ -127,7 +127,7 @@ try:
         fig.add_hline(y=100, line_dash="dot", line_color="gray",  opacity=0.5)
 
         fig.update_layout(
-            title=(
+            title=(" "
             ),
             xaxis=dict(title="Hours relative to Event Start", tickmode="linear", dtick=1),
             yaxis=dict(title="Relative Vehicle Count (% of Hourly Median)"),
