@@ -42,7 +42,7 @@ st.markdown("""
 
     8. How did the traffic in rush-hours change on Autobahnen around Kiel over the past five years?  
 
-    9. How do extreme weather events affect hourly traffic volumes at selected counting stations near Kiel, and how long does it take for traffic to return to normal levels?
+    9. *A Bonus Question:* How do extreme weather events affect hourly traffic volumes at selected counting stations near Kiel, and how long does it take for traffic to return to normal levels?
 """, unsafe_allow_html=True)
 
 st.markdown("""
