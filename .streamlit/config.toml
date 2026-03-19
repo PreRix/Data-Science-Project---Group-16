@@ -1,6 +1,9 @@
 [theme]
 base = "light"
 
+[client]
+toolbarMode = "viewer"
+
 [server]
 headless = true          # recommended for cloud deployments
 
