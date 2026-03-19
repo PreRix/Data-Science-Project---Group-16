@@ -62,7 +62,7 @@ try:
     aq_col   = AIR_QUALITY_VARS[aq_label]
 
     all_years = sorted(df_traffic["year"].unique().to_list())
-    years_sel = col2.multiselect("Years (empty = all)", all_years, default=[])
+    years_sel = col2.multiselect("Years", all_years, default=[])
     active_years = years_sel
 
     if not active_years:
