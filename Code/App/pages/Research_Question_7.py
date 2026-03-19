@@ -31,11 +31,11 @@ st.markdown("""
 # Global variables
 
 KIELER_WOCHE_PRESETS = {
-    "Kieler Woche 2021": (date(2021, 9, 4),  date(2021, 9, 12)),
-    "Kieler Woche 2022": (date(2022, 6, 18), date(2022, 6, 26)),
-    "Kieler Woche 2023": (date(2023, 6, 17), date(2023, 6, 25)),
-    "Kieler Woche 2024": (date(2024, 6, 22), date(2024, 6, 30)),
     "Kieler Woche 2025": (date(2025, 6, 21), date(2025, 6, 29)),
+    "Kieler Woche 2024": (date(2024, 6, 22), date(2024, 6, 30)),    
+    "Kieler Woche 2023": (date(2023, 6, 17), date(2023, 6, 25)),
+    "Kieler Woche 2022": (date(2022, 6, 18), date(2022, 6, 26)),
+    "Kieler Woche 2021": (date(2021, 9, 4),  date(2021, 9, 12)),
 }
 
 ZST_VARS = {
