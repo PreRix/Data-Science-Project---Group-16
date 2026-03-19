@@ -261,7 +261,7 @@ try:
         plot_bgcolor="white", height=520, hovermode="x unified", margin=dict(t=140, b=60),
     )
     fig.update_yaxes(title_text="BEV Share (% of fleet)", secondary_y=False)
-    fig.update_yaxes(title_text="NO2 per Vehicle (µg/m³ per veh/h)", secondary_y=True, showgrid=False)
+    fig.update_yaxes(title_text="NO2 per Vehicle (µg/m³ per veh)", secondary_y=True, showgrid=False)
 
     st.plotly_chart(apply_font(fig), width="stretch")
     st.caption(
@@ -280,7 +280,7 @@ try:
                     "avg_vehicles": "Avg Vehicles (veh)", "no2_per_veh": "NO₂ per Vehicle"})
             .with_columns([
                 pl.col("Avg NO₂ (µg/m³)").round(2),
-                pl.col("Avg Vehicles (veh/h)").round(1),
+                pl.col("Avg Vehicles (veh)").round(1),
                 pl.col("NO₂ per Vehicle").round(5),
             ]),
             width="stretch",
