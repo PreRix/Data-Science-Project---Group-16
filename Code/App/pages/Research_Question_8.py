@@ -45,9 +45,9 @@ def apply_font(fig):
 
 def make_rush_figure(x, y_morning, y_evening, title, x_title):
     fig = go.Figure([
-        go.Scatter(x=x, y=y_morning, name="Morning Rush – into Kiel (6–8h)",
+        go.Scatter(x=x, y=y_morning, name="Morning Rush – into Kiel (6:00–8:59 a.m.)",
                    mode="lines+markers", line=dict(color="steelblue", width=3)),
-        go.Scatter(x=x, y=y_evening, name="Evening Rush – out of Kiel (15–17h)",
+        go.Scatter(x=x, y=y_evening, name="Evening Rush – out of Kiel (3:00–5:59 p.m.)",
                    mode="lines+markers", line=dict(color="tomato", width=3)),
     ])
     fig.update_layout(title=title, xaxis_title=x_title,
@@ -118,8 +118,8 @@ st.markdown("""
     ### Definitions + How we aggregated the Data:
     The two lines in the chart represent the traffic of the two rush-hours each day at the A215, aggregated to an *average day of the month*. No other counting station 
     displays the commuter traffic better than this one, as the A215 is known for being a main commuter route for Kiel.  
-    For the morning rush-hour we defined the time window from 6-8 a.m.; only considering the traffic coming to Kiel.  
-    For the evening rush-hour we chose 3-5 p.m., while only considering traffic leaving Kiel.  
+    For the morning rush-hour we defined the time window from 6:00-8:59 a.m.; only considering the traffic coming to Kiel.  
+    For the evening rush-hour we chose 3:00-5:59 p.m., while only considering traffic leaving Kiel.  
     Additionally we only took into account data from weekdays (Monday to Friday), so that data from weekends would not bias the result.  
 
     ####
