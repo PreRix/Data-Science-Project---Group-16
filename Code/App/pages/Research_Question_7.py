@@ -225,7 +225,7 @@ st.markdown("""
     - station 1104: Rumohr on the A215
     - station 1156: AS Wankendorf on the A21.
 
-    The counting station for which the data should be displayed can be selected.
+    The counting station for which the data should be displayed can be selected, as well as the sum over all stations.
     
     ####
     ### Interpretation:
@@ -235,6 +235,11 @@ st.markdown("""
 
     However for freight transport, no such pattern can be observed. The Kieler Woche traffic and basline level traffic are generally very even; with 
     more traffic on weekdays than on weekends, as many of these vehicles are not permitted to drive on these days.
+""")
+
+st.warning("""
+    Keep in mind: The Kieler Woche in 2021 was very different compared to a "normal" situation due to the COVID-19 pandemic. Therefore the data from this year 
+    differs quite a lot from the other years.
 """)
 
 # ====================================
