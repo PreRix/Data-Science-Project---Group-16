@@ -23,7 +23,7 @@ with col3_top_btn:
 st.title("Research Question #7")
 
 st.markdown("""
-    # *How does the daily passenger transport and freight transport traffic change during Kieler Woche compared to the surrounding month (two weeks before and after)?*
+    # *How does the daily passenger transport and freight transport traffic change during the Kieler Woche compared to the surrounding month (two weeks before and after)?*
     ## Traffic compared: Kieler Woche vs. Baseline Levels
 """)
 
