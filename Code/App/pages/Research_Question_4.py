@@ -4,12 +4,9 @@
 import streamlit as st
 import polars as pl
 import plotly.express as px
-from utils.navigation import setup
 
 # ====================================
 # Website design
-
-setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 

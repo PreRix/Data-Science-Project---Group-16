@@ -3,12 +3,9 @@
 
 import streamlit as st
 from pathlib import Path
-from utils.navigation import setup
 
 # ====================================
 # Website design
-
-setup()
 
 st.title("The Data we used")
 st.write("Here you can find all raw data we used for this project. Expand on the data you want to know more about.")

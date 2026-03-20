@@ -6,12 +6,9 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils.navigation import setup
 
 # ====================================
 # Website design
-
-setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 

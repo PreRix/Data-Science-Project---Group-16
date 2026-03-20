@@ -3,13 +3,10 @@
 
 import streamlit as st
 from pathlib import Path
-from utils.navigation import setup
 
 # ====================================
 # Website design
-
-setup()
-         
+  
 st.title("Welcome to the Website of our Data Science Project!")
 st.markdown("""
     ### The Topic we performed research on:
