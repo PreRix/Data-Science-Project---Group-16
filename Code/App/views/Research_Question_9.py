@@ -12,7 +12,7 @@ col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
     if st.button("⬅️ Previous Question", key="btn_top"):
-        st.switch_page("pages/Research_Question_8.py")
+        st.switch_page("views/Research_Question_8.py")
 
 st.title("BONUS Research Question")
 
@@ -177,7 +177,7 @@ col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
 
 with col1_bottom_btn:
     if st.button("⬅️ Previous Question", key="btn_bottom"):
-        st.switch_page("pages/Research_Question_8.py")
+        st.switch_page("views/Research_Question_8.py")
 
 st.divider()
 
@@ -185,8 +185,8 @@ col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns(
 
 with col5_bottom_btn:
     if st.button("Go to Imprint", width="stretch"):
-        st.switch_page("pages/Imprint.py")
+        st.switch_page("views/Imprint.py")
 
 with col6_bottom_btn:
     if st.button("Back to Homepage 🏠", width="stretch"):
-        st.switch_page("pages/homepage.py")
+        st.switch_page("views/homepage.py")

@@ -90,4 +90,4 @@ col_left, col_middle, col_right = st.columns([1, 0.4, 1])
 
 with col_middle:
     if st.button("Back to Homepage 🏠", width = "stretch"):
-        st.switch_page("pages/homepage.py")
+        st.switch_page("views/homepage.py")

@@ -70,8 +70,8 @@ col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns(
 
 with col5_bottom_btn:
     if st.button("Go to Imprint", width = "stretch"):
-        st.switch_page("pages/Imprint.py")
+        st.switch_page("views/Imprint.py")
 
 with col6_bottom_btn:
     if st.button("Back to Homepage 🏠", width = "stretch"):
-        st.switch_page("pages/homepage.py")
+        st.switch_page("views/homepage.py")
