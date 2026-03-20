@@ -4,7 +4,6 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import load_traffic_base, load_weather
 
 # ====================================
 # Website design
@@ -46,11 +45,11 @@ def apply_font(fig):
 try:
     # Traffic: only need datetime + vehicle_count for Zst 1194
     df_traffic = (
-        load_traffic_base()
+        st.session_state.df_traffic
         .filter(pl.col("Zst") == "1194")
         .select(["datetime", pl.col("KFZ_total").alias("vehicle_count")])
     )
-    df_weather = load_weather()
+    df_weather = st.session_state.df_weather
 except Exception as e:
     st.error(f"Could not load data: {e}")
     st.stop()

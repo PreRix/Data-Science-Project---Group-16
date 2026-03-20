@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.data_loader import load_traffic_base, load_registrations, load_registrations_fuel, load_weather
 
 st.set_page_config(
     page_title = "DSP - Group 16",
@@ -8,6 +9,19 @@ st.set_page_config(
         "About" : "[Check out our GitHub Repository](https://github.com/PreRix/Data-Science-Project---Group-16)"
     }
 )
+
+# Preload all data into session_state once
+if "df_traffic" not in st.session_state:
+    st.session_state.df_traffic = load_traffic_base()
+
+if "df_registrations" not in st.session_state:
+    st.session_state.df_registrations = load_registrations()
+
+if "df_registrations_fuel" not in st.session_state:
+    st.session_state.df_registrations_fuel = load_registrations_fuel()
+
+if "df_weather" not in st.session_state:
+    st.session_state.df_weather = load_weather()
 
 pages = {
     "Home": [

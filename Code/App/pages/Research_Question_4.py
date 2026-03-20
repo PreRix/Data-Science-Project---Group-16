@@ -4,7 +4,6 @@
 import streamlit as st
 import polars as pl
 import plotly.express as px
-from utils.data_loader import load_traffic_base
 
 # ====================================
 # Website design
@@ -42,7 +41,7 @@ def apply_font(fig):
 try:
     # Filter to station 1194
     df_traffic = (
-        load_traffic_base()
+        st.session_state.df_traffic
         .filter(pl.col("Zst") == "1194")
         .rename({"KFZ_total": "vehicle_count"})
     )

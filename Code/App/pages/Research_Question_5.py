@@ -6,7 +6,6 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-from utils.data_loader import load_traffic_base, load_registrations_fuel
 
 # ====================================
 # Website design
@@ -68,7 +67,7 @@ def apply_font(fig):
     return fig
 
 try:
-    _base = load_traffic_base()
+    _base = st.session_state.df_traffic
 
     # Compute NO2/vehicle ratio at hourly level, then aggregate to monthly means
     df_monthly = (
@@ -92,7 +91,7 @@ try:
         )
     )
 
-    df_registrations = load_registrations_fuel()
+    df_registrations = st.session_state.df_registrations_fuel
 
 except Exception as e:
     st.error(f"Could not load data: {e}")

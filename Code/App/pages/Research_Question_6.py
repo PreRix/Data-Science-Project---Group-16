@@ -6,7 +6,6 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils.data_loader import load_traffic_base
 
 # ====================================
 # Website design
@@ -54,7 +53,7 @@ def apply_font(fig):
 try:
     # Rename R1/R2 to inbound/outbound and compute ratio — all in-memory on the cached base
     df_traffic = (
-        load_traffic_base()
+        st.session_state.df_traffic
         .with_columns(pl.col("Zst").str.strip_chars())
         .rename({"KFZ_R1": "R1_Inbound", "KFZ_R2": "R2_Outbound"})
         .drop_nulls(["R1_Inbound", "R2_Outbound"])

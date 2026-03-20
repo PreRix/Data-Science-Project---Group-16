@@ -4,7 +4,6 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import load_traffic_base
 
 # ====================================
 # Website design
@@ -60,7 +59,7 @@ def make_rush_figure(x, y_morning, y_evening, title, x_title):
 try:
     # Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
     df_traffic = (
-        load_traffic_base()
+        st.session_state.df_traffic
         .filter(pl.col("Zst") == "1194")
         .filter(pl.col("weekday") <= 5)
     )

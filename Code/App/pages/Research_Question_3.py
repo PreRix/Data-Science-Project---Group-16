@@ -4,7 +4,6 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import load_traffic_base, load_registrations
 
 # ====================================
 # Website design
@@ -49,8 +48,8 @@ def apply_font(fig):
     return fig
 
 try:
-    df_raw = load_traffic_base()
-    df_registrations = load_registrations()
+    df_raw = st.session_state.df_traffic
+    df_registrations = st.session_state.df_registrations
 except Exception as e:
     st.error(f"Could not load data: {e}")
     st.stop()

@@ -5,7 +5,6 @@ import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 from datetime import date, timedelta
-from utils.data_loader import load_traffic_base
 
 # ====================================
 # Website design
@@ -63,7 +62,7 @@ def apply_font(fig):
 try:
     # The base loader already cleaned Pkw/Mot/Bus/PmA _R1/_R2 if present in the CSV.
     # Compute Personal_Traffic and Truck_Traffic as lightweight in-memory ops.
-    _base = load_traffic_base()
+    _base = st.session_state.df_traffic
 
     df_traffic = _base.with_columns([
         (

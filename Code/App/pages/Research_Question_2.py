@@ -6,7 +6,6 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils.data_loader import load_traffic_base, AIR_QUALITY_VARS
 
 # ====================================
 # Website design
@@ -33,6 +32,13 @@ st.markdown("""
 
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
 
+AIR_QUALITY_VARS = {
+    "PM10":  "pm10",
+    "PM2.5": "pm2_5",
+    "NO2":   "nitrogen_dioxide",
+    "CO":    "carbon_monoxide",
+}
+
 # ====================================
 # Data collection and help
 
@@ -48,7 +54,7 @@ def apply_font(fig):
 
 try:
     # Filter to station 1194
-    df_traffic = load_traffic_base().filter(pl.col("Zst").str.strip_chars() == "1194")
+    df_traffic = st.session_state.df_traffic.filter(pl.col("Zst").str.strip_chars() == "1194")
 except Exception as e:
     st.error(f"Could not load traffic data: {e}")
     st.stop()

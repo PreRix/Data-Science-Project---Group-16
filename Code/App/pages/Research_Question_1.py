@@ -6,7 +6,6 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils.data_loader import load_traffic_base
 
 # ====================================
 # Website design
@@ -54,7 +53,7 @@ def apply_font(fig):
     return fig
 
 try:
-    df_traffic = load_traffic_base()
+    df_traffic = st.session_state.df_traffic
 except Exception as e:
     st.error(f"Could not load traffic data: {e}")
     st.stop()
