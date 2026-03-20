@@ -4,10 +4,12 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import ensure_session_data
+from utils.navigation import setup
 
 # ====================================
 # Website design
+
+setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -33,7 +35,7 @@ DETAIL_YEAR  = 2023
 DETAIL_MONTH = 2
 
 # ====================================
-# Data collection and help
+# Data collection and helpers
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -57,7 +59,6 @@ def make_rush_figure(x, y_morning, y_evening, title, x_title):
                      )
     return apply_font(fig)
 
-ensure_session_data()
 # Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
 df_traffic = (
     st.session_state.df_traffic

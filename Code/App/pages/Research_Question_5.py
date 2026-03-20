@@ -6,10 +6,12 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-from utils.data_loader import ensure_session_data
+from utils.navigation import setup
 
 # ====================================
 # Website design
+
+setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -67,7 +69,6 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-ensure_session_data()
 _base = st.session_state.df_traffic
 df_registrations = st.session_state.df_registrations_fuel
 

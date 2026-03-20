@@ -5,10 +5,12 @@ import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 from datetime import date, timedelta
-from utils.data_loader import ensure_session_data
+from utils.navigation import setup
 
 # ====================================
 # Website design
+
+setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -48,7 +50,7 @@ BUFFER_DAYS  = 14
 WEEKDAYS_MAP = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
 
 # ====================================
-# Data collection and help
+# Data collection and helpers
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -60,7 +62,6 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-ensure_session_data()
 # The base loader already cleaned Pkw/Mot/Bus/PmA _R1/_R2 if present in the CSV.
 # Compute Personal_Traffic and Truck_Traffic as lightweight in-memory ops.
 _base = st.session_state.df_traffic

@@ -4,10 +4,12 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import ensure_session_data
+from utils.navigation import setup
 
 # ====================================
 # Website design
+
+setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -31,7 +33,7 @@ WINDOW_BEFORE  = 2
 WINDOW_AFTER   = 4
 
 # ====================================
-# Data collection and help
+# Data collection and helpers
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -43,7 +45,6 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-ensure_session_data()
 # Traffic: only need datetime + vehicle_count for Zst 1194
 df_traffic = (
     st.session_state.df_traffic

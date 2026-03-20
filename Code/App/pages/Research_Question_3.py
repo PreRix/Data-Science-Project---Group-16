@@ -4,10 +4,12 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
-from utils.data_loader import ensure_session_data
+from utils.navigation import setup
 
 # ====================================
 # Website design
+
+setup()
 
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
@@ -36,7 +38,7 @@ ZST_VARS = {
 }
 
 # ====================================
-# Data collection and help
+# Data collection and helpers
 
 def apply_font(fig):
     fig.update_layout(font_size=22, legend_font_size=22)
@@ -48,7 +50,6 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-ensure_session_data()
 df_raw = st.session_state.df_traffic
 df_registrations = st.session_state.df_registrations
 

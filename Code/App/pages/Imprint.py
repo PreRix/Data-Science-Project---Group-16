@@ -1,4 +1,13 @@
+# ====================================
+# Imports
+
 import streamlit as st
+from utils.navigation import setup
+
+# ====================================
+# Website design
+
+setup()
 
 st.title("Imprint")
 
