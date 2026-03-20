@@ -9,6 +9,13 @@ CSV_TRAFFIC      = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FL
 CSV_REGISTRATION = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
 CSV_WEATHER_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/dYtnayFdSte8EPN/?accept=zip"
 
+AIR_QUALITY_VARS = {
+    "PM10":  "pm10",
+    "PM2.5": "pm2_5",
+    "NO2":   "nitrogen_dioxide",
+    "CO":    "carbon_monoxide",
+}
+
 # RQ5
 _FUEL_COLS = [
     "PT_Nach Kraftstoffarten_Benzin",
