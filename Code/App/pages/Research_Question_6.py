@@ -6,6 +6,7 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -50,26 +51,23 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    # Rename R1/R2 to inbound/outbound and compute ratio — all in-memory on the cached base
-    df_traffic = (
-        st.session_state.df_traffic
-        .with_columns(pl.col("Zst").str.strip_chars())
-        .rename({"KFZ_R1": "R1_Inbound", "KFZ_R2": "R2_Outbound"})
-        .drop_nulls(["R1_Inbound", "R2_Outbound"])
-        .with_columns(
-            (pl.col("R1_Inbound") + pl.col("R2_Outbound")).alias("Total_KFZ")
-        )
-        .with_columns(
-            pl.when(pl.col("Total_KFZ") > 0)
-              .then(pl.col("R1_Inbound") / pl.col("Total_KFZ"))
-              .otherwise(None)
-              .alias("Inbound_Ratio")
-        )
+ensure_session_data()
+# Rename R1/R2 to inbound/outbound and compute ratio — all in-memory on the cached base
+df_traffic = (
+    st.session_state.df_traffic
+    .with_columns(pl.col("Zst").str.strip_chars())
+    .rename({"KFZ_R1": "R1_Inbound", "KFZ_R2": "R2_Outbound"})
+    .drop_nulls(["R1_Inbound", "R2_Outbound"])
+    .with_columns(
+        (pl.col("R1_Inbound") + pl.col("R2_Outbound")).alias("Total_KFZ")
     )
-except Exception as e:
-    st.error(f"Could not load traffic data: {e}")
-    st.stop()
+    .with_columns(
+        pl.when(pl.col("Total_KFZ") > 0)
+            .then(pl.col("R1_Inbound") / pl.col("Total_KFZ"))
+            .otherwise(None)
+            .alias("Inbound_Ratio")
+    )
+)
 
 # ====================================
 # First visualization
@@ -147,9 +145,10 @@ try:
     avg_out = df_filtered["R2_Outbound"].mean()
     st.markdown(f"**Quick Stats for {zst_label}:** Average Inbound: {avg_in:.0f} | Average Outbound: {avg_out:.0f}")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

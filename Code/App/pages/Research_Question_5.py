@@ -6,6 +6,7 @@ import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -66,36 +67,31 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    _base = st.session_state.df_traffic
+ensure_session_data()
+_base = st.session_state.df_traffic
+df_registrations = st.session_state.df_registrations_fuel
 
-    # Compute NO2/vehicle ratio at hourly level, then aggregate to monthly means
-    df_monthly = (
-        _base
-        .filter(pl.col("Zst") == "1194")
-        .drop_nulls(subset=["KFZ_total", "nitrogen_dioxide"])
-        .filter(pl.col("KFZ_total") > 0)
-        .with_columns(
-            (pl.col("nitrogen_dioxide") / pl.col("KFZ_total")).alias("no2_per_veh")
-        )
-        .group_by(["year", "month"])
-        .agg(
-            pl.col("no2_per_veh").mean().alias("avg_no2_per_veh"),
-            pl.col("nitrogen_dioxide").mean().alias("avg_no2"),
-            pl.col("KFZ_total").mean().alias("avg_vehicles"),
-        )
-        .sort(["year", "month"])
-        .with_columns(
-            (pl.col("year").cast(pl.Utf8) + "-" +
-             pl.col("month").cast(pl.Utf8).str.zfill(2) + "-01").alias("date_str")
-        )
+# Compute NO2/vehicle ratio at hourly level, then aggregate to monthly means
+df_monthly = (
+    _base
+    .filter(pl.col("Zst") == "1194")
+    .drop_nulls(subset=["KFZ_total", "nitrogen_dioxide"])
+    .filter(pl.col("KFZ_total") > 0)
+    .with_columns(
+        (pl.col("nitrogen_dioxide") / pl.col("KFZ_total")).alias("no2_per_veh")
     )
-
-    df_registrations = st.session_state.df_registrations_fuel
-
-except Exception as e:
-    st.error(f"Could not load data: {e}")
-    st.stop()
+    .group_by(["year", "month"])
+    .agg(
+        pl.col("no2_per_veh").mean().alias("avg_no2_per_veh"),
+        pl.col("nitrogen_dioxide").mean().alias("avg_no2"),
+        pl.col("KFZ_total").mean().alias("avg_vehicles"),
+    )
+    .sort(["year", "month"])
+    .with_columns(
+        (pl.col("year").cast(pl.Utf8) + "-" +
+            pl.col("month").cast(pl.Utf8).str.zfill(2) + "-01").alias("date_str")
+    )
+)
 
 # ====================================
 # First visualization
@@ -168,9 +164,10 @@ try:
         table = table.with_columns(pl.Series("Total", [totals[y] for y in table["Year"].to_list()]))
         st.dataframe(table, width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================
@@ -275,9 +272,10 @@ try:
             width="stretch",
         )
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

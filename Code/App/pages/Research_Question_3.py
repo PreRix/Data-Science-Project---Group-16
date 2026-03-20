@@ -4,6 +4,7 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -47,12 +48,9 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    df_raw = st.session_state.df_traffic
-    df_registrations = st.session_state.df_registrations
-except Exception as e:
-    st.error(f"Could not load data: {e}")
-    st.stop()
+ensure_session_data()
+df_raw = st.session_state.df_traffic
+df_registrations = st.session_state.df_registrations
 
 # ====================================
 # Helper aggregations
@@ -121,9 +119,10 @@ try:
 
     st.plotly_chart(apply_font(fig), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

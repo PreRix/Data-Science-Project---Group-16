@@ -4,6 +4,7 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -42,17 +43,14 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    # Traffic: only need datetime + vehicle_count for Zst 1194
-    df_traffic = (
-        st.session_state.df_traffic
-        .filter(pl.col("Zst") == "1194")
-        .select(["datetime", pl.col("KFZ_total").alias("vehicle_count")])
-    )
-    df_weather = st.session_state.df_weather
-except Exception as e:
-    st.error(f"Could not load data: {e}")
-    st.stop()
+ensure_session_data()
+# Traffic: only need datetime + vehicle_count for Zst 1194
+df_traffic = (
+    st.session_state.df_traffic
+    .filter(pl.col("Zst") == "1194")
+    .select(["datetime", pl.col("KFZ_total").alias("vehicle_count")])
+)
+df_weather = st.session_state.df_weather
 
 df = df_traffic.join(df_weather, on="datetime", how="left")
 
@@ -136,9 +134,10 @@ try:
 
         st.plotly_chart(apply_font(fig), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

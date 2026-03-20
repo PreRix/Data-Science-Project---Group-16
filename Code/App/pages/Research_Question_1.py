@@ -6,6 +6,7 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -52,11 +53,8 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    df_traffic = st.session_state.df_traffic
-except Exception as e:
-    st.error(f"Could not load traffic data: {e}")
-    st.stop()
+ensure_session_data()
+df_traffic = st.session_state.df_traffic
      
 # ====================================
 # First visualization
@@ -165,9 +163,10 @@ try:
 
     st.plotly_chart(apply_font(fig_hm), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================
@@ -267,9 +266,10 @@ try:
 
     st.plotly_chart(apply_font(fig_box), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

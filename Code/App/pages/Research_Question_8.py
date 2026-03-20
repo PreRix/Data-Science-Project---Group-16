@@ -4,6 +4,7 @@
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -56,16 +57,13 @@ def make_rush_figure(x, y_morning, y_evening, title, x_title):
                      )
     return apply_font(fig)
 
-try:
-    # Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
-    df_traffic = (
-        st.session_state.df_traffic
-        .filter(pl.col("Zst") == "1194")
-        .filter(pl.col("weekday") <= 5)
-    )
-except Exception as e:
-    st.error(f"Could not load traffic data: {e}")
-    st.stop()
+ensure_session_data()
+# Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
+df_traffic = (
+    st.session_state.df_traffic
+    .filter(pl.col("Zst") == "1194")
+    .filter(pl.col("weekday") <= 5)
+)
 
 # ====================================
 # Helper aggregations
@@ -108,9 +106,10 @@ try:
         width="stretch",
     )
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================
@@ -168,9 +167,10 @@ try:
         width="stretch",
     )
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

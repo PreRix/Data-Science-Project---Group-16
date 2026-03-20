@@ -9,6 +9,13 @@ CSV_TRAFFIC      = "https://cloud.rz.uni-kiel.de/public.php/dav/files/NnYrtwJ7FL
 CSV_REGISTRATION = "https://cloud.rz.uni-kiel.de/public.php/dav/files/aDAQmERmoBkwepJ/?accept=zip"
 CSV_WEATHER_DATA = "https://cloud.rz.uni-kiel.de/public.php/dav/files/dYtnayFdSte8EPN/?accept=zip"
 
+AIR_QUALITY_VARS = {
+    "PM10":  "pm10",
+    "PM2.5": "pm2_5",
+    "NO2":   "nitrogen_dioxide",
+    "CO":    "carbon_monoxide",
+}
+
 # RQ5
 _FUEL_COLS = [
     "PT_Nach Kraftstoffarten_Benzin",
@@ -136,3 +143,19 @@ def load_weather(path: str = CSV_WEATHER_DATA) -> pl.DataFrame:
         )
         .select(["datetime", "precipitation", "snowfall"])
     )
+
+# ── Cache loader helper function ──────────────────────────────────────────────
+
+def ensure_session_data():
+    try:
+        if "df_traffic" not in st.session_state:
+            st.session_state.df_traffic = load_traffic_base()
+        if "df_registrations" not in st.session_state:
+            st.session_state.df_registrations = load_registrations()
+        if "df_registrations_fuel" not in st.session_state:
+            st.session_state.df_registrations_fuel = load_registrations_fuel()
+        if "df_weather" not in st.session_state:
+            st.session_state.df_weather = load_weather()
+    except Exception as e:
+        st.error(f"Could not load data from the server: {e}")
+        st.stop()

@@ -5,6 +5,7 @@ import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 from datetime import date, timedelta
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -59,25 +60,22 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    # The base loader already cleaned Pkw/Mot/Bus/PmA _R1/_R2 if present in the CSV.
-    # Compute Personal_Traffic and Truck_Traffic as lightweight in-memory ops.
-    _base = st.session_state.df_traffic
+ensure_session_data()
+# The base loader already cleaned Pkw/Mot/Bus/PmA _R1/_R2 if present in the CSV.
+# Compute Personal_Traffic and Truck_Traffic as lightweight in-memory ops.
+_base = st.session_state.df_traffic
 
-    df_traffic = _base.with_columns([
-        (
-            pl.col("Pkw_R1") + pl.col("Pkw_R2") +
-            pl.col("Mot_R1") + pl.col("Mot_R2") +
-            pl.col("Bus_R1") + pl.col("Bus_R2") +
-            pl.col("PmA_R1") + pl.col("PmA_R2")
-        ).alias("Personal_Traffic"),
-        (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("Total_Traffic"),
-    ]).with_columns(
-        (pl.col("Total_Traffic") - pl.col("Personal_Traffic")).alias("Truck_Traffic")
-    )
-except Exception as e:
-    st.error(f"Could not load traffic data: {e}")
-    st.stop()
+df_traffic = _base.with_columns([
+    (
+        pl.col("Pkw_R1") + pl.col("Pkw_R2") +
+        pl.col("Mot_R1") + pl.col("Mot_R2") +
+        pl.col("Bus_R1") + pl.col("Bus_R2") +
+        pl.col("PmA_R1") + pl.col("PmA_R2")
+    ).alias("Personal_Traffic"),
+    (pl.col("KFZ_R1") + pl.col("KFZ_R2")).alias("Total_Traffic"),
+]).with_columns(
+    (pl.col("Total_Traffic") - pl.col("Personal_Traffic")).alias("Truck_Traffic")
+)
 
 # ====================================
 # First visualization
@@ -193,9 +191,10 @@ try:
         f"{total_event_trucks:,.0f}", f"{diff_trucks:+.1f}%",
     )
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================

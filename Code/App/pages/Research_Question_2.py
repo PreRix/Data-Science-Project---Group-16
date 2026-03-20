@@ -6,6 +6,7 @@ import polars as pl
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from utils.data_loader import ensure_session_data
 
 # ====================================
 # Website design
@@ -52,12 +53,9 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-try:
-    # Filter to station 1194
-    df_traffic = st.session_state.df_traffic.filter(pl.col("Zst").str.strip_chars() == "1194")
-except Exception as e:
-    st.error(f"Could not load traffic data: {e}")
-    st.stop()
+ensure_session_data()
+# Filter to station 1194
+df_traffic = st.session_state.df_traffic.filter(pl.col("Zst").str.strip_chars() == "1194")
 
 # ====================================
 # First visualization
@@ -122,9 +120,10 @@ try:
 
     st.plotly_chart(apply_font(fig), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================
@@ -266,9 +265,10 @@ try:
             }))
         st.dataframe(pl.concat(frames), width="stretch")
 
-except Exception as e:
-    st.warning("Something went wrong while loading — restarting...")
-    st.session_state.clear()
+except Exception:
+    for key in list(st.session_state.keys()):
+        if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
+            del st.session_state[key]
     st.rerun()
 
 # ====================================
