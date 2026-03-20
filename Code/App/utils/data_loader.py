@@ -143,3 +143,19 @@ def load_weather(path: str = CSV_WEATHER_DATA) -> pl.DataFrame:
         )
         .select(["datetime", "precipitation", "snowfall"])
     )
+
+# ── Cache loader helper function ──────────────────────────────────────────────
+
+def ensure_session_data():
+    try:
+        if "df_traffic" not in st.session_state:
+            st.session_state.df_traffic = load_traffic_base()
+        if "df_registrations" not in st.session_state:
+            st.session_state.df_registrations = load_registrations()
+        if "df_registrations_fuel" not in st.session_state:
+            st.session_state.df_registrations_fuel = load_registrations_fuel()
+        if "df_weather" not in st.session_state:
+            st.session_state.df_weather = load_weather()
+    except Exception as e:
+        st.error(f"Could not load data from the server: {e}")
+        st.stop()
