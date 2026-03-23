@@ -48,7 +48,7 @@ In an additional step we did some analysis on the data to [check the quality](Co
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
 For all further exploration of the data we will not use entries that contain missing values. We will sort them out during the visualization process. 
 We also detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
-We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore that and we'll update this ReadMe accordingly.
+We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore that and we'll update this ReadMe accordingly.  
 *UPDATE* (end of project): We sadly did not receive any answer from BASt for an explanation of the quality flags. We used the data in a way that made up for potential estimated values.
 
 
@@ -94,8 +94,14 @@ A .csv-file containing all data was then created.
 For one of our research questions we wanted to show how traffic changes when special events take place. We decided that football matches at the Holstein Stadion would be a great case. We used the OpenLigaDB API to get data about when a match took place there.
 For that, we used the knowledge that matches there only take place when Holstein Kiel is playing as the "Home Team". 
 In the OpenLigaDB for each match both teams are listed; the first team is always the home team. 
-Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API-requests/openligadb.de API.ipynb>).
-**We ended up not using this data as we adjusted the research questions in a way so that this data is no longer needed.**
+Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API-requests/openligadb.de API.ipynb>).  
+
+-----
+-----
+**We ended up not using this data as we adjusted the research questions in a way so that this data is no longer needed.**  
+
+-----
+-----
 
 
 ### Kieler Woche Data:
