@@ -11,7 +11,7 @@ We had to find a topic which is interesting to us and perform data science on it
 from the collection of raw, non-pre-processed data, through data cleansing and analyzing, to the creation of visualizations for our findings.
 Those should then be accessible on a self-programmed website.
 
-*All of us are native-german speakers, so please excuse the maybe non-perfect English :)*
+*All of us are native German speakers, so please excuse the maybe non-perfect English :)*
 
 ### The Topic
 The topic of our project is as follows: The Personal Traffic around Kiel in the past five years *(2021 to 2025)*.
@@ -39,27 +39,28 @@ As we only consider data for Schleswig-Holstein, we aggregated each data file to
 To make sure the data is consistent, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
 
-In the next step we merged all files to one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates for the counting stations given in the meta-data files to another encoding, so that they can be used for the API requests on weather and air quality. [Here](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb) you can find the code.  
+In the next step we merged all files into one .csv-file for the entire traffic data of Schleswig-Holstein. On top of that we had to convert the coordinates for the counting stations given in the meta-data files to another encoding, so that they can be used for the API requests on weather and air quality. [Here](Code/BASt_Data_Aggregation/BAStDataKielAggregation.ipynb) you can find the code.  
 Next we cut the .csv-files down to the rows only containing info about the [selected counting stations](#selection-of-the-traffic-counting-stations) with [this code](Code/CSV-Transformation/filter_kiel_measuring_points.ipynb).
 
-*For these aggregation files it's important to keep in mind that they maybe have to be adjusted because of file-names and directory paths on your own machine.*
+*For these aggregation files it's important to keep in mind that they may have to be adjusted because of file-names and directory paths on your own machine.*
 
 In an additional step we did some analysis on the data to [check the quality](Code/BASt_Data_Aggregation/DataCleaningSH_data.ipynb) in terms of how many errors are present in the data.  
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
-For all further exploration of the data we will not use entries that are containing missing values. We will sort them out during the visualization process. 
-As well we detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
-We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore on that and we'll update this ReadMe accordingly.
+For all further exploration of the data we will not use entries that contain missing values. We will sort them out during the visualization process. 
+We also detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
+We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore that and we'll update this ReadMe accordingly.
+*UPDATE* (end of project): We sadly did not receive any answer from BASt for an explanation of the quality flags. We used the data in a way that made up for potential estimated values.
 
 
 ### KBA Data:
-The data for yearly vehicle registration counts in Germany are provided in Excel files. The naming of the columns did not stay consistent over the five year observation span. Thus we had to normalize the columns in each file, so that columns covering the same information have the same name. We did that so we were able to later join all files into one .csv-file. 
-We then collected only the rows that are giving information about Kiel registration counts. 
+The data for yearly vehicle registration counts in Germany is provided in Excel files. The naming of the columns did not stay consistent over the five-year observation span. Thus we had to normalize the columns in each file, so that columns covering the same information have the same name. We did that so we were able to later join all files into one .csv-file. 
+We then collected only rows containing information about Kiel registration counts. 
 After that the single files got merged into one .csv-file containing all registration counts for Kiel from the years 2021 to 2025.
 The code for that can be found [here](Code/CSV-Transformation/KBA_data_combination.ipynb).
 
 
 ### Open-Meteo Weather Data:
-We chose the Open-meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the following variables:
+We chose the Open-Meteo Weather API to collect historical weather data for the time period from 2021 to 2025. We set up the API and requested data for the following variables:
 - daily:
   - weather code
   - temperature mean
@@ -84,39 +85,40 @@ The code for the API requests is stored [here](Code/API-requests/openmeteo_weath
 ### Open-Meteo Air Quality Data:
 We chose to use Open-Meteo as well for our Air Quality data collection by using the Open-meteo Air Quality API to retrieve data for corresponding variables.
 A list of the variables we requested from the API can be found [here](https://cloud.rz.uni-kiel.de/index.php/s/2jW9kXWdny9T8td) with an explanation on why we decided that way.
-We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retrieved the data by the coordinates of the BASt counting stations.
-A .csv-file containing all data was created then.
+We set up the API and requested hourly data for the selected variables. As we did for the weather data, we retrieved the data by using the coordinates of the BASt counting stations.
+A .csv-file containing all data was then created.
 [This code](Code/API-requests/openmeteo_airquality_API.ipynb) was used to make the API requests and collect the data.
 
 
 ### OpenLigaDB Data:
-For one of our Research Questions we wanted to show how traffic changes when special events take place. We decided that football matches at the Holstein Stadion would be a great case. We used the OpenLigaDB API to get data about when a match took place there.
-For that, we used the knowledge that matches there only take place when Holstein Kiel is playing as the "Home-Team". 
-In the OpenLigaDB for each match both teams are listed; the first team is always the Home-Team. 
+For one of our research questions we wanted to show how traffic changes when special events take place. We decided that football matches at the Holstein Stadion would be a great case. We used the OpenLigaDB API to get data about when a match took place there.
+For that, we used the knowledge that matches there only take place when Holstein Kiel is playing as the "Home Team". 
+In the OpenLigaDB for each match both teams are listed; the first team is always the home team. 
 Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API-requests/openligadb.de API.ipynb>).
+**We ended up not using this data as we adjusted the research questions in a way so that this data is no longer needed.**
 
 
 ### Kieler Woche Data:
-As well as football matches we wanted to take the Kieler Woche into account as a big event which might influence the traffic around Kiel.
+In addition to football matches we wanted to take the Kieler Woche into account as a big event which might influence the traffic around Kiel.
 The data we needed is not available via an API nor given in some data files. Therefore we went on the internet and collected these few data points ourselves and wrote them into a .csv-file containing the dates from when to when the Kieler Woche took place from 2021 to 2025, as well as the estimated visitor counts. 
 
 -----
 
 ## Merging data together:
-To gain a good overview over all data we merged all possible data together into one big .csv-file; containing the traffic data, weather and air quality data for the corresponding counting station, in an hourly sample rate. 
-Therefore all encodings or formats for join attributes had to be normalized.
-After joining we removed all redundant columns from the file as well.
+To gain a good overview, we merged all data together into one big .csv-file; containing the traffic data, weather and air quality data for the corresponding counting station, at an hourly sampling rate. 
+Therefore, all encodings or formats for join attributes had to be normalized.
+After joining, we removed all redundant columns from the file as well.
 The code can be found [here](Code/CSV-Transformation/holy_file_generator.ipynb).
 
 -----
 
 ## Selection of the traffic counting stations
-To get a first idea of where the counting stations in and around Kiel are located, we exported one exemplary Meta-Data file from BASt to Google MyMaps
+To get a first idea of where the counting stations in and around Kiel are located, we exported one exemplary metadata file from BASt to Google MyMaps
 and identified "the most relevant" measuring points by eye and feeling.
 
 ![](measuring_points_map_kiel.png)
 
-Because this is no scientific way of selecting the measuring points providing data the whole project relies on, 
+Because this is not a scientific way of selecting the measuring points providing data on which the whole project relies on, 
 we created a coordinate frame (bounding box) for the Kiel region (+ extra radius for surrounding area) and identified the traffic measuring points that are 
 located within this frame.
 
@@ -131,11 +133,11 @@ The data for the bounding box was retrieved from the OpenStreetMap API using the
 
 The counting stations within this frame then got analyzed by us in terms of usefulness for our project.
 We selected the following stations as relevant:
-- **1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct linkage to the A7 from Kiel.
-- **1111: "Kiel-Holtenau I" on the B503** -> counting station on the Holtenauer bridge to count vehicles to the North of Kiel. This station is before a road branches off to Holstein Stadion.
+- **1104: "Rumohr" on the A215** -> a main route when traveling the North-South-Axis; e.g. it is the direct connection to the A7 from Kiel.
+- **1111: "Kiel-Holtenau I" on the B503** -> counting station on the Holtenauer Bridge to count vehicles to the North of Kiel. This station is before a road branches off to Holstein Stadion.
 - **1112: "Kiel-Holtenau 2" on the B503** -> counting station next to station #1111 but after the branch to Holstein Stadion. We selected this station as well to have the opportunity to answer questions where the information might be helpful, how many vehicles took the branch.
 - **1116: "Gettorf (Wulfshagen)" on the B76** -> the only counting station covering the vehicle counts for the North-West-Axis from Kiel.
-- **1135: "Raisdorf I" on the B76** -> the closest of the counting stations in the East of Kiel; and one that got used over all five years of the observation period.
+- **1135: "Raisdorf I" on the B76** -> the closest of the counting stations in the East of Kiel; and one that was in operation over all five years of the observation period.
 - **1156: "AS Wankendorf (Stolpe)" on the A21** -> counting station covering the traffic coming from the East via the Autobahn (e.g. trips from Berlin).
 - **1158: "Kiel/Schönkirchen" on the B502** -> only counting station in the North-East of Kiel.
 - **1162: "Melsdorf" on the A210** -> counting vehicles on the West-Axis of Kiel. 
