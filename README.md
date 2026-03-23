@@ -159,6 +159,25 @@ The website gets hosted via Streamlit Community Cloud, which is connected to thi
 
 -----
 
+## How to use our website
+
+Visit our website: https://dsp-group16.streamlit.app .  
+
+By clicking on the link above you will reach our homepage where you can find an introduction to our topic and a list of all our research questions.  
+
+On the left you can find our navigation menu. From there you can directly visit the page for all used data sources, each research question and the imprint. The sidebar can be folded in, as well as each of the sections it's holding.
+There is also a page called "Question Catalog", which gives another, more visually pleasing look of the navigation to each question.  
+
+Click through the questions; for most of them the visualizations are interactive to display the data you want to see.  
+Under each figure you'll find a detailed explanation with information and our interpretation of the findings.  
+
+You'll find navigation buttons on the top and bottom of each question page to easily switch between questions.  
+Furthermore, the imprint and homepage are easily accessible from every page of the website with buttons on the very bottom.  
+
+Have fun exploring! :)
+
+-----
+
 ## The usage of generative AI and Large Language Models
 
 For this project a lot of Python code with Polars and other indispensable libraries had to be written.  
@@ -172,6 +191,8 @@ The following models were used for this project:
 
 Especially for hosting the website and the necessary efficient data management and loading, we used *Claude* because none of us had ever deployed a website before.  
 As a last step, all content in this ReadMe and on the website was checked for **misspelling and grammatical mistakes** using *Google Gemini*.
+
+-----
 
 -----
 -----
@@ -211,6 +232,11 @@ conda list --export > requirements.txt
 conda install --name <envname> --file requirements.txt
 ```
 
+-----
 
+Thank you for taking a look at our project! 
+We really hope you enjoyed it.
 
-*to be continued*
+All the best from
+**Lenn, Felix, Moritz and Anthime**.
+
