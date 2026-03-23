@@ -10,6 +10,7 @@ from pathlib import Path
 st.title("The Data we used")
 st.write("Here you can find all raw data we used for this project. Expand on the data you want to know more about.")
 
+# listing of all used data sources
 with st.expander("Vehicle Counting Data"):
     st.markdown("""
         For information about the vehicle count on the streets in and around Kiel we used the data from BASt, the "Bundesanstalt für Straßen- und Verkehrswesen". 
@@ -63,7 +64,7 @@ with st.expander("Kieler Woche Data"):
     """)
     st.info("**Source:** https://www.kieler-woche.de/de/medien/meldung.php")
 
-
+# button layout
 st.divider()
 
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
