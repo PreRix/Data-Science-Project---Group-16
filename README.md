@@ -192,8 +192,6 @@ Especially for hosting the website and the necessary efficient data management a
 As a last step, all content in this ReadMe and on the website was checked for **misspelling and grammatical mistakes** using *Google Gemini*.
 
 -----
-
------
 -----
 
 ## Using Anaconda
