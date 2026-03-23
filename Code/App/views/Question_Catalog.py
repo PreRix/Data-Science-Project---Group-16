@@ -13,6 +13,7 @@ st.markdown("""
     ####    
 """)
 
+# clickable buttons to directly reach each question
 col1_btn, col2_btn, col3_btn, col4_btn = st.columns([1, 1, 1, 1], gap = "large")
 
 with col1_btn:
@@ -48,6 +49,7 @@ with col4_btn:
 
 st.divider()
 
+# button layout
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
