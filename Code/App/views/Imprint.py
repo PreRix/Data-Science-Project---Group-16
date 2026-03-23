@@ -86,6 +86,7 @@ st.markdown("""
 
 st.divider()
 
+# button layout
 col_left, col_middle, col_right = st.columns([1, 0.4, 1])
 
 with col_middle:
