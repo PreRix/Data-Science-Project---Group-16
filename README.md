@@ -145,7 +145,12 @@ We selected the following stations as relevant:
 - **1162: "Melsdorf" on the A210** -> counting vehicles on the West-Axis of Kiel. 
 - **1194: "Kiel-West" on the A215** -> counting station directly in front of Kiel, where the A215 and A210 merge together.
 
+-----
 
+## Buildung and Deploying the Website
+
+### Building 
+To build the we chose the approach that all visualizations will be developed seperately from each other in different files
 
 
 -----
