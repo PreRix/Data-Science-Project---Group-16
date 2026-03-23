@@ -147,11 +147,15 @@ We selected the following stations as relevant:
 
 -----
 
-## Buildung and Deploying the Website
+## Building and Deploying the Website
 
 ### Building 
-To build the we chose the approach that all visualizations will be developed seperately from each other in different files
+To build the website, we chose the approach that all visualizations will be developed separately from each other in individual Python scripts. During the same time the website interface and structure (homepage, navigation menu, button allocation) got developed as the general layout.  
+After each of the files was mostly finalized, they got implemented into the website layout. Small adjustments had to be made for a successful integration, e.g. the correction of file paths or equal layout.
 
+### Deploying
+The structure is as follows: While the code is stored in the GitHub repository, the data is saved in a separate NextCloud instance.  
+The website gets hosted via Streamlit Community Cloud, which is connected to this repository. The website fetches the data via a public share link from NextCloud and caches it on the server to ensure great performance. 
 
 -----
 
