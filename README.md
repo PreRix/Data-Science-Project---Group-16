@@ -155,8 +155,25 @@ After each of the files was mostly finalized, they got implemented into the webs
 
 ### Deploying
 The structure is as follows: While the code is stored in the GitHub repository, the data is saved in a separate NextCloud instance.  
-The website gets hosted via Streamlit Community Cloud, which is connected to this repository. The website fetches the data via a public share link from NextCloud and caches it on the server to ensure great performance. 
+The website gets hosted via Streamlit Community Cloud, which is connected to this repository. The website fetches the data via a public share link from NextCloud and caches it on the server to ensure stable performance. 
 
+-----
+
+## The usage of generative AI and Large Language Models
+
+For this project a lot of Python code with Polars and other indispensable libraries had to be written.  
+As all of us were mostly unfamiliar with these libraries, we used the help of different LLMs to assist in coding most of the necessary scripts.
+We also used these tools for the creation of the website layout with the Streamlit library to quickly retrieve the needed syntax.  
+
+The following models were used for this project:
+- Google Gemini: https://gemini.google.com
+- ChatGPT by OpenAI: https://chatgpt.com
+- Claude by Anthropic: https://claude.ai  
+
+Especially for hosting the website and the necessary efficient data management and loading, we used *Claude* because none of us had ever deployed a website before.  
+As a last step, all content in this ReadMe and on the website was checked for **misspelling and grammatical mistakes** using *Google Gemini*.
+
+-----
 -----
 
 ## Using Anaconda
