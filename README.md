@@ -33,7 +33,7 @@ The data we used is freely available and is stored [here](https://cloud.rz.uni-k
 ## Data Pipeline
 
 ### BASt Data:
-We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding meta-data file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
+We began by downloading all traffic datasets of the past five years from BASt.de. The data is provided as zip-archives per year for Autobahnen and Bundesstraßen; each of which contains folders with 12 raw-data files and one corresponding metadata file explaining the data. The data is organized in .csv-files. The data is sampled per hour.
 As we only consider data for Schleswig-Holstein, we aggregated each data file to only contain rows with information corresponding to Schleswig-Holstein.
 To make sure the data is consistent, we also checked if the ID for Schleswig-Holstein in the meta-data stayed consistent over all datasets.
 This was done using the script in [this Jupyter Notebook](Code/BASt_Data_Aggregation/BAStDataSHAggregation.ipynb).
@@ -47,7 +47,7 @@ In an additional step we did some analysis on the data to [check the quality](Co
 We detected that counting station #1162 has no values over the entire observation period, so we removed it from our data.  
 For all further exploration of the data we will not use entries that contain missing values. We will sort them out during the visualization process. 
 We also detected, that for some counting stations there is a high percentage of values flagged as "estimated because of missing value".  
-We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explore that and we'll update this ReadMe accordingly.  
+We currently (10.03.26) don't know what is meant with a value being "estimated" because the description of the data states that the data is in its most raw form. We've contacted BASt to explain that and we'll update this ReadMe accordingly.  
 
 *UPDATE* (end of project): We sadly did not receive any answer from BASt for an explanation of the quality flags. We used the data in a way that made up for potential estimated values.
 
