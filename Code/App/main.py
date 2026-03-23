@@ -18,6 +18,7 @@ st.set_page_config(
 
 ensure_session_data()
 
+# implement and name page layout
 views = {
     "Home": [
         st.Page("views/homepage.py", title = "🏠 Homepage", default = True),
@@ -40,5 +41,8 @@ views = {
     ]
 }
 
+# add to executable navigation function
 pg = st.navigation(views, position="sidebar")
+
+# execute so that navigation works on all pages
 pg.run()
