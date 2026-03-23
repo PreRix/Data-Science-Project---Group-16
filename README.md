@@ -8,15 +8,14 @@ We are a group of four students from the Christian-Albrechts-University to Kiel 
 This project is assigned to the Data-Science-Project which is taking place between the fifth and sixth semester (Feb 23 - Mar 20, 2026).
 
 We had to find a topic which is interesting to us and perform data science on it:
-from the collection of raw, non-pre-processed data, through data cleansing and analyzing, to the creation of visualizations for our findings.
-Those should then be accessible on a self-programmed website.
+from the collection of raw, non-pre-processed data, through data cleansing and analyzing, to the creation of visualizations for our findings, which should then be accessible on a self-programmed website.
 
 *All of us are native German speakers, so please excuse the maybe non-perfect English :)*
 
 ### The Topic
 The topic of our project is as follows: The Personal Traffic around Kiel in the past five years *(2021 to 2025)*.
 
-We developed nine plus one bonus [research questions](Research-Questions.pdf) from which we want to answer eight with this project.
+We developed nine plus one bonus [research questions](Research-Questions.pdf) we want to answer with this project.
 
 ### The Data 
 The data we used is freely available and is stored [here](https://cloud.rz.uni-kiel.de/index.php/s/PZc2LfZtbB4mPQm). The sources are the following:
