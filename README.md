@@ -96,12 +96,7 @@ For that, we used the knowledge that matches there only take place when Holstein
 In the OpenLigaDB for each match both teams are listed; the first team is always the home team. 
 Thus, we collected the data where Holstein Kiel is listed as the first team for each match from 2021 to 2025 in the first and second Bundesliga. We created a corresponding .csv-file containing the information with [this code](<Code/API-requests/openligadb.de API.ipynb>).  
 
------
------
 **We ended up not using this data as we adjusted the research questions in a way so that this data is no longer needed.**  
-
------
------
 
 
 ### Kieler Woche Data:
