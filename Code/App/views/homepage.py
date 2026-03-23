@@ -51,10 +51,12 @@ st.markdown("""
     9. *A Bonus Question:* How do extreme weather events affect hourly traffic volumes at selected counting stations near Kiel, and how long does it take for traffic to return to normal levels?
 """, unsafe_allow_html=True)
 
+# make extra space on website 
 st.markdown("""
     ###   
 """)
 
+# button layout
 col_qst_btn1, col_qst_btn2, col_qst_btn3, col_qst_btn4 = st.columns([1, 1, 1, 1])
 
 with col_qst_btn2:
