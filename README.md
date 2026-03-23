@@ -234,6 +234,6 @@ conda install --name <envname> --file requirements.txt
 Thank you for taking a look at our project! 
 We really hope you enjoyed it.
 
-All the best from
-**Lenn, Felix, Moritz and Anthime**.
+All the best from  
+*Lenn, Felix, Moritz and Anthime*.
 
