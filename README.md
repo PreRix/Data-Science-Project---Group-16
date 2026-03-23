@@ -15,7 +15,7 @@ from the collection of raw, non-pre-processed data, through data cleansing and a
 ### The Topic
 The topic of our project is as follows: The Personal Traffic around Kiel in the past five years *(2021 to 2025)*.
 
-We developed nine plus one bonus [research questions](Research-Questions.pdf) we want to answer with this project.
+We developed eight plus one bonus [research questions](Research-Questions.pdf) we want to answer with this project.
 
 ### The Data 
 The data we used is freely available and is stored [here](https://cloud.rz.uni-kiel.de/index.php/s/PZc2LfZtbB4mPQm). The sources are the following:
