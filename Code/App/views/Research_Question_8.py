@@ -1,20 +1,23 @@
 # ====================================
 # Imports
-
+# ====================================
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 
 # ====================================
-# Website design
-
+# Website Design & Navigation
+# ====================================
+# Top navigation bar with specific column ratios for button alignment
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
+    # Navigation to the previous research question
     if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("views/Research_Question_7.py")
 
 with col3_top_btn:
+    # Navigation to the bonus question/next view
     if st.button("Bonus Question ➡️", key="btn_top2"):
         st.switch_page("views/Research_Question_9.py")
 
@@ -26,15 +29,19 @@ st.markdown("""
 """)
 
 # ====================================
-# Global variables
-
+# Global Configuration
+# ====================================
+# Used for the detailed second visualization (daily view of a specific month)
 DETAIL_YEAR  = 2023
 DETAIL_MONTH = 2
 
 # ====================================
-# Data collection and helpers
-
+# Helper Functions for Styling and Charting
+# ====================================
 def apply_font(fig):
+    """
+    Standardizes font sizes for Plotly charts to ensure readability across different screen resolutions in the Streamlit app.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
@@ -43,20 +50,29 @@ def apply_font(fig):
     return fig
 
 def make_rush_figure(x, y_morning, y_evening, title, x_title):
+    """
+    Generates a dual-line Scatter plot comparing morning and evening rush hours. Uses 'steelblue' for incoming traffic and 'tomato' (red) for outgoing.
+    """
     fig = go.Figure([
+        # Morning Rush: Traffic direction usually R1 (towards city center)
         go.Scatter(x=x, y=y_morning, name="Morning Rush – into Kiel (6:00–8:59 a.m.)",
                    mode="lines+markers", line=dict(color="steelblue", width=3)),
+        # Evening Rush: Traffic direction usually R2 (away from city center)
         go.Scatter(x=x, y=y_evening, name="Evening Rush – out of Kiel (3:00–5:59 p.m.)",
                    mode="lines+markers", line=dict(color="tomato", width=3)),
     ])
     fig.update_layout(title=title, xaxis_title=x_title,
                       yaxis_title="Vehicles during Rush Hour", 
-                      height=600, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                      height=600, 
+                      # Position legend at the top to save horizontal space
+                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
                       margin=dict(t=100)
                      )
     return apply_font(fig)
 
-# Filter to Zst 1194, weekdays only — all in-memory on the shared cached base
+# Pre-filtering data:
+# 1. Zst '1194' is Autobahnkreuz Kiel-West (highly representative of commuter flow).
+# 2. Weekdays only (1-5) to exclude weekend leisure patterns which differ from work commutes.
 df_traffic = (
     st.session_state.df_traffic
     .filter(pl.col("Zst") == "1194")
@@ -64,14 +80,19 @@ df_traffic = (
 )
 
 # ====================================
-# Helper aggregations
-
+# Data Aggregation Helpers (Polars)
+# ====================================
 def monthly_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
-    """Daily-then-monthly average of `col` for rush-hour data."""
+    """
+    Aggregates hourly traffic into daily sums, then monthly averages. This step is vital to smooth out daily variance (e.g., public holidays) and show the overarching trend over several years.
+    """
     return (
+        # First, get the total count for the defined rush hour per day
         df.group_by(["year", "month", "day"]).agg(pl.col(col).sum().alias("daily"))
+        # Second, calculate the mean of these daily totals for the whole month
         .group_by(["year", "month"]).agg(pl.col("daily").mean().alias("avg"))
         .sort(["year", "month"])
+        # Create a string label "YYYY-MM" for the X-axis
         .with_columns(
             (pl.col("year").cast(pl.Utf8) + "-" + pl.col("month").cast(pl.Utf8).str.zfill(2))
             .alias("year_month")
@@ -79,19 +100,24 @@ def monthly_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
     )
 
 def daily_avg(df: pl.DataFrame, col: str) -> pl.DataFrame:
-    """Per-day average of `col` within a single month's rush-hour data."""
+    """
+    Calculates the total vehicle sum for a specific day. Used for the "Exemplary Month" visualization.
+    """
     return (
         df.group_by("day").agg(pl.col(col).sum().alias("avg"))
         .sort("day")
     )
 
 # ====================================
-# First visualization — monthly overview 2021–2025
-
+# First Visualization: 5-Year Monthly Overview
+# ====================================
 try:
+    # Defining Time Windows: Morning (6-9) and Evening (15-18) is_between is inclusive, so 6-8 includes the 8:00–8:59 hour.
     morning_all = df_traffic.filter(pl.col("hour").is_between(6, 8))
     evening_all = df_traffic.filter(pl.col("hour").is_between(15, 17))
 
+    # Calculate average volume per month
+    # Note: KFZ_R1 represents inbound, KFZ_R2 outbound traffic
     morning = monthly_avg(morning_all, "KFZ_R1")
     evening = monthly_avg(evening_all, "KFZ_R2")
 
@@ -105,14 +131,15 @@ try:
     )
 
 except Exception:
+    # Standard cleanup and rerun if session state data is missing or corrupted
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
 
 # ====================================
-# Text
-
+# Text: Findings and Methodology
+# ====================================
 st.markdown("""
     ### Definitions + How we aggregated the Data:
     The two lines in the chart represent the traffic of the two rush-hours each day at the A215, aggregated to an *average day of the month*. No other counting station 
@@ -141,6 +168,9 @@ st.markdown("""
 
 st.divider()
 
+# ====================================
+# Second Visualization: Daily Detail
+# ====================================
 st.markdown(f"""
     ## Rush-Hour Traffic for one exemplary month - Feb {DETAIL_YEAR}
 """)
@@ -149,6 +179,7 @@ st.markdown(f"""
 # Second visualization — daily detail for DETAIL_YEAR / DETAIL_MONTH
 
 try:
+    # Zoom in on a single month (February is chosen as it has no summer/winter school holidays)
     df_month = df_traffic.filter(
         (pl.col("year") == DETAIL_YEAR) & (pl.col("month") == DETAIL_MONTH)
     )
@@ -166,13 +197,11 @@ try:
     )
 
 except Exception:
+    # Standard cleanup for session state
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
-
-# ====================================
-# Text
 
 st.markdown("""
     ### Description:
@@ -181,8 +210,8 @@ st.markdown("""
 """)
 
 # ====================================
-# Website design
-
+# Final Navigation Design
+# ====================================
 st.divider()
 
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
@@ -197,6 +226,7 @@ with col3_bottom_btn:
 
 st.divider()
 
+# Footer utility links
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
