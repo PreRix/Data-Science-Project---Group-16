@@ -1,4 +1,24 @@
 # ====================================
+# Streamlit dashboard page for Research Question #7: Extraordinary Traffic.
+#
+# This page investigates how the traffic around Kiel changes due to the Kiel Week.
+# It visualizes the difference in freight and passenger transport during Kiel Week
+# and the surounding month and enables interactive exploration through a Streamlit interface.
+#
+# The analysis includes a bar chart showing both traffic categories during Kiel Week,
+# as well as the same statistic for the surounding months using the average of the two
+# weeks prior the Kiel Week and the two weeks after Kiel Week.
+#
+# The user can select which Kiel Week is shown and for which traffic counting station.
+#
+# The data used in this view is preprocessed and loaded from shared cached
+# datasets and filtered to the preferred traffic counting station, Kiel-West 
+# (Zst 1194) by default, which serves as a representative location for traffic 
+# in the Kiel area.
+#
+# Developed with the assistance of Gemini (Google) [https://gemini.google.com/].
+
+# ====================================
 # Imports
 
 import streamlit as st
