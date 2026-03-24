@@ -31,15 +31,18 @@ from datetime import date, timedelta
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
+    # Navigation to the previous page/question in the multipage app 
     if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("views/Research_Question_6.py")
 
 with col3_top_btn:
+    # Navigation to the next page/question in the multipage app
     if st.button("Next Question ➡️", key="btn_top2"):
         st.switch_page("views/Research_Question_8.py")
 
 st.title("Research Question #7")
 
+# Main headline and sub-header for the specific analysis
 st.markdown("""
     # *How does the daily passenger transport and freight transport traffic change during the Kieler Woche compared to the surrounding month (two weeks before and after)?*
     ## Traffic compared: Kieler Woche vs. Baseline Levels
@@ -56,12 +59,14 @@ KIELER_WOCHE_PRESETS = {
     "Kieler Woche 2021": (date(2021, 9, 4),  date(2021, 9, 12)),
 }
 
+# Mapping of display names to internal counting station IDs (Zst)
 ZST_VARS = {
     "Kiel-West":     "1194",
     "Rumohr":        "1104",
     "AS Wankendorf": "1156",
 }
 
+# Amount of days before and after Kiel Week taken into account for comparison
 BUFFER_DAYS  = 14
 WEEKDAYS_MAP = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Sun"}
 
@@ -69,6 +74,9 @@ WEEKDAYS_MAP = {1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "
 # Data collection and helpers
 
 def apply_font(fig):
+    """
+    Standardizes font sizes for Plotly charts to ensure readability within the Streamlit web interface.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
@@ -98,6 +106,7 @@ df_traffic = _base.with_columns([
 # First visualization
 
 try:
+    # UI elements for user-defined filtering
     col1, col2, col3, col4 = st.columns(4)
     options   = ["All stations"] + list(ZST_VARS.keys())
     zst_label = col1.selectbox("Counting station", options)
@@ -112,6 +121,7 @@ try:
     baseline_start = start_date - timedelta(days=BUFFER_DAYS)
     baseline_end   = end_date   + timedelta(days=BUFFER_DAYS)
 
+    # Computes daily values
     df_daily_sums = (
         df_station.group_by(["day", "weekday"])
         .agg([
@@ -120,9 +130,12 @@ try:
         ])
     )
 
+    # Filters for the selected timeframe of Kiel Week
     df_event_daily = df_daily_sums.filter(
         (pl.col("day") >= start_date) & (pl.col("day") <= end_date)
     )
+
+    # Filters for the selected timeframe surounding Kiel Week
     df_base_daily = df_daily_sums.filter(
         ((pl.col("day") >= baseline_start) & (pl.col("day") < start_date)) |
         ((pl.col("day") > end_date)        & (pl.col("day") <= baseline_end))
@@ -145,23 +158,28 @@ try:
 
     df_plot = df_event_9days.join(df_base_wd, on="weekday", how="left").sort("day")
 
+    # Labels x axis (weekdays)
     x_labels = [
         f"{d.strftime('%d.%m.')} ({WEEKDAYS_MAP[w]})"
         for d, w in zip(df_plot["day"], df_plot["weekday"])
     ]
 
+    # Initiate Figure
     fig = go.Figure()
 
+    # Add passenger transport during KW
     fig.add_trace(go.Bar(
         x=x_labels, y=df_plot["event_cars"].to_list(),
         name="Passenger Transport (Kieler Woche)",
         marker_color="#4C9BE8", offsetgroup=1,
     ))
+    # Add freight transport during KW
     fig.add_trace(go.Bar(
         x=x_labels, y=df_plot["event_trucks"].to_list(),
         name="Freight Transport (Kieler Woche)",
         marker_color="#2b5c8f", offsetgroup=2,
     ))
+    # Add passenger transport surrounding month
     fig.add_trace(go.Scatter(
         x=x_labels, y=df_plot["base_cars"].to_list(),
         name="Ø Passenger Transport (Surrounding Month)",
@@ -169,6 +187,7 @@ try:
         line=dict(color="#EA4633", width=3, dash="dot"),
         marker=dict(size=8, symbol="diamond"),
     ))
+    # Add freight transport surrounding month
     fig.add_trace(go.Scatter(
         x=x_labels, y=df_plot["base_trucks"].to_list(),
         name="Ø Freight Transport (Surrounding Month)",
@@ -192,6 +211,7 @@ try:
 
     st.plotly_chart(apply_font(fig), width="stretch")
 
+    # Compute metrics for display
     total_event_cars   = df_event_daily["daily_cars"].mean()
     total_base_cars    = df_base_daily["daily_cars"].mean()
     diff_cars          = ((total_event_cars / total_base_cars) - 1) * 100 if total_base_cars else 0
@@ -199,6 +219,7 @@ try:
     total_base_trucks  = df_base_daily["daily_trucks"].mean()
     diff_trucks        = ((total_event_trucks / total_base_trucks) - 1) * 100 if total_base_trucks else 0
 
+    # Display metrics
     col3.metric(
         "Ø Passenger Transport per Day (Kieler Woche vs. Baseline)",
         f"{total_event_cars:,.0f}", f"{diff_cars:+.1f}%",
