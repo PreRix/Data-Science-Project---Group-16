@@ -7,6 +7,7 @@ from utils.data_loader import ensure_session_data
 # ====================================
 # Website design
 
+# set website configuration
 st.set_page_config(
     page_title="DSP - Group 16",
     page_icon="📊",
