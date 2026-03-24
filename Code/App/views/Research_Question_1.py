@@ -57,6 +57,7 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 
 # Color palette for consistent visual design across different charts
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
+
 # Mapping of display names to internal counting station IDs (Zst)
 ZST_VARS = {
     "Kiel-West": "1194",
@@ -115,6 +116,7 @@ try:
         """
         if df_subset.height == 0:
             return np.full((24, 7), np.nan), np.full((24, 7), np.nan)
+            
         # Grouping by weekday and hour to calculate the average traffic
         grouped = (
             df_subset.group_by(["weekday", "hour"])
@@ -125,6 +127,7 @@ try:
         )
         matrix_mean  = np.full((24, 7), np.nan)
         matrix_count = np.full((24, 7), np.nan)
+        
         # Mapping long-format data into the 2D matrix structure for Heatmaps
         for row in grouped.iter_rows(named=True):
             w = row["weekday"] - 1 # Polars Weekday 1-7 mapped to index 0-6
@@ -307,6 +310,7 @@ try:
             line_color="#2b5c8f",
         ))
 
+    # Update for title and height
     fig_box.update_layout(
         xaxis_title=f"Daily Total Vehicles ({selected_day_name})",
         yaxis_title="Daily Average Temperature",
