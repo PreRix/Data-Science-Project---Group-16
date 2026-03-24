@@ -31,15 +31,18 @@ from plotly.subplots import make_subplots
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
+    # Navigation to the previous page/question in the multipage app
     if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("views/Research_Question_5.py")
 
 with col3_top_btn:
+    # Navigation to the next page/question in the multipage app
     if st.button("Next Question ➡️", key="btn_top2"):
         st.switch_page("views/Research_Question_7.py")
 
 st.title("Research Question #6")
 
+# Main headline and sub-header for the specific analysis
 st.markdown("""
     # *How does the ratio of incoming and outgoing traffic around Kiel change during the day?*
     ## Incoming vs. Outgoing Traffic
@@ -49,6 +52,8 @@ st.markdown("""
 # Global variables
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+# Mapping of display names to internal counting station IDs (Zst)
 ZST_VARS = {
     "Kiel-West":     "1194",
     "Rumohr":        "1104",
@@ -59,6 +64,9 @@ ZST_VARS = {
 # Data collection and helpers
 
 def apply_font(fig):
+    """
+    Standardizes font sizes for Plotly charts to ensure readability within the Streamlit web interface.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
@@ -68,12 +76,12 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-# Rename R1/R2 to inbound/outbound and compute ratio — all in-memory on the cached base
+# Retrieve traffic data stored in the session state (loaded previously)
 df_traffic = (
     st.session_state.df_traffic
     .with_columns(pl.col("Zst").str.strip_chars())
     .rename({"KFZ_R1": "R1_Inbound", "KFZ_R2": "R2_Outbound"})
-    .drop_nulls(["R1_Inbound", "R2_Outbound"])
+    .drop_nulls(["R1_Inbound", "R2_Outbound"]) # Clean-up Nulls
     .with_columns(
         (pl.col("R1_Inbound") + pl.col("R2_Outbound")).alias("Total_KFZ")
     )
@@ -89,13 +97,14 @@ df_traffic = (
 # First visualization
 
 try:
+    # UI elements for user-defined filtering
     col1, col2, col3 = st.columns(3)
     zst_label = col1.selectbox("Select Counting Station", list(ZST_VARS.keys()))
     zst_id    = ZST_VARS[zst_label]
 
     available_years  = sorted(df_traffic["datetime"].dt.year().unique().to_list(), reverse=True)
     selected_year    = col2.selectbox("Year", ["All Years"] + available_years)
-
+    
     if selected_year == "All Years":
         df_filtered_time = df_traffic
         month_options    = ["Full Year"]
@@ -117,7 +126,7 @@ try:
     def get_ratio_matrix(df_subset: pl.DataFrame) -> np.ndarray:
         grouped = (
             df_subset.group_by(["weekday", "hour"])
-            .agg(pl.col("Inbound_Ratio").mean().alias("avg_ratio"))
+            .agg(pl.col("Inbound_Ratio").mean().alias("avg_ratio")) # Mean ratio of each hour
         )
         matrix = np.full((24, 7), np.nan)
         for row in grouped.iter_rows(named=True):
@@ -128,11 +137,13 @@ try:
 
     ratio_matrix = get_ratio_matrix(df_filtered)
 
+    # Initiate plot
     fig_hm = make_subplots(
         rows=1, cols=1,
         subplot_titles=["Directional traffic split: Percentage of total traffic moving towards Kiel. <br> Blue: higher volume entering Kiel. <br> Red: higher volume leaving Kiel"],
     )
 
+    # Custom colours
     custom_rdbu = [
         [0.0, "rgb(178, 24, 43)"],
         [0.4, "rgb(244, 165, 130)"],
@@ -141,6 +152,7 @@ try:
         [1.0, "rgb(33, 102, 172)"],
     ]
 
+    # Add Heatmap
     fig_hm.add_trace(go.Heatmap(
         z=ratio_matrix, x=WEEKDAYS, y=list(range(24)),
         colorscale=custom_rdbu, zmin=0.2, zmax=0.8,
@@ -148,6 +160,7 @@ try:
         colorbar=dict(title="Ratio Inbound", tickformat=".0%"),
     ))
 
+    # Update height and axis title
     fig_hm.update_layout(
         height=800,
         xaxis_title="Day of Week",
@@ -155,6 +168,7 @@ try:
         yaxis=dict(tickmode="linear", dtick=1),
     )
 
+    # Render the Plotly chart in Streamlit
     st.plotly_chart(apply_font(fig_hm), width="stretch")
 
     avg_in  = df_filtered["R1_Inbound"].mean()
