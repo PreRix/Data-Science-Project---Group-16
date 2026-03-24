@@ -1,20 +1,23 @@
 # ====================================
 # Imports
-
+# ====================================
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 
 # ====================================
-# Website design
-
+# Website Design & Navigation
+# ====================================
+# Horizontal layout for the top navigation bar
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
+    # Navigation to the previous research question
     if st.button("⬅️ Previous Question", key="btn_top1"):
         st.switch_page("views/Research_Question_2.py")
 
 with col3_top_btn:
+    # Navigation to the next research question
     if st.button("Next Question ➡️", key="btn_top2"):
         st.switch_page("views/Research_Question_4.py")
 
@@ -26,8 +29,9 @@ st.markdown("""
 """)
 
 # ====================================
-# Global variables
-
+# Global Variables
+# ====================================
+# Mapping display names to specific counting station IDs
 ZST_VARS = {
     "Rumohr":        "1104",
     "AS Wankendorf": "1156",
@@ -35,9 +39,12 @@ ZST_VARS = {
 }
 
 # ====================================
-# Data collection and helpers
-
+# Data Collection and Helpers
+# ====================================
 def apply_font(fig):
+    """
+    Adjusts Plotly chart font sizes to ensure high visibility and a professional look within the Streamlit UI.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
@@ -47,22 +54,32 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
+# Load traffic and registration data from the session state
 df_raw = st.session_state.df_traffic
 df_registrations = st.session_state.df_registrations
 
 # ====================================
-# Helper aggregations
-
+# Helper Aggregations
+# ====================================
 def yearly_avg_traffic(df: pl.DataFrame) -> pl.DataFrame:
+    """
+    Performs a two-step aggregation to calculate the yearly traffic volume:
+    1. Sum hourly counts into daily totals per station.
+    2. Calculate the mean of those daily totals per year.
+    3. Sum the averages across the selected stations.
+    """
+    # Step 1: Hourly -> Daily sum
     daily = (
         df.group_by(["year", "day", "Zst"])
         .agg(pl.col("KFZ_total").sum().alias("daily_traffic"))
     )
+    # Step 2: Daily -> Yearly mean per station
     whole = (
         daily.group_by(["year", "Zst"])
         .agg(pl.col("daily_traffic").mean().alias("avg_daily_traffic"))
         .sort("year")
     )
+    # Step 3: Total traffic volume across all stations per year
     return (
         whole.group_by("year")
         .agg(pl.col("avg_daily_traffic").sum().alias("traf"))
@@ -70,25 +87,30 @@ def yearly_avg_traffic(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 # ====================================
-# First visualization
-
+# Main Visualization: Dual-Axis Comparison
+# ====================================
 try:
+    # Filter data to include only the relevant highway counting stations
     target_ids  = list(ZST_VARS.values())
     df_filtered = df_raw.filter(pl.col("Zst").is_in(target_ids))
+    # Process traffic data and join with registration data on the 'year' column
     df_traffic  = yearly_avg_traffic(df_filtered)
     df_plot     = df_traffic.join(df_registrations, on="year", how="left").sort("year")
 
+    # Determine a common Y-axis range to allow for visual comparison, even though scales for 'registrations' and 'daily traffic' differ.
     min_range = min(df_plot["registrations"].min(), df_plot["traf"].min())
     max_range = max(df_plot["registrations"].max(), df_plot["traf"].max())
 
     fig = go.Figure()
 
+    # Add Bar chart for Registered Vehicles (Kiel city data)
     fig.add_trace(go.Bar(
         x=df_plot["year"], y=df_plot["registrations"],
         name="Registered Vehicles (Kiel)",
         marker_color="steelblue", opacity=0.7, yaxis="y1",
     ))
 
+    # Add Scatter/Line chart for Average Daily Traffic (Measured on roads)
     fig.add_trace(go.Scatter(
         x=df_plot["year"], y=df_plot["traf"],
         name="Avg. Daily Traffic",
@@ -97,6 +119,7 @@ try:
         yaxis="y2",
     ))
 
+    # Layout configuration for dual Y-axes
     fig.update_layout(
         title="Registered Vehicles vs. Avg. Daily Traffic",
         xaxis=dict(title="Year", tickmode="linear", dtick=1),
@@ -115,17 +138,19 @@ try:
         height=550,
     )
 
+    # Apply font formatting and display the chart
     st.plotly_chart(apply_font(fig), width="stretch")
 
 except Exception:
+    # Robust error handling: Clear session state (except raw data) and rerun on failure
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
 
 # ====================================
-# Text
-
+# Descriptive Text & Findings
+# ====================================
 st.markdown("""
 
     ### Description:  
@@ -153,8 +178,8 @@ st.markdown("""
 """)
 
 # ====================================
-# Website design
-
+# Website Footer Design
+# ====================================
 st.divider()
 
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
@@ -169,6 +194,7 @@ with col3_bottom_btn:
 
 st.divider()
 
+# Navigation links to auxiliary pages
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
