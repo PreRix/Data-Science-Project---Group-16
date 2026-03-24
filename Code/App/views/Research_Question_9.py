@@ -1,16 +1,17 @@
 # ====================================
 # Imports
-
+# ====================================
 import streamlit as st
 import polars as pl
 import plotly.graph_objects as go
 
 # ====================================
-# Website design
-
+# Website Design & Navigation
+# ====================================
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col1_top_btn:
+    # Navigation back to the final standard research question
     if st.button("⬅️ Previous Question", key="btn_top"):
         st.switch_page("views/Research_Question_8.py")
 
@@ -22,17 +23,22 @@ st.markdown("""
 """)
 
 # ====================================
-# Global variables
-
-RAIN_THRESHOLD = 10.0
-SNOW_THRESHOLD = 1.0
+# Global Parameters (Thresholds & Windows)
+# ====================================
+# Meteorological thresholds for "Extreme" events
+RAIN_THRESHOLD = 10.0  # mm per hour (Heavy rain)
+SNOW_THRESHOLD = 1.0   # cm per hour (Significant snowfall)
+# Time window for the Event Study (Hours relative to T=0)
 WINDOW_BEFORE  = 2
 WINDOW_AFTER   = 4
 
 # ====================================
-# Data collection and helpers
-
+# Data Collection and Helpers
+# ====================================
 def apply_font(fig):
+    """
+    Standardizes font sizes for consistent Plotly styling.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
     if fig.layout.title.text:
         fig.update_layout(title_font_size=34)
@@ -42,7 +48,7 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
-# Traffic: only need datetime + vehicle_count for Zst 1194
+# Pre-processing: Isolate target station and join traffic with weather data
 df_traffic = (
     st.session_state.df_traffic
     .filter(pl.col("Zst") == "1194")
@@ -50,13 +56,15 @@ df_traffic = (
 )
 df_weather = st.session_state.df_weather
 
+# Combine datasets on the shared datetime timestamp
 df = df_traffic.join(df_weather, on="datetime", how="left")
 
 # ====================================
-# First visualization
-
+# Visualization: Event Study Plot
+# ====================================
 try:
-    # Per-hour median vehicle count as the baseline
+    # 1. Calculate the 'Hourly Baseline' 
+    # This represents 'Normal' traffic for every hour of the day (0-23)
     hourly_baseline = (
         df
         .with_columns(pl.col("datetime").dt.hour().alias("hour"))
@@ -64,8 +72,10 @@ try:
         .agg(pl.col("vehicle_count").median().alias("baseline"))
     )
 
+    # 2. Identify Event Timestamps
     offsets = list(range(-WINDOW_BEFORE, WINDOW_AFTER + 1))
 
+    # This advanced Polars pipeline: filters for hours where weather exceeds thresholds, explodes the time to include the +/- window hours, calculates the 'Relative Count' as a % of the typical baseline
     df_events = (
         df
         .filter(
@@ -94,6 +104,7 @@ try:
     if df_events.is_empty():
         st.warning("No data found in the event window.")
     else:
+        # Calculate the median trend across all identified events
         median_line = (
             df_events.group_by("offset")
             .agg(pl.col("relative_count").median())
@@ -102,6 +113,7 @@ try:
 
         fig = go.Figure()
 
+        # Scatter plot of all individual event-hours (translucent for density)
         fig.add_trace(go.Scatter(
             x=df_events["offset"].to_list(),
             y=df_events["relative_count"].to_list(),
@@ -109,6 +121,8 @@ try:
             marker=dict(color="steelblue", size=4, opacity=0.25),
             name="Individual Events",
         ))
+
+        # Trend line showing the median behavior
         fig.add_trace(go.Scatter(
             x=median_line["offset"].to_list(),
             y=median_line["relative_count"].to_list(),
@@ -118,6 +132,7 @@ try:
             name="Median",
         ))
 
+        # Visual anchors: Dash at T=0 (Event start) and Dot at 100% (Normal traffic)
         fig.add_vline(x=0, line_dash="dash",  line_color="white", opacity=0.5)
         fig.add_hline(y=100, line_dash="dot", line_color="gray",  opacity=0.5)
 
@@ -133,14 +148,15 @@ try:
         st.plotly_chart(apply_font(fig), width="stretch")
 
 except Exception:
+    # Error handling: Clear cache and rerun
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
 
 # ====================================
-# Text
-
+# Interpretation & Limits
+# ====================================
 st.markdown("""
     ### Definitions:
     Extreme weather events were identified using the following thresholds:
@@ -169,8 +185,8 @@ st.markdown("""
 """)
 
 # ====================================
-# Website design
-
+# Website Footer
+# ====================================
 st.divider()
 
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
