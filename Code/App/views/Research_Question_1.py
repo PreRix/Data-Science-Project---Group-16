@@ -1,4 +1,26 @@
 # ====================================
+# Streamlit dashboard page for Research Question #1: Weather & Traffic.
+#
+# This page investigates the relationship between hourly vehicle counts and
+# Weather conditions in Kiel. It visualizes the average hourly/daily vehicle count 
+# during varying weather conditions and enables interactive exploration through
+# a Streamlit interface.
+#
+# The analysis includes:
+# - A heatmap showing the average hourly vehicle counts during hours with no rain.
+# - A heatmap showing the average hourly vehicle counts during hours with a,
+#   by the user, predeterment amount of rain.
+# - A heatmap showing the procentual change between the first two heatmaps.
+# - BoxPlots of vehicle counts per day, grouped by the average daily temperature.
+#
+# The data used in this view is preprocessed and loaded from shared cached
+# datasets and filtered to the preferred traffic counting station, Kiel-West 
+# (Zst 1194) by default, which serves as a representative location for traffic 
+# in the Kiel area.
+#
+# Developed with the assistance of Gemini (Google) [https://gemini.google.com/].
+
+# ====================================
 # Imports
 # ====================================
 import streamlit as st
