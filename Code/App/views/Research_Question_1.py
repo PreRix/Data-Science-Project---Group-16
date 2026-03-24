@@ -1,6 +1,6 @@
 # ====================================
 # Imports
-
+# ====================================
 import streamlit as st
 import polars as pl
 import numpy as np
@@ -8,29 +8,34 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # ====================================
-# Website design
-
+# Website Design & Navigation
+# ====================================
+# Layout for the top navigation button (right-aligned using column ratios)
 col1_top_btn, col2_top_btn, col3_top_btn = st.columns([1, 3.6, 1])
 
 with col3_top_btn:
+    # Navigation to the next page/question in the multipage app
     if st.button("Next Question ➡️", key = "btn_top"):
         st.switch_page("views/Research_Question_2.py")
 
 st.title("Research Question #1")
 
+# Main headline and sub-header for the specific analysis
 st.markdown("""
     # *How do precipitation and temperature affect the hourly vehicle counts near Kiel between 2021 and 2025?*
     ## Traffic Volume: Dry vs. Wet
     """)
 
 # ====================================
-# Global variables
-
+# Global Variables & Configuration
+# ====================================
 COL_PRECIP = "precipitation" 
 COL_TEMP = "temperature_2m"
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+# Color palette for consistent visual design across different charts
 YEAR_COLORS = ["#4C9BE8", "#E85C4C", "#2DB37A", "#F5A623", "#A259E8"]
+# Mapping of display names to internal counting station IDs (Zst)
 ZST_VARS = {
     "Kiel-West": "1194",
     "Rumohr": "1104",
@@ -38,9 +43,12 @@ ZST_VARS = {
 }
 
 # ====================================
-# Data collection and helpers
-
+# Helper Functions & Data Collection
+# ====================================
 def apply_font(fig):
+    """
+    Standardizes font sizes for Plotly charts to ensure readability within the Streamlit web interface.
+    """
     fig.update_layout(font_size=22, legend_font_size=22)
 
     if fig.layout.title.text:
@@ -52,29 +60,40 @@ def apply_font(fig):
         annotation.font.size = 26
     return fig
 
+# Retrieve traffic data stored in the session state (loaded previously)
 df_traffic = st.session_state.df_traffic
      
 # ====================================
-# First visualization
-
+# First Visualization: Heatmap Comparison (Rain)
+# ====================================
 try:
+    # UI elements for user-defined filtering
     col1, col2, col3 = st.columns(3)
     zst_label = col1.selectbox("Counting station", list(ZST_VARS))
     zst_col   = ZST_VARS[zst_label]
 
+    # Slider allows dynamic definition of what constitutes a "Wet Day"
     rain_threshold = col3.slider(
         "Rain threshold for 'Wet Day' (mm/h)", min_value=0.1, max_value=2.0, value=1.0, step=0.1
     )
 
+    # Define filtering conditions using Polars expressions for high performance
     cond_dry = pl.col(COL_PRECIP) == 0
     cond_wet = pl.col(COL_PRECIP) > rain_threshold
 
+    # Filter main dataframe based on the selected counting station
     df_selected = df_traffic.filter(pl.col("Zst") == zst_col)
     st.markdown("Average *Vehicle Count* per hour and weekday.")
 
     def get_heatmap_matrices(df_subset: pl.DataFrame):
+        """
+        Aggregates data into 24x7 matrices (Hours x Weekdays) for:
+        1. Mean vehicle counts
+        2. Total occurrences (sample size) for hover information
+        """
         if df_subset.height == 0:
             return np.full((24, 7), np.nan), np.full((24, 7), np.nan)
+        # Grouping by weekday and hour to calculate the average traffic
         grouped = (
             df_subset.group_by(["weekday", "hour"])
             .agg(
@@ -84,23 +103,28 @@ try:
         )
         matrix_mean  = np.full((24, 7), np.nan)
         matrix_count = np.full((24, 7), np.nan)
+        # Mapping long-format data into the 2D matrix structure for Heatmaps
         for row in grouped.iter_rows(named=True):
-            w = row["weekday"] - 1
+            w = row["weekday"] - 1 # Polars Weekday 1-7 mapped to index 0-6
             h = row["hour"]
             matrix_mean[h, w]  = row["mean_kfz"]
             matrix_count[h, w] = row["count"]
         return matrix_mean, matrix_count
 
+    # Generate matrices for both weather scenarios
     matrix_dry_mean,  matrix_dry_count  = get_heatmap_matrices(df_selected.filter(cond_dry))
     matrix_wet_mean,  matrix_wet_count  = get_heatmap_matrices(df_selected.filter(cond_wet))
 
+    # Calculate differences (Relative % and Absolute value)
     with np.errstate(divide="ignore", invalid="ignore"):
         matrix_change_rel = ((matrix_wet_mean / matrix_dry_mean) - 1) * 100
         matrix_change_abs = matrix_wet_mean - matrix_dry_mean
 
+    # Set a shared color scale range for visual consistency across the first two plots
     global_min = np.nanmin([np.nanmin(matrix_dry_mean), np.nanmin(matrix_wet_mean)])
     global_max = np.nanmax([np.nanmax(matrix_dry_mean), np.nanmax(matrix_wet_mean)])
 
+    # Initialize a 1x3 subplot grid
     fig_hm = make_subplots(
         rows=1, cols=3,
         subplot_titles=(
@@ -113,16 +137,18 @@ try:
 
     hover_template = "<b>%{x}, %{y}:00</b><br>Ø Vehicles: %{z:.0f}<br>Occurrences (Days): %{customdata}<extra></extra>"
 
+    # Custom divergent color scale (Red = decrease, Blue = increase)
     custom_scale = [
-        [0.0,  "rgb(179, 0, 0)"],
+        [0.0,  "rgb(179, 0, 0)"], # Heavy decrease
         [0.3,  "rgb(253, 141, 60)"],
         [0.48, "rgb(255, 245, 235)"],
-        [0.5,  "rgb(255, 255, 255)"],
+        [0.5,  "rgb(255, 255, 255)"], # Neutral (0% change)
         [0.52, "rgb(247, 247, 247)"],
         [0.7,  "rgb(146, 197, 222)"],
-        [1.0,  "rgb(5, 48, 97)"],
+        [1.0,  "rgb(5, 48, 97)"], # Heavy increase
     ]
 
+    # Trace 1: Dry Heatmap
     fig_hm.add_trace(go.Heatmap(
         z=matrix_dry_mean, x=WEEKDAYS, y=list(range(24)),
         customdata=matrix_dry_count, hovertemplate=hover_template,
@@ -131,6 +157,7 @@ try:
         colorbar=dict(title="Vehicles", x=0.23, thickness=15, len=0.8),
     ), row=1, col=1)
 
+    # Trace 2: Wet Heatmap
     fig_hm.add_trace(go.Heatmap(
         z=matrix_wet_mean, x=WEEKDAYS, y=list(range(24)),
         customdata=matrix_wet_count, hovertemplate=hover_template,
@@ -138,6 +165,7 @@ try:
         coloraxis="coloraxis",
     ), row=1, col=2)
 
+    # Trace 3: Relative Change Heatmap
     fig_hm.add_trace(go.Heatmap(
         z=matrix_change_rel, x=WEEKDAYS, y=list(range(24)),
         customdata=matrix_change_abs,
@@ -159,17 +187,17 @@ try:
     )
     fig_hm.update_yaxes(autorange=False, range=[0, 23])
 
+    # Render the Plotly chart in Streamlit
     st.plotly_chart(apply_font(fig_hm), width="stretch")
 
 except Exception:
+    # Error handling: Reset session state keys and rerun to prevent app freeze
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
 
-# ====================================
-# Text
-
+# Methodological context for the user
 st.markdown("""
     ### Definitions:
     To make a comparison possible, we had to define *dry day* and  *wet day*:  
@@ -198,10 +226,10 @@ st.markdown("""
 """)
 
 # ====================================
-# Second visualization
-
+# Second Visualization: Box Plots (Temperature)
+# ====================================
 try:
-    # Dropdown menu to filter by a specific weekday or use the whole week
+    # Dictionary to map weekday names to Polars integer representation
     weekday_options = {
         "Whole Week": None,
         "Monday": 1,
@@ -218,6 +246,7 @@ try:
         selected_day_name = st.selectbox("Filter by Weekday:", list(weekday_options.keys()))
         selected_day_val  = weekday_options[selected_day_name]
 
+    # Aggregate hourly data to daily totals for temperature correlation
     df_daily = (
         df_selected
         .group_by("day")
@@ -228,9 +257,11 @@ try:
         ])
     )
 
+    # Apply weekday filter if "Whole Week" is not selected
     if selected_day_val is not None:
         df_daily = df_daily.filter(pl.col("weekday") == selected_day_val)
 
+    # Bin the temperatures into categorical ranges for discrete analysis
     df_temp = df_daily.with_columns(
         pl.when(pl.col("daily_mean_temp") < 0).then(pl.lit("< 0°C"))
         .when((pl.col("daily_mean_temp") >= 0)  & (pl.col("daily_mean_temp") < 5)).then(pl.lit("0 - 5°C"))
@@ -244,11 +275,12 @@ try:
     temp_categories = ["< 0°C", "0 - 5°C", "5 - 10°C", "10 - 15°C", "15 - 20°C", "> 20°C"]
     fig_box = go.Figure()
 
+    # Create a box plot for each temperature category to show distribution and outliers
     for cat in temp_categories:
         subset = df_temp.filter(pl.col("temp_category") == cat)["daily_total_kfz"].to_list()
         fig_box.add_trace(go.Box(
             x=subset, name=cat,
-            boxpoints="outliers",
+            boxpoints="outliers", # Show data points outside the whiskers
             marker_color="#4C9BE8",
             line_color="#2b5c8f",
         ))
@@ -264,15 +296,14 @@ try:
 
     st.plotly_chart(apply_font(fig_box), width="stretch")
 
+# Cleanup on error
 except Exception:
     for key in list(st.session_state.keys()):
         if key not in ("df_traffic", "df_registrations", "df_registrations_fuel", "df_weather"):
             del st.session_state[key]
     st.rerun()
 
-# ====================================
-# Text
-
+# Summary of data findings
 st.markdown("""
     ### Description:
     It can be seen, that during weekdays, the temperature does not have so much impact on the traffic distribution, as many people have to go to work, 
@@ -294,8 +325,8 @@ st.markdown("""
 """)
 
 # ====================================
-# Website design
-
+# Website Footer & Navigation
+# ====================================
 st.divider()
 
 col1_bottom_btn, col2_bottom_btn, col3_bottom_btn = st.columns([1, 3.6, 1])
@@ -306,6 +337,7 @@ with col3_bottom_btn:
 
 st.divider()
 
+# Bottom footer buttons for Imprint and Homepage
 col4_bottom_btn, col5_bottom_btn, col6_bottom_btn, col7_bottom_btn = st.columns([1, 0.33, 0.33, 1])
 
 with col5_bottom_btn:
