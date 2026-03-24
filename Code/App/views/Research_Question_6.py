@@ -1,4 +1,22 @@
 # ====================================
+# Streamlit dashboard page for Research Question #6: Evolution of Traffic.
+#
+# This page investigates the ratio of incoming and outgoing traffic during the week.
+# It visualizes the average ratio of incoming and outgoing traffic per hour per
+# weekday for a selected timeframe and location.
+# The user can select:
+#  - The traffic counting station
+#  - The Year
+#  - If a single year is selected, the Month
+#
+# The data used in this view is preprocessed and loaded from shared cached
+# datasets and filtered to the preferred traffic counting station, Kiel-West 
+# (Zst 1194) by default, which serves as a representative location for traffic 
+# in the Kiel area.
+#
+# Developed with the assistance of Gemini (Google) [https://gemini.google.com/].
+
+# ====================================
 # Imports
 
 import streamlit as st
