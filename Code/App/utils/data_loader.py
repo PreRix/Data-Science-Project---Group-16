@@ -1,3 +1,19 @@
+# ====================================
+# Shared data loading and caching utilities for the Streamlit dashboard.
+#
+# This module centralizes all dataset loading functions used across the
+# application. It loads traffic, vehicle registration, and weather datasets
+# from remote sources, performs basic preprocessing (type casting, datetime
+# parsing, quality filtering, and feature creation), and caches the results
+# using Streamlit's @st.cache_data decorator to ensure efficient reuse across
+# multiple dashboard pages.
+#
+# The module also provides helper functions to guarantee that required
+# datasets are available in Streamlit's session state, preventing redundant
+# downloads and improving overall application performance.
+#
+# Developed with the assistance of Claude (Anthropic) [https://claude.ai/].
+
 # ==============================
 # Shared data loaders
 # All pages import from here so @st.cache_data yields one shared cache entry.

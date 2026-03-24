@@ -1,4 +1,27 @@
 # ====================================
+# Streamlit dashboard page for Research Question #2: Air Quality & Traffic.
+#
+# This page investigates the relationship between hourly vehicle counts and
+# air pollutant concentrations (NO₂, CO, PM₂.₅, PM₁₀) in Kiel. It visualizes
+# the average diurnal cycle of pollutant concentrations alongside traffic
+# volume for selected years and enables interactive exploration through a
+# Streamlit interface.
+#
+# The analysis includes:
+# - A dual-axis line chart showing hourly averages of air quality variables
+#   and vehicle counts.
+# - A correlation heatmap illustrating the statistical relationship between
+#   traffic volume and air pollutants, as well as correlations among the
+#   pollutants themselves.
+# - An optional hourly summary table of the aggregated values.
+#
+# The data used in this view is preprocessed and loaded from shared cached
+# datasets and filtered to the Kiel-West traffic counting station (Zst 1194),
+# which serves as a representative location for traffic in the Kiel area.
+#
+# Developed with the assistance of Claude (Anthropic) [https://claude.ai/].
+
+# ====================================
 # Imports
 
 import streamlit as st

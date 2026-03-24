@@ -1,4 +1,30 @@
 # ====================================
+# Streamlit dashboard page for Research Question #5: Electric Vehicles and NO₂.
+#
+# This page explores whether the increasing share of battery-electric vehicles
+# (BEVs) in Kiel's registered vehicle fleet between 2021 and 2025 corresponds
+# with a measurable decrease in nitrogen dioxide (NO₂) concentrations on
+# high-traffic roads near the city.
+#
+# The analysis includes two main visualizations:
+# - A bar chart showing the yearly distribution of registered vehicles by
+#   fuel type, highlighting the growth of electric and hybrid drivetrains.
+# - A combined time-series visualization comparing the estimated BEV fleet
+#   share with the average monthly NO₂ emissions per vehicle at a major
+#   traffic counting station (Zst 1194 – Autobahnkreuz Kiel-West).
+#
+# NO₂-per-vehicle values are calculated by dividing hourly NO₂ concentrations
+# by the corresponding hourly vehicle counts and then aggregating these ratios
+# into monthly averages. A rolling mean and linear trend line are included to
+# highlight longer-term patterns.
+#
+# The page relies on preloaded datasets stored in Streamlit's session state,
+# including traffic counts, air quality data, and vehicle registration
+# statistics for Kiel.
+#
+# Developed with the assistance of Claude (Anthropic) [https://claude.ai/].
+
+# ====================================
 # Imports
 
 import streamlit as st
